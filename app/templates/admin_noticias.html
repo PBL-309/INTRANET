@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrar Noticias</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <style>
+        body {
+            background-color: #f4f4f4;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            width: 800px;
+        }
+        h2, h3 {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .btn-custom {
+            background: #3498db;
+            color: white;
+            font-size: 1rem;
+            padding: 10px;
+            border-radius: 5px;
+            transition: 0.3s;
+            width: 100%;
+            text-align: center;
+        }
+        .btn-custom:hover {
+            background: #2980b9;
+        }
+        .btn-danger {
+            font-size: 0.9rem;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        .input-custom {
+            font-size: 1rem;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #bdc3c7;
+            transition: 0.3s;
+            width: 100%;
+        }
+        .input-custom:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0px 0px 5px rgba(52, 152, 219, 0.5);
+        }
+        .table {
+            font-size: 1rem;
+            margin-top: 15px;
+            text-align: center;
+        }
+        .table th {
+            background: #2c3e50;
+            color: white;
+            padding: 10px;
+        }
+        .table td {
+            padding: 8px;
+        }
+        .noticia-img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        .back-btn {
+            font-size: 1rem;
+            background: #27ae60;
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+            transition: 0.3s;
+            display: inline-block;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .back-btn:hover {
+            background: #219150;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="{{ url_for('main.dashboard') }}" class="back-btn">⬅️ Regresar</a>
+    
+    <h2>📢 Administrar Noticias</h2>
+
+    <form method="POST" enctype="multipart/form-data" class="mb-3">
+        <div class="mb-2">
+            <label class="form-label">Título</label>
+            <input type="text" name="titulo" class="input-custom" placeholder="Título de la noticia" required>
+        </div>
+        <div class="mb-2">
+            <label class="form-label">Descripción</label>
+            <textarea name="descripcion" class="input-custom" rows="3" placeholder="Escribe la descripción" required></textarea>
+        </div>
+        <div class="mb-2">
+            <label class="form-label">Imagen</label>
+            <input type="file" name="imagen" class="input-custom" required>
+        </div>
+        <div class="mb-2">
+            <label class="form-label">Enlace (Opcional)</label>
+            <input type="text" name="link" class="input-custom" placeholder="Enlace a la noticia">
+        </div>
+        <button type="submit" class="btn-custom">📩 Agregar Noticia</button>
+    </form>
+
+    <h3>📰 Noticias Actuales</h3>
+
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Imagen</th>
+                <th>Título</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="noticiasTable">
+            {% for noticia in noticias %}
+                <tr data-id="{{ noticia.id }}" data-orden="{{ noticia.orden }}">
+                    <td>
+                        <img src="{{ url_for('static', filename='img/' + noticia.imagen) }}" class="noticia-img">
+                    </td>
+                    <td>{{ noticia.titulo }}</td>
+                    <td>
+                        <a href="{{ url_for('main.delete_noticia', id=noticia.id) }}" class="btn btn-danger">🗑️ Eliminar</a>
+                        <a href="{{ url_for('main.move_noticia', id=noticia.id, direction='up') }}" 
+                           class="btn btn-secondary move-btn" data-id="{{ noticia.id }}" data-direction="up">🔼</a>
+                        <a href="{{ url_for('main.move_noticia', id=noticia.id, direction='down') }}" 
+                           class="btn btn-secondary move-btn" data-id="{{ noticia.id }}" data-direction="down">🔽</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+document.querySelectorAll('.move-btn').forEach(button => {
+    button.addEventListener('click', function (event) {
+        event.preventDefault();
+        let row = this.closest('tr');
+        let direction = this.dataset.direction;
+        let sibling = direction === 'up' ? row.previousElementSibling : row.nextElementSibling;
+
+        if (sibling) {
+            row.parentNode.insertBefore(row, direction === 'up' ? sibling : sibling.nextSibling);
+        }
+
+        fetch(this.href)
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.error('Error:', error));
+    });
+});
+</script>
+
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+</html>

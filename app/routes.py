@@ -1,0 +1,605 @@
+import datetime
+from flask_mail import Mail, Message
+import pandas as pd
+from flask import Blueprint, current_app, json, jsonify, render_template, request, redirect, session, url_for, send_from_directory, flash
+from flask_login import current_user, login_user, logout_user, login_required
+import qrcode
+from werkzeug.utils import secure_filename
+from app import db
+import os
+from app.models import Aviso, Evento, File, Folder, FormularioRespuesta, PortalWeb, Respuesta, User, VacationRequest, Noticia
+from app.forms import LoginForm
+from datetime import datetime, timedelta
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
+from app import mail
+import smtplib
+
+main = Blueprint('main', __name__)
+@main.route('/enviar_denuncia', methods=['POST'])
+def enviar_denuncia():
+    try:
+        data = request.form
+        archivos = request.files
+
+        # Recuperar datos del primer formulario enviados con inputs hidden
+        anonima = data.get("anonima", "No")
+        nombre = data.get("nombre", "No proporcionado")
+        calle = data.get("calle", "No proporcionado")
+        colonia = data.get("colonia", "No proporcionado")
+        municipio = data.get("municipio", "No proporcionado")
+        telefono = data.get("telefono", "No proporcionado")
+        email = data.get("email", "No proporcionado")
+
+        # Datos del segundo formulario
+        descripcion = data.get("descripcion", "No proporcionado")
+        tipo_denuncia = data.get("tipo_denuncia", "No especificado")
+        lugar_hechos = data.get("lugar_hechos", "No especificado")
+        fecha_hora = data.get("fecha_hora", "No especificado")
+        dependencia = data.get("dependencia", "No especificado")
+
+        print(f"🔎 Datos recibidos en Flask:")
+        print(f"Descripción: {descripcion}")
+
+        mensaje = f"""
+        Nueva denuncia recibida:
+        --------------------------------------
+        Anónima: {anonima}
+        Nombre: {nombre}
+        Dirección: {calle}, {colonia}, {municipio}
+        Teléfono: {telefono}
+        Email: {email}
+        
+        Descripción de los hechos:
+        {descripcion}
+        
+        Tipo de denuncia: {tipo_denuncia}
+        Lugar de los hechos: {lugar_hechos}
+        Fecha y hora: {fecha_hora}
+        Dependencia: {dependencia}
+        """
+
+        msg = Message("Nueva Denuncia Recibida", recipients=["cristian.rodriguez@bomberosdeleon.org"])
+        msg.body = mensaje
+
+        # Adjuntar archivos
+        for key in archivos:
+            file = archivos[key]
+            if file.filename:
+                msg.attach(file.filename, file.content_type, file.read())
+
+        mail.send(msg)
+
+        return jsonify({"mensaje": "Denuncia enviada con éxito"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+@main.route('/dashboard')
+@login_required
+def dashboard():
+    # Ruta absoluta
+    uploads_path = os.path.join(current_app.root_path, 'static', 'uploads')
+    username = current_user.username
+    user_image_path = os.path.join(uploads_path, f"{username}.jpg")
+
+    if os.path.exists(user_image_path):
+        user_image = f"uploads/{username}.jpg"
+    else:
+        user_image = "uploads/default.png"
+
+    # Resto
+    files = os.listdir(uploads_path) if os.path.exists(uploads_path) else []
+    avisos = Aviso.query.order_by(Aviso.fecha_creacion.desc()).all()
+    eventos = Evento.query.order_by(Evento.fecha.asc()).all()
+    noticias = Noticia.query.order_by(Noticia.orden.asc()).all()
+    portales = PortalWeb.query.all()
+
+    return render_template(
+        'dashboard.html',
+        files=files,
+        avisos=avisos,
+        eventos=eventos,
+        noticias=noticias,
+        portales=portales,
+        user_image=user_image
+    )
+
+@main.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated: 
+        return redirect(url_for('main.dashboard'))
+
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        if user and user.check_password(form.password.data):
+            login_user(user)
+            flash('Inicio de sesión exitoso.', 'success')
+            return redirect(url_for('main.dashboard'))
+        else:
+            flash('Usuario o contraseña incorrectos.', 'danger')
+
+    return render_template('login.html', form=form)
+
+
+@main.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('Has cerrado sesión.', 'info')
+    return redirect(url_for('main.login'))
+
+
+@main.route('/submit_form', methods=['POST'])
+@login_required
+def submit_form():
+    nombre = request.form.get('nombre')
+    email = request.form.get('email')
+    mensaje = request.form.get('mensaje')
+    flash(f'Mensaje recibido de {nombre}', 'success')
+    return redirect(url_for('main.dashboard'))
+
+@main.route('/download/<filename>')
+def download_file(filename):
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
+
+
+@main.before_request
+def verificar_inactividad():
+    session.permanent = True  
+    session.modified = True  
+
+    if 'ultima_actividad' in session:
+        ultima_actividad_str = session.get('ultima_actividad')
+
+        if isinstance(ultima_actividad_str, str): 
+            try:
+                ultima_actividad = datetime.fromisoformat(ultima_actividad_str)  
+            except ValueError:
+                ultima_actividad = datetime.now()  
+        else:
+            ultima_actividad = datetime.now()  
+        
+        tiempo_inactivo = datetime.now() - ultima_actividad
+        if tiempo_inactivo > timedelta(hours=2):
+            logout_user()
+            session.clear()
+            flash('Tu sesión ha expirado por inactividad.', 'warning')
+            return redirect(url_for('main.login'))
+    session['ultima_actividad'] = datetime.now().isoformat()  
+
+@main.route('/check_vacation_status', methods=['GET'])
+@login_required
+def check_vacation_status():
+    vacation = VacationRequest.query.filter_by(user_id=current_user.id).first()
+    if vacation:
+        return jsonify({
+            "sent": True,
+            "selected_date": vacation.selected_date.strftime('%Y-%m-%d'),
+            "assigned_date": vacation.assigned_date.strftime('%Y-%m-%d')
+        })
+    return jsonify({"sent": False})
+
+@main.route('/save_vacation_date', methods=['POST'])
+@login_required
+def save_vacation_date():
+    if VacationRequest.query.filter_by(user_id=current_user.username).first():
+        return jsonify({"error": "Ya has enviado una fecha. Solo puedes enviarla una vez."}), 400
+    data = request.get_json()
+    selected_date_str = data.get('selected_date')
+    assigned_date_str = data.get('assigned_date')
+    if not selected_date_str or not assigned_date_str:
+        return jsonify({"error": "Faltan datos de fecha."}), 400
+    try:
+        selected_date = datetime.strptime(selected_date_str, '%Y-%m-%d').date()
+        assigned_date = datetime.strptime(assigned_date_str, '%Y-%m-%d').date()
+    except ValueError:
+        return jsonify({"error": "Formato de fecha incorrecto."}), 400
+    new_request = VacationRequest(
+        user_id=current_user.username,
+        selected_date=selected_date,
+        assigned_date=assigned_date
+    )
+    db.session.add(new_request)
+    db.session.commit()
+    return jsonify({"message": "Fecha guardada exitosamente.", "redirect": "dashboard"})
+
+@main.route('/ver-excel')
+def ver_excel():
+    excel_path = "static/documentos/calendario.xlsx"
+    df = pd.read_excel(excel_path)
+    excel_html = df.to_html(classes="table table-striped", index=False)
+    return render_template("ver_excel.html", excel_html=excel_html)
+
+@main.route('/profile')
+@login_required
+def profile():
+    return render_template('profile.html')
+
+
+@main.route('/gestor_contenido', defaults={'folder_id': None})
+@main.route('/gestor_contenido/<int:folder_id>')
+@login_required
+def gestor_contenido(folder_id):
+    if folder_id:
+        current_folder = Folder.query.get(folder_id)
+        files = File.query.filter_by(folder_id=folder_id).all()
+        folders = Folder.query.filter_by(parent_id=folder_id).all()
+    else:
+        current_folder = None
+        files = File.query.filter_by(folder_id=None).all()
+        folders = Folder.query.filter_by(parent_id=None).all() 
+    return render_template('gestor_contenido.html', folders=folders, current_folder=current_folder, files=files)
+@main.route('/upload_file', methods=['POST'])
+@login_required
+def upload_file():
+    file = request.files.get('file')
+    folder_id = request.form.get('folder_id')
+    if file and folder_id:
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+
+        new_file = File(filename=filename, folder_id=folder_id)
+        db.session.add(new_file)
+        db.session.commit()
+
+        return jsonify({'success': True, 'filename': filename})
+    return jsonify({'success': False, 'message': 'Faltan datos'}), 400
+
+
+@main.route('/add_folder', methods=['POST'])
+@login_required
+def add_folder():
+    folder_name = request.form.get('folder_name')
+    parent_id = request.form.get('parent_id') or None 
+    if not folder_name:
+        return jsonify({'success': False, 'message': 'El nombre de la carpeta es obligatorio.'}), 400
+    try:
+        new_folder = Folder(name=folder_name, parent_id=parent_id)
+        db.session.add(new_folder)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Carpeta creada correctamente.'}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Error al crear la carpeta: {str(e)}'}), 500
+
+
+@main.route('/rename_folder/<int:folder_id>', methods=['POST'])
+@login_required
+def rename_folder(folder_id):
+    folder = Folder.query.get(folder_id)
+    if folder:
+        data = request.get_json()
+        folder.name = data.get('name')
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Carpeta renombrada correctamente.'})
+    return jsonify({'success': False, 'message': 'Carpeta no encontrada.'}), 404
+
+@main.route('/move_folder/<int:folder_id>', methods=['POST'])
+@login_required
+def move_folder(folder_id):
+    folder = Folder.query.get(folder_id)
+    if folder:
+        data = request.get_json()
+        folder.parent_id = data.get('parent_id')
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Carpeta movida correctamente.'})
+    return jsonify({'success': False, 'message': 'Carpeta no encontrada.'}), 404
+
+@main.route('/get_all_folders', methods=['GET'])
+@login_required
+def get_all_folders():
+    folders = Folder.query.all() 
+    folder_list = [{"id": folder.id, "name": folder.name, "parent_id": folder.parent_id} for folder in folders]
+    return jsonify({"success": True, "folders": folder_list})
+
+@main.route('/rename_file/<int:file_id>', methods=['POST'])
+@login_required
+def rename_file(file_id):
+    file = File.query.get(file_id)
+    if file:
+        data = request.get_json()
+        new_name = data.get('new_name')
+        if new_name:
+            file.filename = new_name
+            db.session.commit()
+            return jsonify({'success': True, 'message': 'Archivo renombrado correctamente.'})
+    return jsonify({'success': False, 'message': 'Archivo no encontrado.'}), 404
+
+@main.route('/add_aviso', methods=['POST'])
+@login_required
+def add_aviso():
+    data = request.get_json()
+    descripcion = data.get('descripcion')
+    fecha_caducidad = data.get('fecha_caducidad')
+
+    if descripcion:
+        aviso = Aviso(
+            descripcion=descripcion,
+            fecha_caducidad=datetime.strptime(fecha_caducidad, '%Y-%m-%d').date() if fecha_caducidad else None,
+            user_id=current_user.id
+        )
+        db.session.add(aviso)
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "aviso": {
+                "descripcion": aviso.descripcion,
+                "fecha_caducidad": aviso.fecha_caducidad.strftime('%Y-%m-%d') if aviso.fecha_caducidad else "",
+                "fecha_creacion": aviso.fecha_creacion.strftime('%Y-%m-%d %H:%M')
+            }
+        })
+    return jsonify({"success": False}), 400
+
+@main.route('/formulario')
+@login_required
+def formulario():
+    return render_template('formulario.html')
+
+@main.route('/dia_bombero')
+@login_required
+def dia_bombero():
+    if current_user.id == 2:
+        return redirect(url_for('main.scanner_asistencia'))
+    respuesta_existente = Respuesta.query.filter_by(user_id=current_user.id, respondido=True).first()
+
+    if respuesta_existente:
+        return render_template('dashboard.html', ya_respondio=True)
+    return render_template('dia_bombero.html', ya_respondio=False)
+
+@main.route('/scanner_asistencia')
+@login_required
+def scanner_asistencia():
+    respuestas_confirmadas = Respuesta.query.filter_by(respondido=True).all()
+    return render_template('scanner.html', respuestas_confirmadas=respuestas_confirmadas)
+
+@main.route('/api/marcar_asistencia', methods=['POST'])
+@login_required
+def marcar_asistencia():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    
+    if not user_id:
+        return jsonify({"success": False, "error": "user_id no proporcionado"}), 400
+    
+    print(f"Recibido user_id: {user_id}")
+    respuesta = Respuesta.query.filter_by(user_id=user_id, respondido=True).first()
+
+    if not respuesta:
+        print(f"No se encontró la respuesta para user_id: {user_id}")
+        return jsonify({"success": False, "error": "Usuario no encontrado o no respondido"}), 400
+
+    if not respuesta.asistio:
+        respuesta.asistio = True
+        db.session.commit()
+        print(f"Asistencia confirmada para: {respuesta.user.nombre}")
+        return jsonify({"success": True, "nombre": respuesta.user.nombre, "nuevo_registro": True}), 200
+    else:
+        print(f"El usuario ya estaba registrado como asistido para user_id: {user_id}")
+        return jsonify({"success": True, "nombre": respuesta.user.nombre, "nuevo_registro": False}), 200
+
+@main.route('/submit_bombero', methods=['POST'])
+@login_required
+def submit_bombero():
+    nombre = current_user.nombre
+    acompanante = request.form.get("lleva_acompanante")
+    nombre_acompanante = request.form.get("nombre_acompanante")
+    correo = request.form.get("correo")
+    respuesta = Respuesta.query.filter_by(user_id=current_user.id).first()
+    if not respuesta:
+        respuesta = Respuesta(user_id=current_user.id)
+    respuesta.nombre_acompanante = nombre_acompanante
+    respuesta.correo = correo
+    respuesta.respondido = True
+    db.session.add(respuesta)
+    db.session.commit()
+    contenido_qr = f"{current_user.id}\nAsistencia confirmada:\n{nombre}"
+    if acompanante == "sí":
+        contenido_qr += f"\nAcompañante: {nombre_acompanante}"
+    contenido_qr += f"\nCorreo: {correo}"
+    qr = qrcode.make(contenido_qr)
+    filename = f"{nombre.replace(' ', '_')}_qr.png"
+    carpeta_qr = os.path.join(os.getcwd(), 'app', 'qr_codes')
+    os.makedirs(carpeta_qr, exist_ok=True)
+    filepath = os.path.join(carpeta_qr, filename)
+    qr.save(filepath)
+    html_body = f"""
+    <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px; text-align: center;">
+            <div style="max-width: 600px; margin: auto; background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                <h2 style="color: #d32f2f;">🎉 Confirmación de Asistencia</h2>
+                <p>Hola <strong>{nombre}</strong>,</p>
+                <p>Gracias por confirmar tu asistencia al <strong>Día del Bombero</strong>.</p>
+                <p><strong>Este es tu pase de entrada</strong>. Presenta este código QR al ingresar al evento:</p>
+                <img src="cid:{filename}" style="margin-top: 20px; width: 250px; height: auto;" alt="QR Code" />
+                <p style="margin-top: 20px; font-size: 0.9rem; color: #555;">⚠️ Sin este pase no podrás acceder al evento. Por favor, no lo pierdas.</p>
+                <p style="margin-top: 30px;">¡Te esperamos! 👨‍🚒</p>
+            </div>
+        </body>
+    </html>
+    """
+    msg = Message("🎫 Tu pase para el Día del Bombero",
+                  sender="tu_correo@gmail.com",
+                  recipients=[correo])
+    msg.body = f"Hola {nombre}, adjunto encontrarás tu código QR para el evento."
+    msg.html = html_body
+
+    with open(filepath, 'rb') as fp:
+        msg.attach(filename, "image/png", fp.read(), headers={"Content-ID": f"<{filename}>"})
+    mail.send(msg)
+    return render_template('confirmation.html', nombre=nombre, correo=correo)
+
+@main.route('/submit_formulario', methods=['POST'])
+def submit_formulario():
+    try:
+        preguntas = [
+            'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 
+            'q9', 'q10', 'q11', 'q12', 'q13', 'q14', 'q15', 'q16', 
+            'q17', 'q18', 'q19', 'q20', 'q21', 'q22', 'q23', 'q24', 
+            'q25', 'q26', 'q27', 'q28', 'q29', 'q30', 'q31', 'q32', 
+            'q33', 'q34', 'q35', 'q36', 'q37', 'q38', 'q39', 'q40', 
+            'q41', 'q42', 'q43', 'q44', 'q45', 'q46', 'q47', 'q48', 
+            'q49', 'q50', 'q51', 'q52', 'q53', 'q54', 'q55', 'q56', 
+            'q57', 'q58', 'q59', 'q60', 'q61', 'q62', 'q63', 'q64'
+        ]
+        respuestas = {}
+        for pregunta in preguntas:
+            respuesta = request.form.get(pregunta)
+            if respuesta:
+                respuestas[pregunta] = int(respuesta) 
+        nueva_respuesta = FormularioRespuesta(
+            usuario_id=current_user.id,
+            respuestas=json.dumps(respuestas),  
+            fecha_creacion=datetime.now()
+        )
+        db.session.add(nueva_respuesta)
+        db.session.commit()
+        flash("¡Formulario enviado correctamente!", "success")
+        return redirect(url_for('main.dashboard'))
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error al enviar el formulario: {e}", "danger")
+        return redirect(url_for('main.index'))
+@main.route('/add_evento', methods=['POST'])
+@login_required
+def add_evento():
+    data = request.get_json()
+    descripcion = data.get("descripcion")
+    fecha = data.get("fecha")
+
+    if descripcion and fecha:
+        evento = Evento(
+            descripcion=descripcion,
+            fecha=datetime.strptime(fecha, "%Y-%m-%d").date(),
+            user_id=current_user.id
+        )
+        db.session.add(evento)
+        db.session.commit()
+        return jsonify({"success": True, "evento_id": evento.id})
+
+    return jsonify({"success": False}), 400
+
+@main.route('/delete_evento/<int:evento_id>', methods=['DELETE'])
+@login_required
+def delete_evento(evento_id):
+    evento = Evento.query.get_or_404(evento_id)
+    db.session.delete(evento)
+    db.session.commit()
+    return jsonify({ "success": True })
+
+@main.route('/admin/noticias', methods=['GET', 'POST'])
+def admin_noticias():
+    if request.method == 'POST':
+        titulo = request.form['titulo']
+        descripcion = request.form['descripcion']
+        imagen = request.files['imagen']
+        link = request.form.get('link')
+
+        if imagen:
+            imagen.save(f"app/static/img/{imagen.filename}")
+
+        nueva_noticia = Noticia(
+            titulo=titulo,
+            descripcion=descripcion,
+            imagen=imagen.filename,
+            link=link
+        )
+        db.session.add(nueva_noticia)
+        db.session.commit()
+        return redirect(url_for('main.admin_noticias'))
+
+    noticias = Noticia.query.all()
+    return render_template('admin_noticias.html', noticias=noticias)
+
+@main.route('/admin/noticias/delete/<int:id>')
+def delete_noticia(id):
+    noticia = Noticia.query.get_or_404(id)
+    db.session.delete(noticia)
+    db.session.commit()
+    return redirect(url_for('main.admin_noticias'))
+@main.route('/delete_file/<filename>', methods=['DELETE'])
+@login_required
+def delete_file(filename):
+    try:
+        file_record = File.query.filter_by(filename=filename).first()
+        if not file_record:
+            return jsonify({'success': False, 'message': 'Archivo no encontrado'}), 404
+
+        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+        db.session.delete(file_record)
+        db.session.commit()
+
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@main.route('/list_files')
+@login_required
+def list_files():
+    files = File.query.with_entities(File.filename).all()
+    filenames = [f[0] for f in files]
+    return jsonify({'files': filenames})
+
+@main.route('/delete_aviso/<int:aviso_id>', methods=['POST'])
+@login_required
+def delete_aviso(aviso_id):
+    if current_user.id != 2:
+        return jsonify({'success': False, 'message': 'No tienes permiso para eliminar avisos.'}), 403
+    
+    aviso = Aviso.query.get_or_404(aviso_id)
+    db.session.delete(aviso)
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'Aviso eliminado correctamente.'})
+
+
+@main.route('/move_noticia/<int:id>/<string:direction>')
+@login_required
+def move_noticia(id, direction):
+    noticia = Noticia.query.get_or_404(id)
+
+    if direction == 'up':
+        noticia_superior = Noticia.query.filter(Noticia.orden < noticia.orden).order_by(Noticia.orden.desc()).first()
+        if noticia_superior:
+            noticia.orden, noticia_superior.orden = noticia_superior.orden, noticia.orden
+
+    elif direction == 'down':
+        noticia_inferior = Noticia.query.filter(Noticia.orden > noticia.orden).order_by(Noticia.orden.asc()).first()
+        if noticia_inferior:
+            noticia.orden, noticia_inferior.orden = noticia_inferior.orden, noticia.orden
+
+    db.session.commit()
+    return redirect(url_for('main.admin_noticias'))
+
+@main.route('/agregar_portal', methods=['POST'])
+@login_required
+def agregar_portal():
+    if current_user.id == 2:
+        nombre = request.form.get('nombre')
+        url = request.form.get('url')
+        if nombre and url:
+            nuevo_portal = PortalWeb(nombre=nombre, url=url)
+            db.session.add(nuevo_portal)
+            db.session.commit()
+            return jsonify({"success": True})
+    return jsonify({"success": False}), 403
+
+@main.route('/eliminar_portal', methods=['POST'])
+@login_required
+def eliminar_portal():
+    if current_user.id == 2:
+        portal_id = request.json.get('id')
+        portal = PortalWeb.query.get(portal_id)
+        if portal:
+            db.session.delete(portal)
+            db.session.commit()
+            return jsonify({"success": True})
+    return jsonify({"success": False}), 403
+
+

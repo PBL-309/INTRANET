@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Escanear Asistencia</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f6f8;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            font-size: 1.5rem; 
+        }
+        .scanner-container {
+            background: white;
+            padding: 30px 20px; 
+            border-radius: 16px;
+            box-shadow: 0px 6px 18px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 900px; 
+        }
+        #reader {
+            width: 100%;
+            min-height: 500px; 
+            background-color: #f0f0f0;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            margin-top: 20px;
+        }
+        .lista-asistencia {
+            max-height: 900px;
+            overflow-y: auto;
+            font-size: 1.4rem; 
+        }
+        .confirmado {
+            background-color: #28a745 !important;
+            color: white;
+        }
+        .mensajePopup {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 20px 40px; 
+            font-size: 1.8rem; 
+            color: white;
+            border-radius: 14px;
+            z-index: 9999;
+            display: none;
+            text-align: center;
+            max-width: 95%;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        .mensaje-exito {
+            background-color: #28a745;
+        }
+        .mensaje-aviso {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .camera-icon {
+            font-size: 100px; 
+            color: #007bff;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+        h2, h4 {
+            text-align: center;
+            font-size: 2.2rem; 
+        }
+        .main-grid {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+                font-size: 1.6rem;
+            }
+            .scanner-container {
+                padding: 20px 10px;
+            }
+            .camera-icon {
+                font-size: 90px;
+            }
+            #reader {
+                min-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="mensajeExito" class="mensajePopup mensaje-exito">✅ Registrado con éxito</div>
+<div id="mensajeAviso" class="mensajePopup mensaje-aviso">⚠️ Este usuario ya ha sido registrado</div>
+<div class="main-grid">
+    <div class="scanner-container">
+        <h2 class="text-danger mb-4">📷 Escanear Asistencia</h2>
+        <div class="text-center">
+            <i class="fas fa-camera camera-icon" id="cameraPermissionBtn"></i>
+            <p class="text-center">Haz clic en la cámara para iniciar el escáner.</p>
+        </div>
+        <div id="reader-container">
+            <div id="reader"></div>
+        </div>
+    </div>
+    <div class="scanner-container">
+        <h4 class="mb-3">🎫 Lista de Asistencia</h4>
+        <ul class="list-group lista-asistencia" id="listaAsistencia">
+            {% for respuesta in respuestas_confirmadas %}
+                <li class="list-group-item {% if respuesta.asistio %}confirmado{% endif %}" id="usuario-{{ respuesta.user_id }}">
+                    <div>
+                        {{ respuesta.user.nombre }}
+                        {% if respuesta.nombre_acompanante %}
+                            <small class="text-muted d-block">👥 Acompañante: {{ respuesta.nombre_acompanante }}</small>
+                        {% endif %}
+                    </div>
+                    <span class="badge {% if respuesta.asistio %}bg-success{% else %}bg-secondary{% endif %}">
+                        {% if respuesta.asistio %}Confirmado{% else %}Pendiente{% endif %}
+                    </span>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<script>
+let scanner;
+function mostrarMensaje(id) {
+    const mensaje = document.getElementById(id);
+    mensaje.style.display = "block";
+    setTimeout(() => mensaje.style.display = "none", 2500);
+}
+let scanning = false;
+
+function onScanSuccess(decodedText, decodedResult) {
+    if (scanning) return;  // Si ya está escaneando, no hacer nada
+    scanning = true;  // Marcar que está escaneando
+
+    const lineas = decodedText.trim().split("\n");
+    const userId = lineas[0];
+
+    fetch("/api/marcar_asistencia", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const item = document.getElementById(`usuario-${userId}`);
+            if (item) {
+                item.classList.add("confirmado");
+                const badge = item.querySelector(".badge");
+                badge.textContent = "Confirmado";
+                badge.classList.remove("bg-secondary");
+                badge.classList.add("bg-success");
+            }
+            if (data.nuevo_registro) {
+                mostrarMensaje("mensajeExito");
+            } else {
+                mostrarMensaje("mensajeAviso");
+            }
+        } else {
+            mostrarMensaje("mensajeAviso");
+        }
+    })
+    .catch(error => {
+        console.error("Error al marcar asistencia:", error);
+    })
+    .finally(() => {
+        // Después de procesar, permitir otro escaneo después de 1.5 segundos (ajusta el tiempo si es necesario)
+        setTimeout(() => {
+            scanning = false;  // Permitir otro escaneo
+        }, 1500);  // Puedes aumentar el tiempo si es necesario
+    });
+}
+
+document.getElementById("cameraPermissionBtn").addEventListener("click", function () {
+    try {
+        const html5QrCode = new Html5Qrcode("reader");
+
+        html5QrCode.start(
+            { facingMode: "environment" }, 
+            {
+                fps: 10,
+                qrbox: 250
+            },
+            onScanSuccess,
+            (errorMessage) => {
+            }
+        ).catch(err => {
+            console.error("Error al iniciar escáner:", err);
+        });
+        document.getElementById("cameraPermissionBtn").style.display = "none";
+
+    } catch (error) {
+        console.error("Error general:", error);
+    }
+});
+</script>
+</body>
+</html>

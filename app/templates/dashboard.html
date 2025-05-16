@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard - Intranet</title>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <script src="{{ url_for('static', filename='js/logout.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/shepherd.js@8.0.0/dist/css/shepherd.css">
+    <script src="https://unpkg.com/shepherd.js@8.0.0/dist/js/shepherd.min.js"></script>
+</head>
+
+<body>
+    <div id="logoutModal" class="modal fade" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="logoutModalLabel">Cerrar Sesión</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas cerrar sesión?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <a href="{{ url_for('main.logout') }}" class="btn btn-danger">Cerrar Sesión</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-red fixed-top">
+        <div class="container-fluid">
+            <button class="navbar-toggler me-2" type="button" onclick="toggleSidebar()">
+                ☰
+            </button>
+            <a class="navbar-brand custom-navbar-brand" href="/dashboard">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="navbar-logo">
+                INTRANET BOMBEROS
+            </a>
+            <button class="navbar-toggler" type="button" onclick="toggleNavbar()">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">Cerrar
+                            Sesión</a>
+                    <li class="nav-item">
+                        <div class="user-box d-flex align-items-center">
+                            <img src="{{ url_for('static', filename=user_image) }}"
+                            alt="Foto de {{ current_user.nombre }}" class="user-img">
+                       
+                            <span class="user-name">{{ current_user.nombre }}</span>
+                        </div>
+                    </li>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container-fluid">
+        <div class="row">
+            <nav id="sidebar" class="bg-dark sidebar vh-100">
+                <div class="position-sticky">
+                    <ul class="nav flex-column">
+                        <li class="sidebar-title">
+                            <span>Normatividad Aplicable</span>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link text-white"
+                                href="{{ url_for('static', filename='docs/REGLAMENTO DEL HEROICO CUERPO DE BOMBEROS DE LEÓN, GUANAJUATO.pdf') }}">Reglamento
+                                Del Heroico cuerpo de bomberos de León, Guanajuato</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white"
+                                href="{{ url_for('static', filename='docs/CODIGO DE ETICA.pdf') }}">Código de ética</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white"
+                                href="{{ url_for('static', filename='docs/REGLAMENTO INTERIOR DE LA ADMINISTRACIÓN PÚBLICA MUNICIPAL DE LEÓN, GUANAJUATO.pdf') }}">Código
+                                de
+                                conducta</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white"
+                                href="{{ url_for('static', filename='docs/REGLAMENTO INTERIOR DE LA ADMINISTRACIÓN PÚBLICA MUNICIPAL DE LEÓN, GUANAJUATO.pdf') }}">Reglamento
+                                interior de la administración pública municipal de León, Guanajuato</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white"
+                                href="{{ url_for('static', filename='docs/LEY DE RESPONSABILIDADES ADMINISTRATIVAS PARA EL ESTADO DE GUANAJUATO.pdf') }}">Ley
+                                de responsabilidades administrativas para el estado de Guanajuato</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white"
+                                href="{{ url_for('static', filename='docs/CONSTITUCION POLITICA DE LOS ESTADOS UNIDOS MEXICANOS.pdf') }}">Constitución
+                                politica del estado de Guanajuato</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white"
+                                href="{{ url_for('static', filename='docs/CONSTITUCIÓN POLITICA DEL ESTADO DE GUANAJUATO.pdf') }}">Constitución
+                                politica de los Estados Unidos Mexicanos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white"
+                                href="{{ url_for('static', filename='docs/REGLAMENTO DE CONTROL INTERNO PARA LA ADMINISTRACIÓN PÚBLICA MUNICIPAL DE LEÓN, GUANAJUATO.pdf') }}">Reglamento
+                                de control interno para la administración pública municipal de León, Guanajuato</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white"
+                                href="{{ url_for('static', filename='docs/REGLAMENTO DE ADQUISICIONES, ENAJENACIONES, ARRENDAMIENTOS, COMODATOS Y CONTRATACIÓN DE SERVICIOS PARA EL MUNICIPIO DE LEÓN, GUANAJUATO.pdf') }}">Reglamento
+                                de Adquisiciones, enajenaciones, arrendamientos, comodatos y contratación de servicios
+                                para el municipio de León, Guanajuato</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white"
+                                href="{{ url_for('static', filename='docs/LEY PARA EL GOBIERNO Y ADMINISTRACIÓN DE LOS MUNICIPIOS DEL ESTADO DE GUANAJUATO.pdf') }}">Ley
+                                para el gobierno y administración de los municipios del estado de Guanajuato</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            <main class="col-md-10 ms-sm-auto p-3 d-flex flex-column" style="height: 90vh; margin-top: 90px;">
+                <div class="row h-100">
+                    {% if current_user.id == 2 %}
+                    <a href="/admin/noticias" class="btn btn-primary">EDITAR NOTICIAS</a>
+                    {% endif %}
+                    <div class="col-md-8 d-flex flex-column h-100">
+                        <div id="carouselNoticias" class="carousel slide carousel-fade mb-3 flex-grow-1"
+                            data-bs-ride="carousel" style="max-height: 550px;">
+                            <div class="carousel-inner">
+                                {% for noticia in noticias %}
+                                <div class="carousel-item {% if loop.first %}active{% endif %}">
+                                    <img src="{{ url_for('static', filename='img/' + noticia.imagen) }}"
+                                        class="d-block w-100 img-fluid" alt="{{ noticia.titulo }}">
+                                </div>
+                                {% endfor %}
+                            </div>
+
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carouselNoticias"
+                                data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carouselNoticias"
+                                data-bs-slide="next">
+                                <span class="carousel-control-next-icon"></span>
+                            </button>
+                        </div>
+
+                        <div class="row g-2 four-cards">
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <div
+                                    class="card text-white bg-azulpastel text-center d-flex flex-column calendariopre-btn">
+                                    <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                                        <h5 style="font-weight: bold;">Vacaciones Prehospitalario</h5>
+                                        <i class="bi bi-calendar4-event"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <div
+                                    class="card text-white bg-azulpastel text-center d-flex flex-column calendarioop-btn">
+                                    <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                                        <h5 style="font-weight: bold;">Vacaciones Operativo</h5>
+                                        <i class="bi bi-calendar-event-fill"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <a href="https://denuncia.leon.gob.mx/" target="_blank" style="text-decoration: none;">
+                                    <div class="card text-white bg-azulpastel text-center d-flex flex-column">
+                                        <div
+                                            class="card-body d-flex flex-column align-items-center justify-content-center">
+                                            <h5 style="font-weight: bold;">Denuncia León</h5>
+                                            <i class="bi bi-journal-text"></i>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-3">
+                                <div
+                                    class="card text-white bg-azulpastel text-center d-flex flex-column calendario-btn">
+                                    <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                                        <h5 style="font-weight: bold;">Calendario Del Año</h5>
+                                        <i class="bi bi-calendar-event-fill"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 mt-1.5" style="height: auto;">
+                                <a href="#" data-bs-toggle="modal" data-bs-target="#avisoPrivacidadModal"
+                                    style="text-decoration: none;">
+                                    <div
+                                        class="card text-white bg-limonpastel text-center d-flex flex-column extra-btn">
+                                        <div
+                                            class="card-body d-flex flex-column align-items-center justify-content-center">
+                                            <h5 style="font-weight: bold;">Aviso de Privacidad Integral</h5>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="modal fade" id="avisoPrivacidadModal" tabindex="-1"
+                                aria-labelledby="avisoPrivacidadLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="avisoPrivacidadLabel">Aviso de Privacidad</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Cerrar"></button>
+                                        </div>
+                                        <div class="modal-body" style="text-align: justify; font-size: 14px;">
+                                            <p>Con fundamento en lo dispuesto en los artículos 3 fracción I 34, 35, 36,
+                                                37, 38, 39, 40, 42 así como lo dispuesto en el titulo tercero, capítulo
+                                                primero de la Ley de Protección de Datos Personales en Posesión de
+                                                Sujetos Obligados para el Estado de Guanajuato, publicada en el
+                                                periódico oficial del Gobierno del Estado de Guanajuato el 14 de julio
+                                                del 2017, se hace de su conocimiento lo siguiente: </p>
+                                            <p>Patronato de Bomberos de León, Gto, con domicilio en Apolo 309, Col.
+                                                Obrera, León, Guanajuato, no podrá requerirle información que exceda los
+                                                fines para los cuales se solicita, así como tampoco podrá usarse dicha
+                                                información para finalidades distintas a las que Usted solicita, lo
+                                                anterior, a efecto de cumplir con la Ley de la materia, debiendo ser la
+                                                información identificable, exacta, adecuada, pertinente y no excesiva.
+                                            </p>
+                                            <p>Los datos personales recabados y por esta dependencia podrán ser
+                                                recabados en las formas establecidas en el artículo 3 tres fracción VII
+                                                y VIII de la Ley de Protección de Datos Personales en Posesión de
+                                                Sujetos Obligados para el Estado de Guanajuato, serán protegidos,
+                                                incorporados y tratados en las bases de datos personales con la única,
+                                                determinada, explicita y legitima finalidad para lo cual fueron
+                                                otorgados por usted los cuales y que consiste para efectos de atención a
+                                                quejas, respuesta y seguimiento ante ministerio público, instituciones y
+                                                dependencias involucradas en las incidencias que se atienden de
+                                                conformidad en los artículos 6° Base A y 16 segundo párrafo de la
+                                                Constitución Política de los Estados Unidos Mexicano; y el artículo 34,
+                                                fracción XIX del Reglamento Interior de la Secretaría de la Función
+                                                Pública.</p>
+                                            <p>Datos personales que serán sometidos a tratamiento (identificando
+                                                aquéllos que son sensibles).</p>
+                                            <p><strong>Datos que se recaban:</strong><br>
+                                                - Nombre completo.<br>
+                                                - Teléfono.<br>
+                                                - Domicilio.<br>
+                                                - Día y mes de nacimiento.<br>
+                                                - Correo electrónico.</p>
+                                            <p><strong>Los datos recabados por esta dependencia no serán transferidos a
+                                                    otros sujetos obligados.</strong></p>
+                                            <p>Se hace de su conocimiento que en términos del artículo 62 de la Ley de
+                                                Protección de Datos Personales en Posesión de Sujetos Obligados para el
+                                                Estado de Guanajuato, puede solicitar ante La Unidad de Transparencia
+                                                Municipal de León Guanajuato, que es la unidad administrativa
+                                                responsable del sistema de datos personales y el lugar donde el titular
+                                                de los datos personales podrá ejercer su derecho de acceso,
+                                                rectificación, cancelación, corrección u oposición al tratamiento de sus
+                                                datos personales (ARCO) recabados por esta dependencia ubicada en Plaza
+                                                Principal S/N, Zona Centro, León, Guanajuato C.P. 37000 teléfono 788
+                                                0000 ext. 1840 en un horario de 08:00 a 15:30 o bien a través de la
+                                                dirección electrónica umaip@leon.gob.mx</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cerrar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                </a>
+                            </div>
+                        </div>
+                        <div id="contenido"></div>
+                    </div>
+                    <div class="col-md-4 d-flex flex-column gap-3">
+                        <div class="accordion" id="mainAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header d-flex justify-content-between align-items-center"
+                                    id="headingAvisos">
+                                    <button class="accordion-button collapsed" type="button"
+                                        data-target-id="collapseAvisos">
+                                        AVISOS PARA TODO EL PERSONAL
+                                    </button>
+                                    {% if current_user.id == 2 %}
+                                    <button class="btn btn-light btn-sm fw-bold ms-2" data-bs-toggle="modal"
+                                        data-bs-target="#avisoModal">➕</button>
+                                    {% endif %}
+                                </h2>
+                                <div id="collapseAvisos" class="accordion-collapse collapse"
+                                    aria-labelledby="headingAvisos">
+                                    <div class="accordion-body">
+                                        <div id="avisosContainer">
+                                            {% if avisos %}
+                                            {% for aviso in avisos %}
+                                            <div class="card mb-3 position-relative border-0 shadow-sm rounded-3">
+                                                {% if current_user.id == 2 %}
+                                                <button
+                                                    class="btn btn-sm delete-aviso-btn position-absolute top-0 end-0"
+                                                    data-aviso-id="{{ aviso.id }}">
+                                                    ✖
+                                                </button>
+                                                {% endif %}
+                                                <div class="card-body">
+                                                    <p class="mb-1 fw-semibold">{{ aviso.descripcion }}</p>
+                                                    {% if current_user.id == 2 %}
+                                                    <small class="text-muted">📅 Caduca: {{
+                                                        aviso.fecha_caducidad.strftime('%d de %B del %Y').upper()
+                                                        }}</small><br>
+                                                    {% endif %}
+                                                    <small class="text-muted">🕒 Creado: {{
+                                                        aviso.fecha_creacion.strftime('%Y-%m-%d %H:%M') }}</small>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                            {% else %}
+                                            <p>No hay avisos disponibles.</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header d-flex justify-content-between align-items-center"
+                                    id="headingPortales">
+                                    <button class="accordion-button collapsed" type="button"
+                                        data-target-id="collapsePortales">
+
+                                        PORTALES WEB
+                                    </button>
+                                    {% if current_user.id == 2 %}
+                                    <button class="btn btn-light btn-sm ms-2" data-bs-toggle="modal"
+                                        data-bs-target="#portalModal">➕</button>
+                                    {% endif %}
+                                </h2>
+                                <div id="collapsePortales" class="accordion-collapse collapse"
+                                    aria-labelledby="headingPortales">
+                                    <div class="accordion-body" id="portales-web-container">
+                                        {% for portal in portales %}
+                                        <div class="portal-item position-relative d-flex align-items-center gap-2">
+                                            <img src="{{ url_for('static', filename='img/favicon.png') }}"
+                                                alt="{{ portal.nombre }}">
+                                            <a href="{{ portal.url }}" target="_blank">{{ portal.nombre }}</a>
+                                            {% if current_user.id == 2 %}
+                                            <button
+                                                class="btn btn-sm delete-portal-btn text-danger border-0 position-absolute top-0 end-0"
+                                                data-portal-id="{{ portal.id }}">
+                                                ✖
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header d-flex justify-content-between align-items-center"
+                                    id="headingDocumentos">
+                                    <button class="accordion-button collapsed" type="button"
+                                        data-target-id="collapseDocumentos">
+                                        DOCUMENTOS
+                                    </button>
+                                    {% if current_user.id == 2 %}
+                                    <button class="btn btn-light btn-sm ms-2" data-bs-toggle="modal"
+                                        data-bs-target="#uploadModal">
+                                        📤
+                                    </button>
+                                    {% endif %}
+                                </h2>
+                                <div id="collapseDocumentos" class="accordion-collapse collapse"
+                                    aria-labelledby="headingDocumentos">
+                                    <div class="accordion-body" id="documentosContainer">
+                                        <ul class="list-group" id="file-list">
+                                            {% for file in files %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center"
+                                                data-filename="{{ file }}">
+                                                <span>📄 {{ file }}</span>
+                                                <div>
+                                                    <a href="{{ url_for('main.download_file', filename=file) }}"
+                                                        class="btn btn-sm btn-outline-primary">⬇️</a>
+                                                    {% if current_user.id == 2 %}
+                                                    <a href="#" class="btn btn-sm btn-outline-danger delete-file-btn"
+                                                        data-filename="{{ file }}">❌</a>
+                                                    {% endif %}
+                                                </div>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header d-flex justify-content-between align-items-center"
+                                    id="headingEventos">
+                                    <button class="accordion-button collapsed" type="button"
+                                        data-target-id="collapseEventos">
+                                        PRÓXIMOS EVENTOS
+                                    </button>
+                                    {% if current_user.id == 2 %}
+                                    <button id="addEventoBtn" class="btn btn-light btn-sm fw-bold ms-2"
+                                        data-bs-toggle="modal" data-bs-target="#eventoModal"
+                                        data-url="{{ url_for('main.add_evento') }}">➕</button>
+                                    {% endif %}
+                                </h2>
+                                <div id="collapseEventos" class="accordion-collapse collapse"
+                                    aria-labelledby="headingEventos">
+                                    <div class="accordion-body" id="eventosContainer">
+                                        {% if eventos %}
+                                        {% for evento in eventos %}
+                                        <div class="card mb-3 position-relative border-0 shadow-sm rounded-3">
+                                            {% if current_user.id == 2 %}
+                                            <button class="btn btn-sm delete-evento-btn position-absolute top-0 end-0"
+                                                data-evento-id="{{ evento.id }}">✖</button>
+                                            {% endif %}
+                                            <div class="card-body">
+                                                <p class="mb-1 fw-semibold">{{ evento.descripcion }}</p>
+                                                <small class="text-muted">📅 Fecha: {{ evento.fecha }}</small>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                        {% else %}
+                                        <p id="noEventosTexto">No hay eventos programados.</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="toast align-items-center position-fixed bottom-0 end-0 m-3" id="toastEvento"
+                            role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="d-flex">
+                                <div class="toast-body" id="toastEventoBody"></div>
+                                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"
+                                    aria-label="Cerrar"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade" id="avisoModal" tabindex="-1" aria-labelledby="avisoModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form id="avisoForm" data-url="{{ url_for('main.add_aviso') }}">
+
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="avisoModalLabel">Añadir Aviso</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Cerrar"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <textarea id="descripcion" name="descripcion" class="form-control"
+                                        placeholder="Describe el aviso" required></textarea>INGRESE LA FECHA
+                                    DE
+                                    TERMINACIÓN
+                                    <input type="date" id="fecha_caducidad" name="fecha_caducidad"
+                                        class="form-control mt-2" placeholder="Ingrese la fecha que caduque">
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary">Enviar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade" id="eventoModal" tabindex="-1" aria-labelledby="eventoModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <form id="eventoForm" data-url="{{ url_for('main.add_evento') }}">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="eventoModalLabel">Añadir Evento</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Cerrar"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <textarea id="eventoDescripcion" name="descripcion" class="form-control"
+                                        placeholder="Describe el evento" required></textarea>FECHA DEL EVENTO
+                                    <input type="date" id="eventoFecha" name="fecha" class="form-control mt-2">
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary">Enviar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+        </div>
+        <div class="modal fade" id="portalModal" tabindex="-1" aria-labelledby="portalModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form id="portalForm">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Añadir Portal</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Cerrar"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="text" id="nombrePortal" name="nombre" class="form-control mb-2"
+                                placeholder="Nombre del portal" required>
+                            <input type="text" id="urlPortal" name="url" class="form-control mb-2"
+                                placeholder="URL del portal" required>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Agregar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true"
+            data-bs-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="uploadModalLabel">Subir Archivo</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="upload-form" data-upload-url="/upload_file">
+                            <div class="mb-3">
+                                <input type="hidden" name="folder_id" value="1">
+                                <label for="fileInput" class="form-label">Selecciona un archivo</label>
+                                <input type="file" id="fileInput" name="file" required class="form-control">
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Subir</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </main>
+    </div>
+    {% if ya_respondio %}
+    <script>
+        window.onload = function () {
+            alert("🚫 Ya has respondído anteriormente.");
+            setTimeout(() => {
+                window.location.href = "{{ url_for('main.dashboard') }}";
+            }, 0);
+        };
+    </script>
+    {% endif %}
+    </div>
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const accordionButtons = document.querySelectorAll('.accordion-button');
+            accordionButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const targetId = this.getAttribute('data-target-id');
+                    const target = document.getElementById(targetId);
+                    const isOpen = target.classList.contains('show');
+                    document.querySelectorAll('.accordion-collapse.show').forEach(openItem => {
+                        const collapseInstance = bootstrap.Collapse.getInstance(openItem) || new bootstrap.Collapse(openItem, { toggle: false });
+                        collapseInstance.hide();
+                    });
+                    accordionButtons.forEach(btn => btn.classList.add('collapsed'));
+                    if (!isOpen) {
+                        const collapseInstance = bootstrap.Collapse.getInstance(target) || new bootstrap.Collapse(target, { toggle: false });
+                        collapseInstance.show();
+                        this.classList.remove('collapsed');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

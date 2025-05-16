@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Día del Bombero 👨‍🚒</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #e3f2fd; 
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 10px;
+        }
+        .form-container {
+            background: linear-gradient(135deg, #fceabb, #f8b500); 
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+            filter: blur(5px);
+            transition: filter 0.3s ease;
+            width: 100%;
+            max-width: 1100px;
+            box-sizing: border-box;
+        }
+        .form-container.active {
+            filter: none;
+        }
+        .question {
+            background-color: #fffde7; 
+            padding: 22px;
+            border-radius: 8px;
+            margin-bottom: 36px;
+            border: 1px solid #ffca28;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            font-size: 1.1rem;
+            color: #3e2723;
+            font-weight: bold;
+        }
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .radio-group label {
+            padding: 10px 16px;
+            border-radius: 25px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s, transform 0.2s;
+            user-select: none;
+            font-size: 0.9rem;
+            color: #555;
+            background-color: #fffde7;
+        }
+        .radio-group label:hover {
+            background-color: #fff176;
+            border-color: #fdd835;
+            transform: scale(1.05);
+        }
+        .radio-group input[type="radio"] {
+            display: none;
+        }
+        .radio-group input[type="radio"]:checked + label {
+            background-color: #ffeb3b;
+            border-color: #fbc02d;
+            font-weight: bold;
+            color: #0d47a1;
+            transform: scale(1.1);
+        }
+        .welcome-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backdrop-filter: blur(8px);
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .welcome-message {
+            background-color: #fff;
+            padding: 24px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 400px;
+        }
+        .btn-custom {
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            font-size: 0.9rem;
+        }
+        .btn-custom:hover {
+            background-color: #218838;
+            color: #fff;
+        }
+        @media (max-width: 600px) {
+            .form-container {
+                padding: 16px;
+            }
+            .question {
+                font-size: 3rem;
+                padding: 24px;
+                margin-bottom: 40px;
+            }
+            .radio-group {
+                flex-direction: column;
+            }
+            .radio-group label {
+                padding: 14px 24px;
+                font-size: 2.8rem;
+                display: block;
+                text-align: center;
+                width: 100%;
+            }
+            .welcome-message {
+                padding: 20px;
+                font-size: 2.5rem;
+            }
+            .btn-custom {
+                padding: 14px 24px;
+                font-size: 2.5rem;
+            }
+        }
+        @media (min-width: 601px) and (max-width: 1024px) {
+            .form-container {
+                padding: 18px;
+            }
+            .question {
+                font-size: 2.8rem;
+                padding: 22px;
+                margin-bottom: 40px;
+            }
+            .radio-group {
+                flex-direction: column;
+            }
+            .radio-group label {
+                padding: 12px 20px;
+                font-size: 2.8rem;
+                width: 100%;
+            }
+            .welcome-message {
+                padding: 22px;
+                font-size: 2.8rem;
+            }
+            .btn-custom {
+                padding: 16px 26px;
+                font-size: 2.8rem;
+            }
+        }
+        @media (min-width: 1025px) {
+            .question {
+                font-size: 1.1rem;
+            }
+    
+            .radio-group label {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+    
+            .welcome-message {
+                padding: 24px;
+                font-size: 1.1rem;
+            }
+    
+            .btn-custom {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="welcome-overlay" id="welcomeOverlay">
+    <div class="welcome-message">
+        <h2>Registro Día del Bombero</h2>
+        <p>Confirma tu asistencia al evento. Tu respuesta nos ayuda a planear mejor.</p>
+        <button class="btn btn-primary btn-custom" onclick="hideOverlay()">De acuerdo</button>
+    </div>
+</div>
+<div class="form-container" id="formContainer">
+    <form method="POST" action="{{ url_for('main.submit_bombero') }}">
+        <h3 class="text-center mb-4">👩‍🚒 Confirmación de Asistencia - Día del Bombero</h3>
+        <div class="question">
+            <p>1️⃣ ¿Asistirás al evento?</p>
+            <div class="radio-group">
+                <input type="radio" id="asistire" name="asistencia" value="sí" required onclick="toggleAcompanante(true)">
+                <label for="asistire">✅ Asistiré</label>
+
+                <input type="radio" id="no-asistire" name="asistencia" value="no" onclick="toggleAcompanante(false)">
+                <label for="no-asistire">❌ No asistiré</label>
+            </div>
+        </div>
+        <div class="question" id="acompanantePregunta" style="display: none;">
+            <p>2️⃣ ¿Llevarás acompañante?</p>
+            <div class="radio-group">
+                <input type="radio" id="llevara-si" name="lleva_acompanante" value="sí" onclick="mostrarCampoNombre(true)">
+                <label for="llevara-si">👫 Sí</label>
+
+                <input type="radio" id="llevara-no" name="lleva_acompanante" value="no" onclick="mostrarCampoNombre(false)">
+                <label for="llevara-no">🚶 No</label>
+            </div>
+
+            
+        </div>
+        <div class="question" id="correoPregunta" style="display: none;">
+            <p>📧 Por favor, escribe tu correo electrónico:</p>
+            <input type="email" name="correo" class="form-control" placeholder="tucorreo@ejemplo.com" required>
+        </div>
+        <!-- Campo para nombre de acompañante -->
+        <div class="question" id="nombreAcompanante" style="display: none;">
+            <p>✍️ Nombre del acompañante:</p>
+            <input type="text" name="nombre_acompanante" class="form-control" placeholder="Escribe el nombre aquí">
+        </div>
+
+        <!-- Botón de envío -->
+        <button type="submit" class="btn btn-success btn-custom w-100">Enviar</button>
+    </form>
+</div>
+
+<script>
+    function hideOverlay() {
+        document.getElementById('welcomeOverlay').style.display = 'none';
+        document.getElementById('formContainer').classList.add('active');
+    }
+
+    function toggleAcompanante(mostrar) {
+        const acomp = document.getElementById('acompanantePregunta');
+        const email = document.getElementById('correoPregunta');
+        acomp.style.display = mostrar ? 'block' : 'none';
+        email.style.display = mostrar ? 'block' : 'none';
+        if (!mostrar) {
+            document.getElementById('nombreAcompanante').style.display = 'none';
+        }
+    }
+
+    function mostrarCampoNombre(mostrar) {
+        document.getElementById('nombreAcompanante').style.display = mostrar ? 'block' : 'none';
+    }
+</script>
+</body>
+</html>

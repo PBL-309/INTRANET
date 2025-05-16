@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario de Evaluación</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 10px;
+        }
+        
+        /* Contenedor del formulario */
+        .form-container {
+            background-color: #fff;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+            filter: blur(5px);
+            transition: filter 0.3s ease;
+            width: 100%;
+            max-width: 1100px;
+            box-sizing: border-box;
+        }
+        
+        .form-container.active {
+            filter: none;
+        }
+        
+        /* Estilo de las preguntas */
+        .question {
+            background-color: #f0f8ff;
+            padding: 22px;
+            border-radius: 8px;
+            margin-bottom: 36px; /* Más espacio entre preguntas */
+            border: 1px solid #a0c4ff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            font-size: 1.1rem;
+            color: #1d3557;
+            font-weight: bold;
+        }
+        
+        /* Grupo de radios */
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        /* Estilo de las opciones de respuesta */
+        .radio-group label {
+            padding: 10px 16px;
+            border-radius: 25px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s, transform 0.2s;
+            user-select: none;
+            font-size: 0.9rem;
+            color: #555;
+            background-color: #f8f9fa;
+        }
+        
+        /* Efecto hover en las opciones */
+        .radio-group label:hover {
+            background-color: #e2e6ea;
+            border-color: #90caf9;
+            transform: scale(1.05);
+        }
+        
+        /* Ocultar input de radio nativo */
+        .radio-group input[type="radio"] {
+            display: none;
+        }
+        
+        /* Opción seleccionada */
+        .radio-group input[type="radio"]:checked + label {
+            background-color: #90caf9;
+            border-color: #42a5f5;
+            font-weight: bold;
+            color: #0d47a1;
+            transform: scale(1.1);
+        }
+        
+        /* Fondo de bienvenida con desenfoque */
+        .welcome-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backdrop-filter: blur(8px);
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* Contenedor del mensaje de bienvenida */
+        .welcome-message {
+            background-color: #fff;
+            padding: 24px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 400px;
+        }
+        
+        /* Botón personalizado */
+        .btn-custom {
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .btn-custom:hover {
+            background-color: #218838;
+            color: #fff;
+        }
+        
+        /* 📱 Media Queries para Móviles */
+        @media (max-width: 600px) {
+            .form-container {
+                padding: 16px;
+            }
+        
+            .question {
+                font-size: 3rem;
+                padding: 24px;
+                margin-bottom: 40px;
+            }
+        
+            .radio-group {
+                flex-direction: column;
+            }
+        
+            .radio-group label {
+                padding: 14px 24px;
+                font-size: 2.8rem;
+                display: block;
+                text-align: center;
+                width: 100%;
+            }
+        
+            .welcome-message {
+                padding: 20px;
+                font-size: 2.5rem;
+            }
+        
+            .btn-custom {
+                padding: 14px 24px;
+                font-size: 2.5rem;
+            }
+        }
+        
+        /* 📱 Media Queries para Tablets */
+        @media (min-width: 601px) and (max-width: 1024px) {
+            .form-container {
+                padding: 18px;
+            }
+        
+            .question {
+                font-size: 2.8rem;
+                padding: 22px;
+                margin-bottom: 40px;
+            }
+        
+            .radio-group {
+                flex-direction: column;
+            }
+        
+            .radio-group label {
+                padding: 12px 20px;
+                font-size: 2.8rem;
+                width: 100%;
+            }
+        
+            .welcome-message {
+                padding: 22px;
+                font-size: 2.8rem;
+            }
+        
+            .btn-custom {
+                padding: 16px 26px;
+                font-size: 2.8rem;
+            }
+        }
+        
+        /* 💻 PC: Tamaño Normal */
+        @media (min-width: 1025px) {
+            .question {
+                font-size: 1.1rem;
+            }
+        
+            .radio-group label {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+        
+            .welcome-message {
+                padding: 24px;
+                font-size: 1.1rem;
+            }
+        
+            .btn-custom {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+        }
+        </style>
+        
+</head>
+<body>
+
+<div class="welcome-overlay" id="welcomeOverlay">
+    <div class="welcome-message">
+        <h2>Formulario Anónimo</h2>
+        <p>Este formulario es completamente anónimo. Tus respuestas serán confidenciales y se utilizarán únicamente para mejorar nuestros procesos.</p>
+        <button class="btn btn-primary btn-custom" onclick="hideOverlay()">De acuerdo</button>
+    </div>
+</div>
+
+<div class="form-container" id="formContainer">
+    <form method="POST" action="{{ url_for('main.submit_formulario') }}">
+        <h3 class="text-center mb-4">Comunicación Organizacional 📢</h3>
+
+        <div class="question">
+            <p>1️⃣ Creo que la dependencia realmente le interesa saber lo que piensa su personal.</p>
+            <div class="radio-group">
+                <input type="radio" id="q1-1" name="q1" value="1" required>
+                <label for="q1-1">❌ Muy en desacuerdo</label>
+
+                <input type="radio" id="q1-2" name="q1" value="2">
+                <label for="q1-2">⚠️ En desacuerdo</label>
+
+                <input type="radio" id="q1-3" name="q1" value="3">
+                <label for="q1-3">⚖️ Neutral</label>
+
+                <input type="radio" id="q1-4" name="q1" value="4">
+                <label for="q1-4">✅ De acuerdo</label>
+
+                <input type="radio" id="q1-5" name="q1" value="5">
+                <label for="q1-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+
+        <div class="question">
+            <p><strong>2️⃣ EN MI DIRECCION LA FUNCIONES Y TAREAS SE TRANSMITEN DE MANERA CLARA Y PRECISA</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q2-1" name="q2" value="1" required>
+                <label for="q2-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q2-2" name="q2" value="2" >
+                <label for="q2-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q2-3" name="q2" value="3" >
+                <label for="q2-3">⚖️ Neutral</label>
+                <input type="radio" id="q2-4" name="q2" value="4" >
+                <label for="q2-4">✅ De acuerdo</label>
+                <input type="radio" id="q2-5" name="q2" value="5" >
+                <label for="q2-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>3️⃣ EN MI AREA EXISTE UNA BUENA COMUNICACIÓN ENTRE SUS COLABORADORES</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q3-1" name="q3" value="1" required>
+                <label for="q3-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q3-2" name="q3" value="2" >
+                <label for="q3-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q3-3" name="q3" value="3" >
+                <label for="q3-3">⚖️ Neutral</label>
+                <input type="radio" id="q3-4" name="q3" value="4" >
+                <label for="q3-4">✅ De acuerdo</label>
+                <input type="radio" id="q3-5" name="q3" value="5" >
+                <label for="q3-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>4️⃣ LA COMUNICACIÓN Y APOYO ENTRE DEPARTAMENTOS Y AREAS ES BUENA</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q4-1" name="q4" value="1" required>
+                <label for="q4-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q4-2" name="q4" value="2" >
+                <label for="q4-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q4-3" name="q4" value="3" >
+                <label for="q4-3">⚖️ Neutral</label>
+                <input type="radio" id="q4-4" name="q4" value="4" >
+                <label for="q4-4">✅ De acuerdo</label>
+                <input type="radio" id="q4-5" name="q4" value="5" >
+                <label for="q4-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>5️⃣ HAY REUNIONES PERIODICOS DEL AREA O DIRECCION Y SE TOMAN EN CUENTA LAS OPINIONES DEL PERSONAL, PROPICIANDO LA COMUNICACIÓN EFECTIVA</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q5-1" name="q5" value="1" required>
+                <label for="q5-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q5-2" name="q5" value="2" >
+                <label for="q5-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q5-3" name="q5" value="3" >
+                <label for="q5-3">⚖️ Neutral</label>
+                <input type="radio" id="q5-4" name="q5" value="4" >
+                <label for="q5-4">✅ De acuerdo</label>
+                <input type="radio" id="q5-5" name="q5" value="5" >
+                <label for="q5-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>6️⃣ MI TRABAJO ME OFRECE RETOS Y LA OPORTUNIDAD DE SEGUIR MEJORANDO</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q6-1" name="q6" value="1" required>
+                <label for="q6-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q6-2" name="q6" value="2" >
+                <label for="q6-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q6-3" name="q6" value="3" >
+                <label for="q6-3">⚖️ Neutral</label>
+                <input type="radio" id="q6-4" name="q6" value="4" >
+                <label for="q6-4">✅ De acuerdo</label>
+                <input type="radio" id="q6-5" name="q6" value="5" >
+                <label for="q6-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>7️⃣ SE TIENE CONOCIMIENTO ACERCA DE LOS MANUALES Y PROCEDIMIENTOS DE MI AREA</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q7-1" name="q7" value="1" required>
+                <label for="q7-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q7-2" name="q7" value="2" >
+                <label for="q7-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q7-3" name="q7" value="3" >
+                <label for="q7-3">⚖️ Neutral</label>
+                <input type="radio" id="q7-4" name="q7" value="4" >
+                <label for="q7-4">✅ De acuerdo</label>
+                <input type="radio" id="q7-5" name="q7" value="5" >
+                <label for="q7-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>8️⃣ CONSIDERO QUE EN ESTA DEPENDENCIA PREDOMINA UNA MENTALIDAD DE MEJORA, CREATIVIDAD E INNOVACIÓN</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q8-1" name="q8" value="1" required>
+                <label for="q8-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q8-2" name="q8" value="2" >
+                <label for="q8-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q8-3" name="q8" value="3" >
+                <label for="q8-3">⚖️ Neutral</label>
+                <input type="radio" id="q8-4" name="q8" value="4" >
+                <label for="q8-4">✅ De acuerdo</label>
+                <input type="radio" id="q8-5" name="q8" value="5" >
+                <label for="q8-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>9️⃣ CUENTO CON LA COLABORACION DE MIS COMPAÑEROS DE AREA PARA CUMPLIR CON LOS OBJETIVOS</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q9-1" name="q9" value="1" required>
+                <label for="q9-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q9-2" name="q9" value="2" >
+                <label for="q9-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q9-3" name="q9" value="3" >
+                <label for="q9-3">⚖️ Neutral</label>
+                <input type="radio" id="q9-4" name="q9" value="4" >
+                <label for="q9-4">✅ De acuerdo</label>
+                <input type="radio" id="q9-5" name="q9" value="5" >
+                <label for="q9-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>1️⃣0️⃣ EN MI EQUIPO DE TRABAJO PUEDO EXPRESAR MI PUNTO DE VISTA, AUN CUANDO CONTRADIGA CON LOS DEMAS</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q10-1" name="q10" value="1" required>
+                <label for="q10-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q10-2" name="q10" value="2" >
+                <label for="q10-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q10-3" name="q10" value="3" >
+                <label for="q10-3">⚖️ Neutral</label>
+                <input type="radio" id="q10-4" name="q10" value="4" >
+                <label for="q10-4">✅ De acuerdo</label>
+                <input type="radio" id="q10-5" name="q10" value="5" >
+                <label for="q10-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>1️⃣1️⃣ ENTRE COMPAÑEROS SOLUCIONAMOS LOS PROBLEMAS DE TRABAJO DE FORMA RESPETUOSA</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q11-1" name="q11" value="1" required>
+                <label for="q11-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q11-2" name="q11" value="2" >
+                <label for="q11-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q11-3" name="q11" value="3" >
+                <label for="q11-3">⚖️ Neutral</label>
+                <input type="radio" id="q11-4" name="q11" value="4" >
+                <label for="q11-4">✅ De acuerdo</label>
+                <input type="radio" id="q11-5" name="q11" value="5" >
+                <label for="q11-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>1️⃣2️⃣ SE COORDINAN CUANDO SE REQUIERE, LAS AREAS ADMINISTRATIVAS Y OPERATIVAS PARA OBTENER RESULTADOS</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q12-1" name="q12" value="1" required>
+                <label for="q12-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q12-2" name="q12" value="2" >
+                <label for="q12-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q12-3" name="q12" value="3" >
+                <label for="q12-3">⚖️ Neutral</label>
+                <input type="radio" id="q12-4" name="q12" value="4" >
+                <label for="q12-4">✅ De acuerdo</label>
+                <input type="radio" id="q12-5" name="q12" value="5" >
+                <label for="q12-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>1️⃣3️⃣ CON LOS DIRECTIVOS SE PUEDE DIALOGAR FACILMENTE SOBRE LAS DUDAS O PROBLEMAS DE TRABAJO</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q13-1" name="q13" value="1" required>
+                <label for="q13-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q13-2" name="q13" value="2" >
+                <label for="q13-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q13-3" name="q13" value="3" >
+                <label for="q13-3">⚖️ Neutral</label>
+                <input type="radio" id="q13-4" name="q13" value="4" >
+                <label for="q13-4">✅ De acuerdo</label>
+                <input type="radio" id="q13-5" name="q13" value="5" >
+                <label for="q13-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>1️⃣4️⃣ LA ORIENTACIÓN QUE ME DA MI JEFE INMEDIATO ME AYUDA A MEJORAR EL DESEMPEÑO EN MI TRABAJO</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q14-1" name="q14" value="1" required>
+                <label for="q14-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q14-2" name="q14" value="2" >
+                <label for="q14-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q14-3" name="q14" value="3" >
+                <label for="q14-3">⚖️ Neutral</label>
+                <input type="radio" id="q14-4" name="q14" value="4" >
+                <label for="q14-4">✅ De acuerdo</label>
+                <input type="radio" id="q14-5" name="q14" value="5" >
+                <label for="q14-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>1️⃣5️⃣ MI JEFE INMEDIATO SE PREOCUPA POR MANTENER UN BUEN CLIMA LABORAL EN ESTE EQUIPO</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q15-1" name="q15" value="1" required>
+                <label for="q15-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q15-2" name="q15" value="2" >
+                <label for="q15-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q15-3" name="q15" value="3" >
+                <label for="q15-3">⚖️ Neutral</label>
+                <input type="radio" id="q15-4" name="q15" value="4" >
+                <label for="q15-4">✅ De acuerdo</label>
+                <input type="radio" id="q15-5" name="q15" value="5" >
+                <label for="q15-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>1️⃣6️⃣ MI JEFE INMEDIATO ME TRATA JUSTAMENTE Y EVITA CUALQUIER TIPO DE FAVORITISMO</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q16-1" name="q16" value="1" required>
+                <label for="q16-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q16-2" name="q16" value="2" >
+                <label for="q16-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q16-3" name="q16" value="3" >
+                <label for="q16-3">⚖️ Neutral</label>
+                <input type="radio" id="q16-4" name="q16" value="4" >
+                <label for="q16-4">✅ De acuerdo</label>
+                <input type="radio" id="q16-5" name="q16" value="5" >
+                <label for="q16-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>1️⃣7️⃣ MI JEFE INMEDIATO ES CONGRUENTE ENTRE LO QUE DICE Y LO QUE HACE</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q17-1" name="q17" value="1" required>
+                <label for="q17-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q17-2" name="q17" value="2" >
+                <label for="q17-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q17-3" name="q17" value="3" >
+                <label for="q17-3">⚖️ Neutral</label>
+                <input type="radio" id="q17-4" name="q17" value="4" >
+                <label for="q17-4">✅ De acuerdo</label>
+                <input type="radio" id="q17-5" name="q17" value="5" >
+                <label for="q17-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>1️⃣8️⃣ MI JEFE INMEDIATO ME COMUNICA A TIEMPO LA INFORMACION RELACIONADA CON EL TRABAJO</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q18-1" name="q18" value="1" required>
+                <label for="q18-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q18-2" name="q18" value="2" >
+                <label for="q18-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q18-3" name="q18" value="3" >
+                <label for="q18-3">⚖️ Neutral</label>
+                <input type="radio" id="q18-4" name="q18" value="4" >
+                <label for="q18-4">✅ De acuerdo</label>
+                <input type="radio" id="q18-5" name="q18" value="5" >
+                <label for="q18-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>1️⃣9️⃣ EN LA DIRECCION ME AYUDAN A IDENTIFICAR MIS AREAS DE OPORTUNIDAD, PARA PODER MEJORAR</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q19-1" name="q19" value="1" required>
+                <label for="q19-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q19-2" name="q19" value="2" >
+                <label for="q19-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q19-3" name="q19" value="3" >
+                <label for="q19-3">⚖️ Neutral</label>
+                <input type="radio" id="q19-4" name="q19" value="4" >
+                <label for="q19-4">✅ De acuerdo</label>
+                <input type="radio" id="q19-5" name="q19" value="5" >
+                <label for="q19-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>2️⃣0️⃣ EN MI AREA EXISTE BUENA DISPOSICION CUANDO SE REQUIERE HACER UN CAMBIO O MEJORA</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q20-1" name="q20" value="1" required>
+                <label for="q20-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q20-2" name="q20" value="2" >
+                <label for="q20-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q20-3" name="q20" value="3" >
+                <label for="q20-3">⚖️ Neutral</label>
+                <input type="radio" id="q20-4" name="q20" value="4" >
+                <label for="q20-4">✅ De acuerdo</label>
+                <input type="radio" id="q20-5" name="q20" value="5" >
+                <label for="q20-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>2️⃣1️⃣ CUANDO SE NOS PRESENTA UN PROBLEMA NOS ENFOCAMOS EN BUSCAR SOLUCIONES Y NO CULPABLES</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q21-1" name="q21" value="1" required>
+                <label for="q21-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q21-2" name="q21" value="2" >
+                <label for="q21-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q21-3" name="q21" value="3" >
+                <label for="q21-3">⚖️ Neutral</label>
+                <input type="radio" id="q21-4" name="q21" value="4" >
+                <label for="q21-4">✅ De acuerdo</label>
+                <input type="radio" id="q21-5" name="q21" value="5" >
+                <label for="q21-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>2️⃣2️⃣ EN ESTA DEPEDENCIA LOS DIRECTIVOS SABEN DELEGAR AUTORIDAD A SUS COLABORADORES</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q22-1" name="q22" value="1" required>
+                <label for="q22-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q22-2" name="q22" value="2" >
+                <label for="q22-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q22-3" name="q22" value="3" >
+                <label for="q22-3">⚖️ Neutral</label>
+                <input type="radio" id="q22-4" name="q22" value="4" >
+                <label for="q22-4">✅ De acuerdo</label>
+                <input type="radio" id="q22-5" name="q22" value="5" >
+                <label for="q22-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>2️⃣3️⃣ SIENTO QUE TENGO LA SUFICIENTE DELEGACIÓN DE AUTORIDAD PARA TOMAR DECISIONES QUE ASEGUREN LA ADECUADA OPERATIVIDAD DE MIS FUNCIONES</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q23-1" name="q23" value="1" required>
+                <label for="q23-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q23-2" name="q23" value="2" >
+                <label for="q23-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q23-3" name="q23" value="3" >
+                <label for="q23-3">⚖️ Neutral</label>
+                <input type="radio" id="q23-4" name="q23" value="4" >
+                <label for="q23-4">✅ De acuerdo</label>
+                <input type="radio" id="q23-5" name="q23" value="5" >
+                <label for="q23-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>2️⃣4️⃣ EN ESTA DEPENDENCIA TODOS SOMOS LOS CORRESPONSABLES DE LOS RESULTADOS OBTENIDOS</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q24-1" name="q24" value="1" required>
+                <label for="q24-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q24-2" name="q24" value="2" >
+                <label for="q24-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q24-3" name="q24" value="3" >
+                <label for="q24-3">⚖️ Neutral</label>
+                <input type="radio" id="q24-4" name="q24" value="4" >
+                <label for="q24-4">✅ De acuerdo</label>
+                <input type="radio" id="q24-5" name="q24" value="5" >
+                <label for="q24-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>2️⃣5️⃣ TENGO LA OPORTUNIDAD DE PROPONER NUEVOS PROYECTOS O NUEVAS FORMAS DE REALIZAR EL TRABAJO</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q25-1" name="q25" value="1" required>
+                <label for="q25-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q25-2" name="q25" value="2" >
+                <label for="q25-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q25-3" name="q25" value="3" >
+                <label for="q25-3">⚖️ Neutral</label>
+                <input type="radio" id="q25-4" name="q25" value="4" >
+                <label for="q25-4">✅ De acuerdo</label>
+                <input type="radio" id="q25-5" name="q25" value="5" >
+                <label for="q25-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>2️⃣6️⃣ LA DEPEDENCIA ME PROPORCIONA EL EQUIPO DE TRABAJO O LOS MATERIALES QUE NECESITO PARA MI TRABAJO</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q26-1" name="q26" value="1" required>
+                <label for="q26-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q26-2" name="q26" value="2" >
+                <label for="q26-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q26-3" name="q26" value="3" >
+                <label for="q26-3">⚖️ Neutral</label>
+                <input type="radio" id="q26-4" name="q26" value="4" >
+                <label for="q26-4">✅ De acuerdo</label>
+                <input type="radio" id="q26-5" name="q26" value="5" >
+                <label for="q26-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>2️⃣7️⃣ EL MOBILIARIO Y EQUIPO ES EL ADECUADO PARA DESARROLLAR MI TRABAJO</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q27-1" name="q27" value="1" required>
+                <label for="q27-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q27-2" name="q27" value="2" >
+                <label for="q27-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q27-3" name="q27" value="3" >
+                <label for="q27-3">⚖️ Neutral</label>
+                <input type="radio" id="q27-4" name="q27" value="4" >
+                <label for="q27-4">✅ De acuerdo</label>
+                <input type="radio" id="q27-5" name="q27" value="5" >
+                <label for="q27-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>2️⃣8️⃣ EL AMBIENTE FISICO (INSTALACIONES, ILUMINACION, RUIDO) EN EL QUE ME DESEMPEÑO ES ADECUADO Y ME AYUDA A SENTIRME SEGURO</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q28-1" name="q28" value="1" required>
+                <label for="q28-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q28-2" name="q28" value="2" >
+                <label for="q28-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q28-3" name="q28" value="3" >
+                <label for="q28-3">⚖️ Neutral</label>
+                <input type="radio" id="q28-4" name="q28" value="4" >
+                <label for="q28-4">✅ De acuerdo</label>
+                <input type="radio" id="q28-5" name="q28" value="5" >
+                <label for="q28-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>2️⃣9️⃣ EN MI TRABAJO SE TOMAN EN CUENTA LAS MEDIDAS DE SEGURIDAD Y SALUD</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q29-1" name="q29" value="1" required>
+                <label for="q29-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q29-2" name="q29" value="2" >
+                <label for="q29-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q29-3" name="q29" value="3" >
+                <label for="q29-3">⚖️ Neutral</label>
+                <input type="radio" id="q29-4" name="q29" value="4" >
+                <label for="q29-4">✅ De acuerdo</label>
+                <input type="radio" id="q29-5" name="q29" value="5" >
+                <label for="q29-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>3️⃣0️⃣ EL AMBIENTE DE TRABAJO QUE PREVALECE ES DIGNO Y CORDIAL</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q30-1" name="q30" value="1" required>
+                <label for="q30-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q30-2" name="q30" value="2" >
+                <label for="q30-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q30-3" name="q30" value="3" >
+                <label for="q30-3">⚖️ Neutral</label>
+                <input type="radio" id="q30-4" name="q30" value="4" >
+                <label for="q30-4">✅ De acuerdo</label>
+                <input type="radio" id="q30-5" name="q30" value="5" >
+                <label for="q30-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>3️⃣1️⃣ LA MAYORIA DEL PERSONAL TIENE UNA ACTITUD POSITIVA RESPECTO A SU TRABAJO</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q31-1" name="q31" value="1" required>
+                <label for="q31-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q31-2" name="q31" value="2" >
+                <label for="q31-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q31-3" name="q31" value="3" >
+                <label for="q31-3">⚖️ Neutral</label>
+                <input type="radio" id="q31-4" name="q31" value="4" >
+                <label for="q31-4">✅ De acuerdo</label>
+                <input type="radio" id="q31-5" name="q31" value="5" >
+                <label for="q31-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>3️⃣2️⃣ EN ESTA DEPEDENCIA EXISTE LA POLITICA DE RESPETO EN LA RELACION DE TRABAJO ENTRE LOS SUPERIORES Y COLABORADORES</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q32-1" name="q32" value="1" required>
+                <label for="q32-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q32-2" name="q32" value="2" >
+                <label for="q32-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q32-3" name="q32" value="3" >
+                <label for="q32-3">⚖️ Neutral</label>
+                <input type="radio" id="q32-4" name="q32" value="4" >
+                <label for="q32-4">✅ De acuerdo</label>
+                <input type="radio" id="q32-5" name="q32" value="5" >
+                <label for="q32-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>3️⃣3️⃣ LOS PROCESOS DE MI AREA SE ENCUENTRAN DOCUMENTADOS Y CUMPLEN CON LOS ESTANDARES DE CALIDAD REQUERIDOS</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q33-1" name="q33" value="1" required>
+                <label for="q33-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q33-2" name="q33" value="2" >
+                <label for="q33-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q33-3" name="q33" value="3" >
+                <label for="q33-3">⚖️ Neutral</label>
+                <input type="radio" id="q33-4" name="q33" value="4" >
+                <label for="q33-4">✅ De acuerdo</label>
+                <input type="radio" id="q33-5" name="q33" value="5" >
+                <label for="q33-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>3️⃣4️⃣ TODAS LAS AREAS QUE CONFORMAN LA DEPEDENCIA SE PREOCUPAN POR REALIZAR CON LA CALIDAD ADECUADA SU TRABAJO</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q34-1" name="q34" value="1" required>
+                <label for="q34-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q34-2" name="q34" value="2" >
+                <label for="q34-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q34-3" name="q34" value="3" >
+                <label for="q34-3">⚖️ Neutral</label>
+                <input type="radio" id="q34-4" name="q34" value="4" >
+                <label for="q34-4">✅ De acuerdo</label>
+                <input type="radio" id="q34-5" name="q34" value="5" >
+                <label for="q34-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>3️⃣5️⃣ SE DA SEGUIMIENTO PERIODICO A LOS OBJETIVOS DEL AREA</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q35-1" name="q35" value="1" required>
+                <label for="q35-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q35-2" name="q35" value="2" >
+                <label for="q35-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q35-3" name="q35" value="3" >
+                <label for="q35-3">⚖️ Neutral</label>
+                <input type="radio" id="q35-4" name="q35" value="4" >
+                <label for="q35-4">✅ De acuerdo</label>
+                <input type="radio" id="q35-5" name="q35" value="5" >
+                <label for="q35-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>3️⃣6️⃣ EN ESTA AREA SE RESUELVEN LOS PROBLEMAS ANTES DE QUE SE CONVIERTAN EN CRISIS</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q36-1" name="q36" value="1" required>
+                <label for="q36-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q36-2" name="q36" value="2" >
+                <label for="q36-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q36-3" name="q36" value="3" >
+                <label for="q36-3">⚖️ Neutral</label>
+                <input type="radio" id="q36-4" name="q36" value="4" >
+                <label for="q36-4">✅ De acuerdo</label>
+                <input type="radio" id="q36-5" name="q36" value="5" >
+                <label for="q36-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>3️⃣7️⃣ LA DEPENDENCIA PROMUEVE EL QUE SE PUEDA PENSAR CON CRITERIO E INICIATIVA PROPIA</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q37-1" name="q37" value="1" required>
+                <label for="q37-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q37-2" name="q37" value="2" >
+                <label for="q37-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q37-3" name="q37" value="3" >
+                <label for="q37-3">⚖️ Neutral</label>
+                <input type="radio" id="q37-4" name="q37" value="4" >
+                <label for="q37-4">✅ De acuerdo</label>
+                <input type="radio" id="q37-5" name="q37" value="5" >
+                <label for="q37-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>3️⃣8️⃣ MIS SUPERIORES TOMAN BUENAS DECISIONES QUE IMPACTAN POSITIVAMENTE EN LOS OBJETIVOS DE LA DEPEDENCIA</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q38-1" name="q38" value="1" required>
+                <label for="q38-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q38-2" name="q38" value="2" >
+                <label for="q38-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q38-3" name="q38" value="3" >
+                <label for="q38-3">⚖️ Neutral</label>
+                <input type="radio" id="q38-4" name="q38" value="4" >
+                <label for="q38-4">✅ De acuerdo</label>
+                <input type="radio" id="q38-5" name="q38" value="5" >
+                <label for="q38-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>3️⃣9️⃣ LOS ASUNTOS DE MI AREA SE LLEVAN A CABO OPORTUNAMENTE GRACIAS A LAS DECISIONES QUE SE TOMAN</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q39-1" name="q39" value="1" required>
+                <label for="q39-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q39-2" name="q39" value="2" >
+                <label for="q39-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q39-3" name="q39" value="3" >
+                <label for="q39-3">⚖️ Neutral</label>
+                <input type="radio" id="q39-4" name="q39" value="4" >
+                <label for="q39-4">✅ De acuerdo</label>
+                <input type="radio" id="q39-5" name="q39" value="5" >
+                <label for="q39-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>4️⃣0️⃣ TENGO CLARO CUALES SON MIS TAREAS Y RESPONSABILIDADES</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q40-1" name="q40" value="1" required>
+                <label for="q40-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q40-2" name="q40" value="2" >
+                <label for="q40-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q40-3" name="q40" value="3" >
+                <label for="q40-3">⚖️ Neutral</label>
+                <input type="radio" id="q40-4" name="q40" value="4" >
+                <label for="q40-4">✅ De acuerdo</label>
+                <input type="radio" id="q40-5" name="q40" value="5" >
+                <label for="q40-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>4️⃣1️⃣ CUANDO ALGUIEN INGRESA A LA DEPEDENCIA RECIBE SUFICIENTE INFORMACION DE LA MISMA</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q41-1" name="q41" value="1" required>
+                <label for="q41-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q41-2" name="q41" value="2" >
+                <label for="q41-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q41-3" name="q41" value="3" >
+                <label for="q41-3">⚖️ Neutral</label>
+                <input type="radio" id="q41-4" name="q41" value="4" >
+                <label for="q41-4">✅ De acuerdo</label>
+                <input type="radio" id="q41-5" name="q41" value="5" >
+                <label for="q41-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>4️⃣2️⃣ EL PERSONAL DE ESTA AREA TIENE CLARO EL PERFIL Y DESCRIPCION DEL PUESTO</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q42-1" name="q42" value="1" required>
+                <label for="q42-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q42-2" name="q42" value="2" >
+                <label for="q42-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q42-3" name="q42" value="3" >
+                <label for="q42-3">⚖️ Neutral</label>
+                <input type="radio" id="q42-4" name="q42" value="4" >
+                <label for="q42-4">✅ De acuerdo</label>
+                <input type="radio" id="q42-5" name="q42" value="5" >
+                <label for="q42-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>4️⃣3️⃣ LAS ACTIVIDADES QUE REALIZO EN MI TRABAJO MEJORAN EL DESEMPEÑO DEL AREA</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q43-1" name="q43" value="1" required>
+                <label for="q43-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q43-2" name="q43" value="2" >
+                <label for="q43-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q43-3" name="q43" value="3" >
+                <label for="q43-3">⚖️ Neutral</label>
+                <input type="radio" id="q43-4" name="q43" value="4" >
+                <label for="q43-4">✅ De acuerdo</label>
+                <input type="radio" id="q43-5" name="q43" value="5" >
+                <label for="q43-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>4️⃣4️⃣ MI AREA ESTA ENFOCADA EN MEJORAR EL DESEMPEÑO DE TODA LA DEPENDENCIA Y EN SU IMPACTO EN EL CIUDADANO Y USUARIO</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q44-1" name="q44" value="1" required>
+                <label for="q44-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q44-2" name="q44" value="2" >
+                <label for="q44-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q44-3" name="q44" value="3" >
+                <label for="q44-3">⚖️ Neutral</label>
+                <input type="radio" id="q44-4" name="q44" value="4" >
+                <label for="q44-4">✅ De acuerdo</label>
+                <input type="radio" id="q44-5" name="q44" value="5" >
+                <label for="q44-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>4️⃣5️⃣ EXISTEN LOS PROCESOS ADECUADOS PARA SOLICITAR INFORMACIÓN O APOYO DE UNA PERSONA U OTRO DEPARTAMENTO</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q45-1" name="q45" value="1" required>
+                <label for="q45-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q45-2" name="q45" value="2" >
+                <label for="q45-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q45-3" name="q45" value="3" >
+                <label for="q45-3">⚖️ Neutral</label>
+                <input type="radio" id="q45-4" name="q45" value="4" >
+                <label for="q45-4">✅ De acuerdo</label>
+                <input type="radio" id="q45-5" name="q45" value="5" >
+                <label for="q45-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>4️⃣6️⃣ EXISTE UNA CLARA INDICACION DE LAS FUNCIONES QUE CADA UNO DEBE DESEMPEÑAR</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q46-1" name="q46" value="1" required>
+                <label for="q46-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q46-2" name="q46" value="2" >
+                <label for="q46-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q46-3" name="q46" value="3" >
+                <label for="q46-3">⚖️ Neutral</label>
+                <input type="radio" id="q46-4" name="q46" value="4" >
+                <label for="q46-4">✅ De acuerdo</label>
+                <input type="radio" id="q46-5" name="q46" value="5" >
+                <label for="q46-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>4️⃣7️⃣ TENGO CLARO LO QUE QUIERO LOGRAR Y LAS METAS QUE QUIERO ALCANZAR</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q47-1" name="q47" value="1" required>
+                <label for="q47-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q47-2" name="q47" value="2" >
+                <label for="q47-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q47-3" name="q47" value="3" >
+                <label for="q47-3">⚖️ Neutral</label>
+                <input type="radio" id="q47-4" name="q47" value="4" >
+                <label for="q47-4">✅ De acuerdo</label>
+                <input type="radio" id="q47-5" name="q47" value="5" >
+                <label for="q47-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>4️⃣8️⃣ ASUMO MIS RESPONSABILIDADES CUANDO NO LOGRO LOS OBJETIVOS DESEADOS</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q48-1" name="q48" value="1" required>
+                <label for="q48-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q48-2" name="q48" value="2" >
+                <label for="q48-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q48-3" name="q48" value="3" >
+                <label for="q48-3">⚖️ Neutral</label>
+                <input type="radio" id="q48-4" name="q48" value="4" >
+                <label for="q48-4">✅ De acuerdo</label>
+                <input type="radio" id="q48-5" name="q48" value="5" >
+                <label for="q48-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>4️⃣9️⃣ EL CONOCIMIENTO QUE TENGO DE MIS FUNCIONES Y RESPONSABILIDADES ME HACE SENTIR SEGURO DE PODER DESEMPEÑARLAS CON UN ALTO NIVEL DE CALIDAD</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q49-1" name="q49" value="1" required>
+                <label for="q49-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q49-2" name="q49" value="2" >
+                <label for="q49-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q49-3" name="q49" value="3" >
+                <label for="q49-3">⚖️ Neutral</label>
+                <input type="radio" id="q49-4" name="q49" value="4" >
+                <label for="q49-4">✅ De acuerdo</label>
+                <input type="radio" id="q49-5" name="q49" value="5" >
+                <label for="q49-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>5️⃣0️⃣ EN LA DEPEDENCIA EL PERSONAL QUE INGRESA RECIBE UN CURSO DE INDUCCIÓN A LA ADMINISTRACION PUBLICA MUNICIPAL</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q50-1" name="q50" value="1" required>
+                <label for="q50-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q50-2" name="q50" value="2" >
+                <label for="q50-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q50-3" name="q50" value="3" >
+                <label for="q50-3">⚖️ Neutral</label>
+                <input type="radio" id="q50-4" name="q50" value="4" >
+                <label for="q50-4">✅ De acuerdo</label>
+                <input type="radio" id="q50-5" name="q50" value="5" >
+                <label for="q50-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>5️⃣1️⃣ EN MI DIRECCION SE PREOCUPAN PORQUE YO ASISTA A LAS CAPACITACIONES QUE ME CORRESPONDEN</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q51-1" name="q51" value="1" required>
+                <label for="q51-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q51-2" name="q51" value="2" >
+                <label for="q51-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q51-3" name="q51" value="3" >
+                <label for="q51-3">⚖️ Neutral</label>
+                <input type="radio" id="q51-4" name="q51" value="4" >
+                <label for="q51-4">✅ De acuerdo</label>
+                <input type="radio" id="q51-5" name="q51" value="5" >
+                <label for="q51-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>5️⃣2️⃣ CONSIDERO ADECUADOS LOS CURSOS PROPUESTOS POR MI AREA PARA MEJORAR MI DESEMPEÑO LABORAL</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q52-1" name="q52" value="1" required>
+                <label for="q52-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q52-2" name="q52" value="2" >
+                <label for="q52-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q52-3" name="q52" value="3" >
+                <label for="q52-3">⚖️ Neutral</label>
+                <input type="radio" id="q52-4" name="q52" value="4" >
+                <label for="q52-4">✅ De acuerdo</label>
+                <input type="radio" id="q52-5" name="q52" value="5" >
+                <label for="q52-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>5️⃣3️⃣ EN ESTA DEPEDENCIA SE LE COMUNICA AL PERSONAL LAS FORTALEZAS Y DEFICIENCIAS EN SU DESEMPEÑO, LO QUE HACE MEJORAR</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q53-1" name="q53" value="1" required>
+                <label for="q53-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q53-2" name="q53" value="2" >
+                <label for="q53-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q53-3" name="q53" value="3" >
+                <label for="q53-3">⚖️ Neutral</label>
+                <input type="radio" id="q53-4" name="q53" value="4" >
+                <label for="q53-4">✅ De acuerdo</label>
+                <input type="radio" id="q53-5" name="q53" value="5" >
+                <label for="q53-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>5️⃣4️⃣ CONSIDERO ADECUADOS LOS CRITERIOS DE EVALUACION DE MI DEPEDENCIA</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q54-1" name="q54" value="1" required>
+                <label for="q54-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q54-2" name="q54" value="2" >
+                <label for="q54-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q54-3" name="q54" value="3" >
+                <label for="q54-3">⚖️ Neutral</label>
+                <input type="radio" id="q54-4" name="q54" value="4" >
+                <label for="q54-4">✅ De acuerdo</label>
+                <input type="radio" id="q54-5" name="q54" value="5" >
+                <label for="q54-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>5️⃣5️⃣ MI TRABAJO ES RECONOCIDO Y VALORADO</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q55-1" name="q55" value="1" required>
+                <label for="q55-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q55-2" name="q55" value="2" >
+                <label for="q55-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q55-3" name="q55" value="3" >
+                <label for="q55-3">⚖️ Neutral</label>
+                <input type="radio" id="q55-4" name="q55" value="4" >
+                <label for="q55-4">✅ De acuerdo</label>
+                <input type="radio" id="q55-5" name="q55" value="5" >
+                <label for="q55-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>5️⃣6️⃣ EN MI DEPEDENCIA MI JEFE INMEDIATO ME RETROALIMENTA SOBRE LAS METAS Y COMPETENCIAS CONSIDERADAS EN MI EVALUACION DEL DESEMPEÑO</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q56-1" name="q56" value="1" required>
+                <label for="q56-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q56-2" name="q56" value="2" >
+                <label for="q56-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q56-3" name="q56" value="3" >
+                <label for="q56-3">⚖️ Neutral</label>
+                <input type="radio" id="q56-4" name="q56" value="4" >
+                <label for="q56-4">✅ De acuerdo</label>
+                <input type="radio" id="q56-5" name="q56" value="5" >
+                <label for="q56-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>5️⃣7️⃣ EL SALARIO QUE RECIBO ES JUSTO Y PROPORCIONAL A LA RESPONSABILIDAD QUE EXIGE EL PUESTO</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q57-1" name="q57" value="1" required>
+                <label for="q57-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q57-2" name="q57" value="2" >
+                <label for="q57-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q57-3" name="q57" value="3" >
+                <label for="q57-3">⚖️ Neutral</label>
+                <input type="radio" id="q57-4" name="q57" value="4" >
+                <label for="q57-4">✅ De acuerdo</label>
+                <input type="radio" id="q57-5" name="q57" value="5" >
+                <label for="q57-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>5️⃣8️⃣ EN GENERAL, LOS SERVICIOS Y PRESTACIONES QUE ESTA ORGANIZACIÓN PROPORCIONA A SU PERSONAL SON BUENOS</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q58-1" name="q58" value="1" required>
+                <label for="q58-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q58-2" name="q58" value="2" >
+                <label for="q58-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q58-3" name="q58" value="3" >
+                <label for="q58-3">⚖️ Neutral</label>
+                <input type="radio" id="q58-4" name="q58" value="4" >
+                <label for="q58-4">✅ De acuerdo</label>
+                <input type="radio" id="q58-5" name="q58" value="5" >
+                <label for="q58-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>5️⃣9️⃣ CONSIDERO QUE OBTENGO BENEFICIOS CUANDO EL MUNICIPIO GENERA CONVENIOS CON PROVEEDORES E INSTITUCIONES</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q59-1" name="q59" value="1" required>
+                <label for="q59-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q59-2" name="q59" value="2" >
+                <label for="q59-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q59-3" name="q59" value="3" >
+                <label for="q59-3">⚖️ Neutral</label>
+                <input type="radio" id="q59-4" name="q59" value="4" >
+                <label for="q59-4">✅ De acuerdo</label>
+                <input type="radio" id="q59-5" name="q59" value="5" >
+                <label for="q59-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>6️⃣0️⃣ CONSIDERO IMPORTANTE QUE EL MUNICIPIO FOMENTE EL AHORRO</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q60-1" name="q60" value="1" required>
+                <label for="q60-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q60-2" name="q60" value="2" >
+                <label for="q60-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q60-3" name="q60" value="3" >
+                <label for="q60-3">⚖️ Neutral</label>
+                <input type="radio" id="q60-4" name="q60" value="4" >
+                <label for="q60-4">✅ De acuerdo</label>
+                <input type="radio" id="q60-5" name="q60" value="5" >
+                <label for="q60-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>6️⃣1️⃣ CONSIDERO QUE LA MAYORIA DEL PERSONAL QUE TRABAJA EN ESTA DEPEDENCIA TIENE UNA IMAGEN POSITIVA Y SE SIENTE IDENTIFICADA CON ELLA</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q61-1" name="q61" value="1" required>
+                <label for="q61-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q61-2" name="q61" value="2" >
+                <label for="q61-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q61-3" name="q61" value="3" >
+                <label for="q61-3">⚖️ Neutral</label>
+                <input type="radio" id="q61-4" name="q61" value="4" >
+                <label for="q61-4">✅ De acuerdo</label>
+                <input type="radio" id="q61-5" name="q61" value="5" >
+                <label for="q61-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>6️⃣2️⃣ CONSIDERO QUE ESTA DEPEDENCIA ESTA CONTRIBUYENDO POSITIVAMENTE AL DESARROLLO DE LA SOCIEDAD EN LA QUE VIVIMOS</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q62-1" name="q62" value="1" required>
+                <label for="q62-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q62-2" name="q62" value="2" >
+                <label for="q62-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q62-3" name="q62" value="3" >
+                <label for="q62-3">⚖️ Neutral</label>
+                <input type="radio" id="q62-4" name="q62" value="4" >
+                <label for="q62-4">✅ De acuerdo</label>
+                <input type="radio" id="q62-5" name="q62" value="5" >
+                <label for="q62-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>6️⃣3️⃣ CONOZCO CUAL ES LA VISION, MISION, Y OBJETIVOS DE ESTA ADMINISTRACION</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q63-1" name="q63" value="1" required>
+                <label for="q63-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q63-2" name="q63" value="2" >
+                <label for="q63-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q63-3" name="q63" value="3" >
+                <label for="q63-3">⚖️ Neutral</label>
+                <input type="radio" id="q63-4" name="q63" value="4" >
+                <label for="q63-4">✅ De acuerdo</label>
+                <input type="radio" id="q63-5" name="q63" value="5" >
+                <label for="q63-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        <div class="question">
+            <p><strong>6️⃣4️⃣ CONSIDERO QUE EN MI DEPENDENCIA SE HAN IDO REALIZANDO ACCIONES PARA BRINDAR ATENCION A PERSONAS CON ALGUNA DISCAPACIDAD</strong></p>
+            <div class="radio-group">
+                <input type="radio" id="q64-1" name="q64" value="1" required>
+                <label for="q64-1">❌ Muy en desacuerdo</label>
+                <input type="radio" id="q64-2" name="q64" value="2" >
+                <label for="q64-2">⚠️ En desacuerdo</label>
+                <input type="radio" id="q64-3" name="q64" value="3" >
+                <label for="q64-3">⚖️ Neutral</label>
+                <input type="radio" id="q64-4" name="q64" value="4" >
+                <label for="q64-4">✅ De acuerdo</label>
+                <input type="radio" id="q64-5" name="q64" value="5" >
+                <label for="q64-5">🌟 Muy de acuerdo</label>
+            </div>
+        </div>
+        
+        
+
+        <button type="submit" class="btn btn-success btn-custom w-100">Enviar</button>
+    </form>
+</div>
+
+<script>
+    function hideOverlay() {
+        document.getElementById('welcomeOverlay').style.display = 'none';
+        document.getElementById('formContainer').classList.add('active');
+    }
+</script>
+
+</body>
+</html>
