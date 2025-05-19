@@ -23,8 +23,6 @@ def enviar_denuncia():
     try:
         data = request.form
         archivos = request.files
-
-        # Recuperar datos del primer formulario enviados con inputs hidden
         anonima = data.get("anonima", "No")
         nombre = data.get("nombre", "No proporcionado")
         calle = data.get("calle", "No proporcionado")
@@ -32,8 +30,6 @@ def enviar_denuncia():
         municipio = data.get("municipio", "No proporcionado")
         telefono = data.get("telefono", "No proporcionado")
         email = data.get("email", "No proporcionado")
-
-        # Datos del segundo formulario
         descripcion = data.get("descripcion", "No proporcionado")
         tipo_denuncia = data.get("tipo_denuncia", "No especificado")
         lugar_hechos = data.get("lugar_hechos", "No especificado")
@@ -51,20 +47,16 @@ def enviar_denuncia():
         Dirección: {calle}, {colonia}, {municipio}
         Teléfono: {telefono}
         Email: {email}
-        
+
         Descripción de los hechos:
         {descripcion}
-        
         Tipo de denuncia: {tipo_denuncia}
         Lugar de los hechos: {lugar_hechos}
         Fecha y hora: {fecha_hora}
         Dependencia: {dependencia}
         """
-
         msg = Message("Nueva Denuncia Recibida", recipients=["cristian.rodriguez@bomberosdeleon.org"])
         msg.body = mensaje
-
-        # Adjuntar archivos
         for key in archivos:
             file = archivos[key]
             if file.filename:
@@ -79,18 +71,28 @@ def enviar_denuncia():
 @main.route('/dashboard')
 @login_required
 def dashboard():
-    # Ruta absoluta
-    uploads_path = os.path.join(current_app.root_path, 'static', 'uploads')
+    # Ruta para la carpeta de documentos (no en static)
+    uploads_path = current_app.config['UPLOAD_FOLDER']
+
+    # Foto de perfil sigue en static/uploads
+    static_uploads_path = os.path.join(current_app.root_path, 'static', 'uploads')
     username = current_user.username
-    user_image_path = os.path.join(uploads_path, f"{username}.jpg")
+    user_image_path = os.path.join(static_uploads_path, f"{username}.jpg")
 
     if os.path.exists(user_image_path):
         user_image = f"uploads/{username}.jpg"
     else:
         user_image = "uploads/default.png"
 
-    # Resto
-    files = os.listdir(uploads_path) if os.path.exists(uploads_path) else []
+    # Archivos visibles desde la base de datos y existentes en uploads/
+    files_in_db = File.query.all()
+    visible_files = []
+    for file in files_in_db:
+        filepath = os.path.join(uploads_path, file.filename)
+        if os.path.exists(filepath):
+            visible_files.append(file)
+
+    # Otros datos
     avisos = Aviso.query.order_by(Aviso.fecha_creacion.desc()).all()
     eventos = Evento.query.order_by(Evento.fecha.asc()).all()
     noticias = Noticia.query.order_by(Noticia.orden.asc()).all()
@@ -98,13 +100,19 @@ def dashboard():
 
     return render_template(
         'dashboard.html',
-        files=files,
+        files=visible_files,  # Archivos son objetos File
         avisos=avisos,
         eventos=eventos,
         noticias=noticias,
         portales=portales,
         user_image=user_image
     )
+
+@main.route('/uploads/<filename>')
+@login_required
+def serve_uploaded_file(filename):
+    upload_folder = current_app.config['UPLOAD_FOLDER']
+    return send_from_directory(upload_folder, filename)
 
 @main.route('/login', methods=['GET', 'POST'])
 def login():
@@ -116,6 +124,7 @@ def login():
         user = User.query.filter_by(username=form.username.data).first()
         if user and user.check_password(form.password.data):
             login_user(user)
+
             flash('Inicio de sesión exitoso.', 'success')
             return redirect(url_for('main.dashboard'))
         else:
