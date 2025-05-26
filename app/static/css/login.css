@@ -74,3 +74,20 @@ button:hover {
     font-size: 14px;
     color: #777;
 }
+.alert {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.alert.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.alert.danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}

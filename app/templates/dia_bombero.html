@@ -210,20 +210,15 @@
                 <input type="radio" id="llevara-no" name="lleva_acompanante" value="no" onclick="mostrarCampoNombre(false)">
                 <label for="llevara-no">🚶 No</label>
             </div>
-
-            
         </div>
         <div class="question" id="correoPregunta" style="display: none;">
             <p>📧 Por favor, escribe tu correo electrónico:</p>
             <input type="email" name="correo" class="form-control" placeholder="tucorreo@ejemplo.com" required>
         </div>
-        <!-- Campo para nombre de acompañante -->
         <div class="question" id="nombreAcompanante" style="display: none;">
             <p>✍️ Nombre del acompañante:</p>
             <input type="text" name="nombre_acompanante" class="form-control" placeholder="Escribe el nombre aquí">
         </div>
-
-        <!-- Botón de envío -->
         <button type="submit" class="btn btn-success btn-custom w-100">Enviar</button>
     </form>
 </div>
@@ -233,7 +228,6 @@
         document.getElementById('welcomeOverlay').style.display = 'none';
         document.getElementById('formContainer').classList.add('active');
     }
-
     function toggleAcompanante(mostrar) {
         const acomp = document.getElementById('acompanantePregunta');
         const email = document.getElementById('correoPregunta');

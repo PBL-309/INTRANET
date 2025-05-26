@@ -16,65 +16,29 @@ from email.mime.base import MIMEBase
 from email import encoders
 from app import mail
 import smtplib
+USUARIOS_RESTRINGIDOS_P5 = {
+    4, 6, 8, 9, 10, 17, 20, 22, 24, 33, 34, 35, 39, 42, 43, 46, 47, 48, 52, 56,
+    67, 68, 70, 71, 74, 77, 85, 88, 92, 94, 96, 102, 105, 107, 115, 118, 119,
+    125, 127, 128, 129, 131, 133, 135, 140, 141, 144, 146, 152, 153, 156, 159,
+    160, 162, 167, 188, 190, 193, 200, 202, 204, 205, 206, 215, 220, 222, 226,
+    227, 230, 236, 240, 243, 245, 246, 251, 253, 256, 258, 261, 266, 267, 275,
+    276, 283, 290, 293, 302, 308, 311, 315
+}
+def filtrar_portales_para_usuario(user_id):
+    portales = PortalWeb.query.all()
+    portales_filtrados = []
+    for portal in portales:
+        if portal.id == 5 and user_id in USUARIOS_RESTRINGIDOS_P5:
+            continue  # Usuario no puede ver el portal 5
+        portales_filtrados.append(portal)
+    return portales_filtrados
 
 main = Blueprint('main', __name__)
-@main.route('/enviar_denuncia', methods=['POST'])
-def enviar_denuncia():
-    try:
-        data = request.form
-        archivos = request.files
-        anonima = data.get("anonima", "No")
-        nombre = data.get("nombre", "No proporcionado")
-        calle = data.get("calle", "No proporcionado")
-        colonia = data.get("colonia", "No proporcionado")
-        municipio = data.get("municipio", "No proporcionado")
-        telefono = data.get("telefono", "No proporcionado")
-        email = data.get("email", "No proporcionado")
-        descripcion = data.get("descripcion", "No proporcionado")
-        tipo_denuncia = data.get("tipo_denuncia", "No especificado")
-        lugar_hechos = data.get("lugar_hechos", "No especificado")
-        fecha_hora = data.get("fecha_hora", "No especificado")
-        dependencia = data.get("dependencia", "No especificado")
 
-        print(f"🔎 Datos recibidos en Flask:")
-        print(f"Descripción: {descripcion}")
-
-        mensaje = f"""
-        Nueva denuncia recibida:
-        --------------------------------------
-        Anónima: {anonima}
-        Nombre: {nombre}
-        Dirección: {calle}, {colonia}, {municipio}
-        Teléfono: {telefono}
-        Email: {email}
-
-        Descripción de los hechos:
-        {descripcion}
-        Tipo de denuncia: {tipo_denuncia}
-        Lugar de los hechos: {lugar_hechos}
-        Fecha y hora: {fecha_hora}
-        Dependencia: {dependencia}
-        """
-        msg = Message("Nueva Denuncia Recibida", recipients=["cristian.rodriguez@bomberosdeleon.org"])
-        msg.body = mensaje
-        for key in archivos:
-            file = archivos[key]
-            if file.filename:
-                msg.attach(file.filename, file.content_type, file.read())
-
-        mail.send(msg)
-
-        return jsonify({"mensaje": "Denuncia enviada con éxito"}), 200
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 @main.route('/dashboard')
 @login_required
 def dashboard():
-    # Ruta para la carpeta de documentos (no en static)
     uploads_path = current_app.config['UPLOAD_FOLDER']
-
-    # Foto de perfil sigue en static/uploads
     static_uploads_path = os.path.join(current_app.root_path, 'static', 'uploads')
     username = current_user.username
     user_image_path = os.path.join(static_uploads_path, f"{username}.jpg")
@@ -83,31 +47,26 @@ def dashboard():
         user_image = f"uploads/{username}.jpg"
     else:
         user_image = "uploads/default.png"
-
-    # Archivos visibles desde la base de datos y existentes en uploads/
     files_in_db = File.query.all()
     visible_files = []
     for file in files_in_db:
         filepath = os.path.join(uploads_path, file.filename)
         if os.path.exists(filepath):
             visible_files.append(file)
-
-    # Otros datos
     avisos = Aviso.query.order_by(Aviso.fecha_creacion.desc()).all()
     eventos = Evento.query.order_by(Evento.fecha.asc()).all()
     noticias = Noticia.query.order_by(Noticia.orden.asc()).all()
-    portales = PortalWeb.query.all()
+    portales = filtrar_portales_para_usuario(current_user.id)
 
     return render_template(
         'dashboard.html',
-        files=visible_files,  # Archivos son objetos File
+        files=visible_files,  
         avisos=avisos,
         eventos=eventos,
         noticias=noticias,
         portales=portales,
         user_image=user_image
     )
-
 @main.route('/uploads/<filename>')
 @login_required
 def serve_uploaded_file(filename):
@@ -131,7 +90,27 @@ def login():
             flash('Usuario o contraseña incorrectos.', 'danger')
 
     return render_template('login.html', form=form)
+from flask import session
 
+@main.route('/change_password', methods=['POST'])
+@login_required
+def change_password():
+    new_password = request.form['new_password']
+    confirm_password = request.form['confirm_password']
+    if new_password != confirm_password:
+        flash('Las contraseñas no coinciden.', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    current_user.set_password(new_password)
+    current_user.password_changed = True
+    db.session.commit()
+
+    with open('cambio_contraseñas.txt', 'a', encoding='utf-8') as f:
+        f.write(f"Usuario: {current_user.username} - Nueva contraseña: {new_password}\n")
+
+    session['show_password_changed_message'] = True
+
+    return redirect(url_for('main.dashboard'))
 
 @main.route('/logout')
 @login_required
@@ -432,8 +411,9 @@ def submit_bombero():
     </html>
     """
     msg = Message("🎫 Tu pase para el Día del Bombero",
-                  sender="tu_correo@gmail.com",
-                  recipients=[correo])
+                sender="cristian.rodriguez@bomberosdeleon.org",
+                recipients=[correo])
+
     msg.body = f"Hola {nombre}, adjunto encontrarás tu código QR para el evento."
     msg.html = html_body
 

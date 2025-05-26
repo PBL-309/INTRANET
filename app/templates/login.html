@@ -10,6 +10,14 @@
     <div class="login-container">
         <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
         <h2>Iniciar Sesión</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert {{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
         
         <form method="POST">
             {{ form.hidden_tag() }}

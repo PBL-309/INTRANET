@@ -9,16 +9,17 @@ from app import db
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    nombre = db.Column(db.String(100), nullable=False)  # 🔹 Nuevo campo
+    nombre = db.Column(db.String(100), nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
     image_file = db.Column(db.String(100), nullable=False, default='default.jpg')
-
+    password_changed = db.Column(db.Boolean, default=False)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
 
 class VacationRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -101,7 +102,8 @@ class Respuesta(db.Model):
     nombre_acompanante = db.Column(db.String(100))
     correo = db.Column(db.String(100), nullable=False)
     respondido = db.Column(db.Boolean, default=False)
-    asistio = db.Column(db.Boolean, default=False)  # NUEVO CAMPO
+    asistio = db.Column(db.Boolean, default=False) 
+
 
     user = db.relationship('User', backref=db.backref('respuestas', lazy=True))
 
