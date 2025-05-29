@@ -24,7 +24,7 @@ def filtrar_portales_para_usuario(user_id):
     portales_filtrados = []
     for portal in portales:
         if portal.id == 5 and user_id in USUARIOS_RESTRINGIDOS_P5:
-            continue  # Usuario no puede ver el portal 5
+            continue
         portales_filtrados.append(portal)
     return portales_filtrados
 
@@ -364,32 +364,41 @@ def marcar_asistencia():
     else:
         print(f"El usuario ya estaba registrado como asistido para user_id: {user_id}")
         return jsonify({"success": True, "nombre": respuesta.user.nombre, "nuevo_registro": False}), 200
-
 @main.route('/submit_bombero', methods=['POST'])
 @login_required
 def submit_bombero():
     nombre = current_user.nombre
     acompanante = request.form.get("lleva_acompanante")
     nombre_acompanante = request.form.get("nombre_acompanante")
+    tipo_acompanante = request.form.get("tipo_acompanante")  # NUEVO CAMPO
     correo = request.form.get("correo")
+
     respuesta = Respuesta.query.filter_by(user_id=current_user.id).first()
     if not respuesta:
         respuesta = Respuesta(user_id=current_user.id)
+
     respuesta.nombre_acompanante = nombre_acompanante
+    respuesta.tipo_acompanante = tipo_acompanante  # Guardar el tipo
     respuesta.correo = correo
     respuesta.respondido = True
+
     db.session.add(respuesta)
     db.session.commit()
+
     contenido_qr = f"{current_user.id}\nAsistencia confirmada:\n{nombre}"
     if acompanante == "sí":
         contenido_qr += f"\nAcompañante: {nombre_acompanante}"
+        if tipo_acompanante:
+            contenido_qr += f" ({tipo_acompanante})"
     contenido_qr += f"\nCorreo: {correo}"
+
     qr = qrcode.make(contenido_qr)
     filename = f"{nombre.replace(' ', '_')}_qr.png"
     carpeta_qr = os.path.join(os.getcwd(), 'app', 'qr_codes')
     os.makedirs(carpeta_qr, exist_ok=True)
     filepath = os.path.join(carpeta_qr, filename)
     qr.save(filepath)
+
     html_body = f"""
     <html>
         <body style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px; text-align: center;">
@@ -405,6 +414,7 @@ def submit_bombero():
         </body>
     </html>
     """
+
     msg = Message("🎫 Tu pase para el Día del Bombero",
                 sender="cristian.rodriguez@bomberosdeleon.org",
                 recipients=[correo])
@@ -414,8 +424,11 @@ def submit_bombero():
 
     with open(filepath, 'rb') as fp:
         msg.attach(filename, "image/png", fp.read(), headers={"Content-ID": f"<{filename}>"})
+
     mail.send(msg)
+
     return render_template('confirmation.html', nombre=nombre, correo=correo)
+
 
 @main.route('/submit_formulario', methods=['POST'])
 def submit_formulario():

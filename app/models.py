@@ -100,10 +100,10 @@ class Respuesta(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     nombre_acompanante = db.Column(db.String(100))
+    tipo_acompanante = db.Column(db.String(20))  # NUEVO CAMPO
     correo = db.Column(db.String(100), nullable=False)
     respondido = db.Column(db.Boolean, default=False)
-    asistio = db.Column(db.Boolean, default=False) 
-
+    asistio = db.Column(db.Boolean, default=False)
 
     user = db.relationship('User', backref=db.backref('respuestas', lazy=True))
 

@@ -114,9 +114,15 @@
                 <li class="list-group-item {% if respuesta.asistio %}confirmado{% endif %}" id="usuario-{{ respuesta.user_id }}">
                     <div>
                         {{ respuesta.user.nombre }}
-                        {% if respuesta.nombre_acompanante %}
-                            <small class="text-muted d-block">👥 Acompañante: {{ respuesta.nombre_acompanante }}</small>
-                        {% endif %}
+                    {% if respuesta.nombre_acompanante %}
+                        <small class="text-muted d-block">
+                            👥 Acompañante: {{ respuesta.nombre_acompanante }}
+                            {% if respuesta.tipo_acompanante %}
+                                ({{ respuesta.tipo_acompanante | capitalize }})
+                            {% endif %}
+                        </small>
+                    {% endif %}
+
                     </div>
                     <span class="badge {% if respuesta.asistio %}bg-success{% else %}bg-secondary{% endif %}">
                         {% if respuesta.asistio %}Confirmado{% else %}Pendiente{% endif %}
@@ -136,8 +142,8 @@ function mostrarMensaje(id) {
 let scanning = false;
 
 function onScanSuccess(decodedText, decodedResult) {
-    if (scanning) return;  // Si ya está escaneando, no hacer nada
-    scanning = true;  // Marcar que está escaneando
+    if (scanning) return;  
+    scanning = true;  
 
     const lineas = decodedText.trim().split("\n");
     const userId = lineas[0];
@@ -171,10 +177,9 @@ function onScanSuccess(decodedText, decodedResult) {
         console.error("Error al marcar asistencia:", error);
     })
     .finally(() => {
-        // Después de procesar, permitir otro escaneo después de 1.5 segundos (ajusta el tiempo si es necesario)
         setTimeout(() => {
-            scanning = false;  // Permitir otro escaneo
-        }, 1500);  // Puedes aumentar el tiempo si es necesario
+            scanning = false;  
+        }, 1500); 
     });
 }
 

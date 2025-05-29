@@ -1,0 +1,2 @@
+Usuario: 475 - Nueva contraseña: 123456
+Usuario: admin - Nueva contraseña: 123456

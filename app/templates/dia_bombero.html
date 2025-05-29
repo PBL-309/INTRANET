@@ -219,6 +219,17 @@
             <p>✍️ Nombre del acompañante:</p>
             <input type="text" name="nombre_acompanante" class="form-control" placeholder="Escribe el nombre aquí">
         </div>
+        <div class="question" id="tipoAcompanante" style="display: none;">
+    <p>👤 ¿El acompañante es niño o adulto?</p>
+    <div class="radio-group">
+        <input type="radio" id="acompanante-nino" name="tipo_acompanante" value="niño">
+        <label for="acompanante-nino">🧒 Niño</label>
+
+        <input type="radio" id="acompanante-adulto" name="tipo_acompanante" value="adulto">
+        <label for="acompanante-adulto">🧑 Adulto</label>
+    </div>
+</div>
+
         <button type="submit" class="btn btn-success btn-custom w-100">Enviar</button>
     </form>
 </div>
@@ -240,8 +251,12 @@
     }
 
     function mostrarCampoNombre(mostrar) {
-        document.getElementById('nombreAcompanante').style.display = mostrar ? 'block' : 'none';
+        const nombre = document.getElementById('nombreAcompanante');
+        const tipo = document.getElementById('tipoAcompanante');
+        nombre.style.display = mostrar ? 'block' : 'none';
+        tipo.style.display = mostrar ? 'block' : 'none';
     }
+
 </script>
 </body>
 </html>
