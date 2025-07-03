@@ -7,7 +7,7 @@ import qrcode
 from werkzeug.utils import secure_filename
 from app import db
 import os
-from app.models import Aviso, Evento, File, Folder, FormularioRespuesta, PortalWeb, Respuesta, User, VacationRequest, Noticia
+from app.models import Aviso, Evento, File, Folder, FormularioRespuesta, PortalWeb, Respuesta, User, VacationRequest, Noticia, RegistroCompetencia
 from app.forms import LoginForm
 from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
@@ -333,6 +333,17 @@ def dia_bombero():
     if respuesta_existente:
         return render_template('dashboard.html', ya_respondio=True)
     return render_template('dia_bombero.html', ya_respondio=False)
+@main.route('/competencia_bomb')
+@login_required
+def competencia_bomb():
+    registro_existente = RegistroCompetencia.query.filter_by(user_id=current_user.id).first()
+
+    if registro_existente:
+        # Ya se registró → lo rediriges o das un aviso
+        return render_template('dashboard.html', ya_respondio=True)
+
+    # Aún no se ha registrado → muestra el formulario
+    return render_template('competencia_bomb.html')
 
 @main.route('/scanner_asistencia')
 @login_required
@@ -428,6 +439,67 @@ def submit_bombero():
     mail.send(msg)
 
     return render_template('confirmation.html', nombre=nombre, correo=correo)
+@main.route('/submit_competencia', methods=['POST'])
+@login_required
+def submit_competencia():
+    nombre = request.form.get('nombre')
+    nomina = request.form.get('nomina')
+    turno = request.form.get('turno')
+    categoria = request.form.get('categoria')
+    ninos = int(request.form.get('ninos', 0))
+    adultos = int(request.form.get('adultos', 0))
+    correo = request.form.get('correo')
+
+    # Verificar si ya hay un registro para este usuario
+    registro = RegistroCompetencia.query.filter_by(user_id=current_user.id).first()
+
+    if not registro:
+        ultimo_num = db.session.query(db.func.max(RegistroCompetencia.numero_competidor)).scalar()
+        nuevo_num = 1 if ultimo_num is None else ultimo_num + 1
+
+        registro = RegistroCompetencia(
+            user_id=current_user.id,
+            nombre=nombre,
+            nomina=nomina,
+            turno=turno,
+            categoria=categoria,
+            ninos=ninos,
+            adultos=adultos,
+            numero_competidor=nuevo_num,
+            correo=correo
+        )
+        db.session.add(registro)
+        db.session.commit()
+    else:
+        nuevo_num = registro.numero_competidor
+
+    from flask_mail import Message
+
+    # Cuerpo simple de texto y HTML sin QR
+    texto = f"Hola {nombre},\n\nGracias por registrarte al Bombero Challenge.\nTu número de competidor es: #{nuevo_num}.\n\n¡Te esperamos!"
+
+    html = f"""
+    <html>
+      <body style="font-family: Arial, sans-serif; padding: 20px; text-align: center;">
+        <h2 style="color: #d32f2f;">🎉 Confirmación de Competencia</h2>
+        <p>Hola <strong>{nombre}</strong>,</p>
+        <p>Gracias por registrarte al <strong>Bombero Challenge</strong>.</p>
+        <p><strong>Tu número de competidor es: #{nuevo_num}</strong></p>
+        <p>¡Te esperamos! 👨‍🚒</p>
+      </body>
+    </html>
+    """
+
+    msg = Message(subject="🎫 Confirmación Bombero Challenge",
+                  sender="cristian.rodriguez@bomberosdeleon.org",
+                  recipients=[correo])
+
+    msg.body = texto
+    msg.html = html
+
+    mail.send(msg)
+
+    return render_template('confirmation_competencia.html', nombre=nombre, correo=correo, numero=nuevo_num)
 
 
 @main.route('/submit_formulario', methods=['POST'])

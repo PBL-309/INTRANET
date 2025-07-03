@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Confirmación de Competencia</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            padding: 40px;
+            text-align: center;
+        }
+        .container {
+            background-color: #e0e0e0;
+            border: 3px solid #d32f2f;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            margin: auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        h2 {
+            color: #d32f2f;
+        }
+        p {
+            font-size: 1.1rem;
+            margin: 15px 0;
+        }
+        .numero {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: #b71c1c;
+        }
+        .contador {
+            font-size: 1.2rem;
+            margin-top: 20px;
+            color: #444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Registro Exitoso 🎉</h2>
+        <p>Hola <strong>{{ nombre }}</strong>,</p>
+        <p>Gracias por registrarte en el <strong>Bombero Challenge</strong>.</p>
+        <p>Tu número de competidor es:</p>
+        <p class="numero">#{{ numero }}</p>
+        <p>Hemos enviado un correo de confirmación a <strong>{{ correo }}</strong>.</p>
+        <p>¡Nos vemos en la competencia! 🚒🔥</p>
+
+        <div class="contador">
+            Redirigiendo en <span id="tiempo">15</span> segundos...
+        </div>
+    </div>
+
+    <script>
+        let tiempo = 15;
+        const spanTiempo = document.getElementById('tiempo');
+
+        const interval = setInterval(() => {
+            tiempo--;
+            spanTiempo.textContent = tiempo;
+            if (tiempo <= 0) {
+                clearInterval(interval);
+                window.location.href = "/dashboard";
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -195,44 +195,18 @@ body {
     padding: 10px;
 }
 @media (min-width: 768px) {
-    #carouselNoticias .carousel-inner {
+  #carouselNoticias .carousel-inner,
+  #carouselNoticias .carousel-item img {
+    max-height: 550px;
+  }
 
-        max-height: 550px;
-    }
-    #carouselNoticias .carousel-item img {
-        max-height: 550px;
-
-    }
-    .carousel-caption {
-        font-size: 1.1rem;
-        padding: 14px;
-
-    }
+  .carousel-caption {
+    font-size: 1.1rem;
+    padding: 14px;
+  }
 }
-@media (max-width: 767px) {
-    #carouselNoticias .carousel-inner {
-        max-height: 234
-        50px;
-        margin-top: 25px;
-    }
-    #carouselNoticias .carousel-item img {
-        max-height: 220px;
-    }
-    .carousel-caption {
-        font-size: 0.9rem;
-        padding: 10px;
-    }
-    .carousel-caption h5 {
-        font-size: 1rem;
-    }
-    .carousel-caption p {
-        font-size: 0.8rem;
-    }
-    .carousel-caption .btn {
-        font-size: 0.8rem;
-        padding: 5px 10px;
-    }
-}
+
+
 .main-sections {
     display: flex;
     justify-content: space-between;
@@ -280,27 +254,8 @@ body {
     box-shadow: 0px 12px 24px rgba(0, 0, 0, 0.4);
 }
 
-/* Ajustes para pantallas pequeñas */
-@media (max-width: 767px) {
-    .right-panel {
-        gap: 15px;  /* Menor espacio entre las tarjetas */
-    }
 
-    .right-panel .card {
-        padding: 15px;  /* Menos padding en las tarjetas */
-        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);  /* Sombra más suave en pantallas pequeñas */
-    }
-
-    .col-md-4 {
-        flex-basis: 100%;  /* Ocupa todo el ancho en pantallas pequeñas */
-    }
-
-    .accordion {
-        margin-top: 50px;  
-        order: 1;  
-    }
-
-}
+ 
 @media (min-width: 768px) {
     
     .right-panel {
@@ -382,34 +337,133 @@ body {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 @media (max-width: 767px) {
-    .four-cards .card {
-        height: 80px; 
-        padding: 15px; 
-    }
-    .four-cards .card-body {
-        padding: 10px; 
-    }
-    .four-cards h5 {
-        font-size: 1rem; 
-    }
-    .four-cards i {
-        font-size: 1.8rem; 
-    }
+  /* GENERAL RESET para evitar espacios inesperados */
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .container, .container-fluid, .parent-container {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  /* CORRECCIÓN DE COMPONENTES QUE GENERAN ESPACIO */
+  #carouselNoticias .carousel-inner {
+    margin-top: 0 !important;
+    max-height: 300px;
+  }
+
+  #carouselNoticias .carousel-item img {
+    max-height: 300px;
+    width: 100%;
+    object-fit: cover;
+  }
+
+  .carousel-caption {
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+
+  .carousel-caption h5 {
+    font-size: 1rem;
+  }
+
+  .carousel-caption p {
+    font-size: 0.8rem;
+  }
+
+  .carousel-caption .btn {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+  }
+
+  .accordion {
+    margin-top: 0 !important;
+  }
+
+  /* TARJETAS PRINCIPALES */
+  .four-cards {
+    margin-top: -10px !important;  /* Ajuste fino */
+    position: static !important;
+  }
+
+  .four-cards .card {
+    padding: 10px !important;
+    margin: 0 !important;
+    border-radius: 10px;
+    box-shadow: none;
+    height: auto;
+    min-height: 80px;
+  }
+
+  .four-cards .card-body {
+    padding: 10px !important;
+    display: flex;
+    flex-direction: row; /* ícono y texto en línea */
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .four-cards h5 {
+    font-size: 0.85rem;
+    margin: 0;
+    text-align: center;
+    font-weight: bold;
+  }
+
+  .four-cards i {
+    font-size: 1.2rem;
+    margin: 0;
+  }
+
+  /* Botón extra vertical */
+  .extra-btn .card-body {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .extra-btn h5 {
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  /* PANEL DERECHO */
+  .right-panel {
+    gap: 15px;
+  }
+
+  .right-panel .card {
+    padding: 15px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .col-md-4 {
+    flex-basis: 100%;
+  }
 }
+
 @media (min-width: 768px) {
-    .four-cards .card {
-        height: 100%; 
-    }
-    .four-cards .card-body {
-        padding: 19px;
-    }
-    .four-cards h5 {
-        font-size: 1.2rem;
-    }
-    .four-cards i {
-        font-size: 2.5rem;
-    }
+  .four-cards .card {
+    height: 100%;
+    padding: 15px;
+    margin: 5px;
+  }
+
+  .four-cards .card-body {
+    padding: 19px;
+  }
+
+  .four-cards h5 {
+    font-size: 1.2rem;
+  }
+
+  .four-cards i {
+    font-size: 2.5rem;
+  }
 }
+
 @media (max-width: 767px) {
     #excelContainer {
         width: 100%;

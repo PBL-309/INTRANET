@@ -109,3 +109,20 @@ class Respuesta(db.Model):
 
     def __repr__(self):
         return f'<Respuesta {self.id}>'
+
+
+class RegistroCompetencia(db.Model):
+    __tablename__ = 'registro_competencia'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    nombre = db.Column(db.String, nullable=False)
+    nomina = db.Column(db.String, nullable=False)
+    turno = db.Column(db.String(1), nullable=False)
+    categoria = db.Column(db.String(20), nullable=False)
+    ninos = db.Column(db.Integer, default=0)
+    adultos = db.Column(db.Integer, default=0)
+    numero_competidor = db.Column(db.Integer, unique=True, nullable=False)
+    correo = db.Column(db.String, nullable=False)
+    fecha_registro = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref='registros_competencia')
