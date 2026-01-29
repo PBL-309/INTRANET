@@ -11,15 +11,17 @@
     <link rel="stylesheet" href="https://unpkg.com/shepherd.js@8.0.0/dist/css/shepherd.css">
     <style>
         :root {
-            --primary-color: #1a73e8;
-            --secondary-color: #34a853;
-            --accent-color: #fbbc04;
-            --danger-color: #ea4335;
-            --bg-light: #f8f9fa;
+            --primary: #2C3E7F;
+            --secondary: #667eea;
+            --accent: #f5576c;
+            --purple: #764ba2;
+            --pink: #f093fb;
+            --danger: #ea4335;
+            --bg-light: #f5f7fa;
             --bg-card: #ffffff;
-            --text-primary: #202124;
+            --text-primary: #1a1a2e;
             --text-secondary: #5f6368;
-            --border-color: #dadce0;
+            --border-color: #e0e0e0;
         }
 
         * {
@@ -28,182 +30,270 @@
             box-sizing: border-box;
         }
 
-        body {
+        html, body {
+            height: 100%;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-light);
+            background: linear-gradient(135deg, var(--bg-light) 0%, #e9ecef 100%);
             color: var(--text-primary);
-            min-height: 100vh;
+        }
+
+        body {
             display: flex;
             flex-direction: column;
         }
 
-        /* NAVBAR MODERNO */
+        /* NAVBAR */
         .navbar {
-            background: linear-gradient(135deg, var(--primary-color) 0%, #1557b0 100%);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            padding: 1rem 0;
-            position: sticky;
-            top: 0;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            box-shadow: 0 8px 24px rgba(44, 62, 127, 0.15);
+            padding: 0.8rem 0;
+            min-height: 60px;
+            flex-shrink: 0;
             z-index: 1000;
         }
 
         .navbar-brand {
-            font-weight: 700;
-            font-size: 1.4rem;
+            font-weight: 800;
+            font-size: 1.15rem;
             color: white !important;
             display: flex;
             align-items: center;
-            gap: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            gap: 0.5rem;
+            letter-spacing: 0.5px;
         }
 
         .navbar-logo {
-            height: 40px;
+            height: 35px;
             width: auto;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
         }
 
         .navbar .nav-link {
-            color: rgba(255, 255, 255, 0.9) !important;
-            font-weight: 500;
-            transition: color 0.3s ease;
+            color: rgba(255, 255, 255, 0.95) !important;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
             padding: 0.5rem 1rem !important;
+            position: relative;
         }
 
-        .navbar .nav-link:hover {
-            color: white !important;
+        .navbar .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: white;
+            transition: all 0.3s;
+            transform: translateX(-50%);
+        }
+
+        .navbar .nav-link:hover::after {
+            width: 100%;
         }
 
         .user-box {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 0.5rem 1rem;
-            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
             backdrop-filter: blur(10px);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .user-box:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
 
         .user-img {
-            width: 35px;
-            height: 35px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.5);
             object-fit: cover;
         }
 
         .user-name {
             color: white;
-            font-weight: 500;
-            font-size: 0.9rem;
+            font-weight: 600;
+            font-size: 0.85rem;
             white-space: nowrap;
         }
 
-        /* SIDEBAR MODERNO */
+        /* MAIN WRAPPER */
+        .wrapper {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR */
         #sidebar {
-            background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
-            min-height: calc(100vh - 80px);
-            padding: 2rem 0;
-            width: 280px;
-            position: fixed;
-            left: 0;
-            top: 80px;
+            background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
+            width: 260px;
             overflow-y: auto;
-            transition: transform 0.3s ease;
-            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 2px 0 20px rgba(44, 62, 127, 0.2);
+            padding: 1rem 0;
+            flex-shrink: 0;
         }
 
         #sidebar .nav-link {
             color: rgba(255, 255, 255, 0.85) !important;
-            padding: 0.8rem 1.5rem !important;
+            padding: 0.7rem 1.2rem !important;
             border-left: 3px solid transparent;
-            transition: all 0.3s ease;
-            font-size: 0.95rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         #sidebar .nav-link:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-left-color: var(--accent-color);
+            background: rgba(255, 255, 255, 0.15);
+            border-left-color: var(--accent);
             color: white !important;
-            padding-left: 1.8rem !important;
+            padding-left: 1.5rem !important;
+            transform: translateX(4px);
         }
 
         .sidebar-title {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.7rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
-            padding: 1rem 1.5rem 0.5rem;
+            padding: 1rem 1.2rem 0.5rem;
             margin-bottom: 0.5rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         /* MAIN CONTENT */
         main {
-            margin-left: 280px;
-            padding: 2rem;
             flex: 1;
-            transition: margin-left 0.3s ease;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* CARDS MODERNAS */
+        /* CONTENT GRID */
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 2.5fr 1fr;
+            gap: 1.5rem;
+            flex: 1;
+        }
+
+        .left-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .right-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow-y: auto;
+        }
+
+        /* CARDS */
         .card {
             border: none;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            background: var(--bg-card);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
             overflow: hidden;
+            position: relative;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
         .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+        }
+
+        .card:hover::before {
+            opacity: 1;
         }
 
         .card-body {
             padding: 1.5rem;
         }
 
-        /* FOUR CARDS LAYOUT */
-        .four-cards {
+        /* QUICK ACCESS CARDS */
+        .quick-access {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
         }
 
-        .four-cards .card {
-            min-height: 150px;
+        .quick-card {
+            min-height: 100px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
             cursor: pointer;
+            border-radius: 10px;
+            color: white !important;
+            font-weight: 700;
+            transition: all 0.4s;
+            text-decoration: none !important;
+            border: none;
         }
 
-        .bg-azulpastel {
+        .quick-card:hover {
+            transform: translateY(-6px);
+            filter: brightness(1.1);
+        }
+
+        .quick-card i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .quick-card-text {
+            font-size: 0.9rem;
+            line-height: 1.3;
+        }
+
+        .card-purple {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white !important;
         }
 
-        .bg-limonpastel {
+        .card-pink {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white !important;
         }
 
-        .four-cards .bi {
-            font-size: 2.5rem;
-            margin-top: 0.5rem;
+        .card-cyan {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
         }
 
         /* CAROUSEL */
         .carousel {
-            border-radius: 12px;
+            border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         }
 
         .carousel-inner {
-            min-height: 400px;
+            min-height: 320px;
         }
 
         .carousel-item img {
@@ -213,36 +303,36 @@
 
         /* ACCORDION */
         .accordion {
-            gap: 1rem;
+            gap: 0.8rem;
         }
 
         .accordion-item {
-            background: var(--bg-card);
+            background: white;
             border: none;
-            border-radius: 12px;
+            border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            margin-bottom: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
 
         .accordion-button {
-            background: linear-gradient(135deg, var(--primary-color) 0%, #1557b0 100%);
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
             color: white;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 0.95rem;
             border: none;
             box-shadow: none;
             padding: 1rem;
+            transition: all 0.3s;
         }
 
         .accordion-button:not(.collapsed) {
-            background: linear-gradient(135deg, var(--primary-color) 0%, #1557b0 100%);
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
             color: white;
             box-shadow: none;
         }
 
         .accordion-button:hover {
-            background: linear-gradient(135deg, #1557b0 0%, #0d47a1 100%);
-            color: white;
+            background: linear-gradient(90deg, #1e2850, #5668d9);
         }
 
         .accordion-button:focus {
@@ -250,27 +340,59 @@
             border-color: transparent;
         }
 
+        .accordion-button i {
+            margin-right: 0.5rem;
+        }
+
         .accordion-body {
-            padding: 1.5rem;
-            background: var(--bg-card);
+            padding: 1rem 1.5rem;
+            background: white;
+        }
+
+        /* LIST */
+        .list-group-item {
+            border: none;
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.8rem 0;
+            background: transparent;
+        }
+
+        .list-group-item:last-child {
+            border-bottom: none;
+        }
+
+        .list-group-item a {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .list-group-item a:hover {
+            color: var(--accent);
+            gap: 1rem;
         }
 
         /* MODAL */
         .modal-content {
             border: none;
             border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
 
         .modal-header {
-            background: linear-gradient(135deg, var(--primary-color) 0%, #1557b0 100%);
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
             color: white;
             border: none;
             padding: 1.5rem;
         }
 
         .modal-title {
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 1.1rem;
         }
 
         .btn-close {
@@ -279,36 +401,126 @@
 
         /* BUTTONS */
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color) 0%, #1557b0 100%);
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
             border: none;
             border-radius: 8px;
-            font-weight: 600;
-            padding: 0.6rem 1.5rem;
-            transition: all 0.3s ease;
+            font-weight: 700;
+            padding: 0.7rem 1.8rem;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-primary:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, #1557b0 0%, #0d47a1 100%);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
         }
 
-        .btn-danger {
-            background: var(--danger-color);
-            border: none;
-            border-radius: 8px;
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 1px solid var(--border-color);
             font-weight: 600;
         }
 
+        .btn-secondary:hover {
+            background: var(--bg-light);
+            border-color: var(--primary);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            border: none;
+        }
+
+        .btn-danger:hover {
+            background: #d63529;
+        }
+
+        .btn-link {
+            color: var(--primary) !important;
+            text-decoration: none !important;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-link:hover {
+            color: var(--accent) !important;
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-light);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #1e2850, #5668d9);
+        }
+
+        /* ANIMATIONS */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        main {
+            animation: slideDown 0.5s ease;
+        }
+
+        .toast {
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
         /* RESPONSIVE */
+        @media (max-width: 992px) {
+            .content-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .right-section {
+                order: 2;
+            }
+        }
+
         @media (max-width: 768px) {
             #sidebar {
                 width: 100%;
-                height: auto;
                 position: relative;
-                top: 0;
-                min-height: auto;
-                padding: 1rem 0;
                 display: none;
             }
 
@@ -317,60 +529,30 @@
             }
 
             main {
-                margin-left: 0;
-                padding: 1.5rem;
+                padding: 1rem;
             }
 
-            .four-cards {
-                grid-template-columns: 1fr;
-            }
-
-            .carousel-inner {
-                min-height: 250px;
-            }
-
-            .user-name {
-                display: none;
-            }
-
-            .user-box {
-                padding: 0.3rem 0.6rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            body {
-                font-size: 0.9rem;
+            .quick-access {
+                grid-template-columns: 1fr 1fr;
             }
 
             .navbar-brand {
                 font-size: 1rem;
             }
+        }
 
-            .navbar-logo {
-                height: 30px;
-            }
-
-            main {
-                padding: 1rem;
-            }
-
-            .card-body {
-                padding: 1rem;
-            }
-
-            .four-cards {
-                gap: 1rem;
+        @media (max-width: 480px) {
+            .quick-access {
+                grid-template-columns: 1fr;
             }
 
             .accordion-button {
+                font-size: 0.85rem;
                 padding: 0.75rem;
-                font-size: 0.9rem;
             }
 
-            .user-img {
-                width: 30px;
-                height: 30px;
+            .carousel-inner {
+                min-height: 200px;
             }
         }
     </style>
@@ -380,12 +562,12 @@
     <div id="overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(5px);">
         <div style="background: white; padding: 2.5rem; border-radius: 16px; max-width: 450px; width: 95%; text-align: center; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
             <div style="font-size: 2rem; margin-bottom: 1rem;">🔐</div>
-            <h2 style="color: #1a73e8; margin-bottom: 1rem; font-weight: 700;">Cambio Obligatorio de Contraseña</h2>
-            <p style="margin-bottom: 1.5rem; color: #5f6368; line-height: 1.6;">Por seguridad, debes cambiar tu contraseña. Esta acción solo se pedirá una vez.</p>
+            <h2 style="color: var(--primary); margin-bottom: 1rem; font-weight: 700;">Cambio Obligatorio de Contraseña</h2>
+            <p style="margin-bottom: 1.5rem; color: var(--text-secondary); line-height: 1.6;">Por seguridad, debes cambiar tu contraseña. Esta acción solo se pedirá una vez.</p>
             <form method="POST" action="{{ url_for('main.change_password') }}" style="margin-top: 1.5rem;">
-                <input type="password" name="new_password" placeholder="Nueva contraseña" required style="width: 100%; padding: 0.8rem; margin-bottom: 1rem; border: 1px solid #dadce0; border-radius: 8px; font-size: 1rem;">
-                <input type="password" name="confirm_password" placeholder="Confirmar contraseña" required style="width: 100%; padding: 0.8rem; margin-bottom: 1.5rem; border: 1px solid #dadce0; border-radius: 8px; font-size: 1rem;">
-                <button type="submit" style="width: 100%; padding: 0.8rem; background: linear-gradient(135deg, #1a73e8 0%, #1557b0 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Cambiar Contraseña</button>
+                <input type="password" name="new_password" placeholder="Nueva contraseña" required style="width: 100%; padding: 0.8rem; margin-bottom: 1rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem;">
+                <input type="password" name="confirm_password" placeholder="Confirmar contraseña" required style="width: 100%; padding: 0.8rem; margin-bottom: 1.5rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem;">
+                <button type="submit" style="width: 100%; padding: 0.8rem; background: linear-gradient(90deg, var(--primary), var(--secondary)); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Cambiar Contraseña</button>
             </form>
         </div>
     </div>
@@ -395,7 +577,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="logoutModalLabel">Cerrar Sesión</h5>
+                    <h5 class="modal-title" id="logoutModalLabel"><i class="bi bi-door-left"></i> Cerrar Sesión</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">¿Estás seguro de que deseas cerrar sesión?</div>
@@ -407,22 +589,27 @@
         </div>
     </div>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-red fixed-top">
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
-            <button class="navbar-toggler me-2" type="button" onclick="toggleSidebar()">☰</button>
-            <a class="navbar-brand custom-navbar-brand" href="/dashboard">
+            <button class="navbar-toggler" type="button" style="color: white; border: none;" onclick="toggleSidebar()">
+                <i class="bi bi-list" style="font-size: 1.5rem;"></i>
+            </button>
+            <a class="navbar-brand" href="/dashboard">
                 <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="navbar-logo">
                 INTRANET BOMBEROS
             </a>
-            <button class="navbar-toggler" type="button" onclick="toggleNavbar()"><span class="navbar-toggler-icon"></span></button>
+            <button class="navbar-toggler" type="button" style="color: white; border: none;" onclick="toggleNavbar()">
+                <i class="bi bi-person-circle" style="font-size: 1.5rem;"></i>
+            </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item"><a class="nav-link" href="/dashboard">Inicio</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal">Cerrar Sesión</a></li>
+                <ul class="navbar-nav ms-auto align-items-center gap-3">
+                    <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="bi bi-house"></i> Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal"><i class="bi bi-door-left"></i> Cerrar</a></li>
                     <li class="nav-item">
-                        <div class="user-box d-flex align-items-center">
-                            <img src="{{ url_for('static', filename=user_image) }}" alt="Foto de {{ current_user.nombre }}" class="user-img">
-                            <span class="user-name ms-2">{{ current_user.nombre }}</span>
+                        <div class="user-box">
+                            <img src="{{ url_for('static', filename=user_image) }}" alt="Foto" class="user-img" title="{{ current_user.nombre }}">
+                            <span class="user-name">{{ current_user.nombre }}</span>
                         </div>
                     </li>
                 </ul>
@@ -430,269 +617,252 @@
         </div>
     </nav>
 
-    <div class="container-fluid">
-        <div class="row">
-            <nav id="sidebar" class="bg-dark sidebar vh-100">
-                <div class="position-sticky">
-                    <ul class="nav flex-column">
-                        <li class="sidebar-title"><span>Normatividad Aplicable</span></li>
-                        <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('static', filename='docs/REGLAMENTO DEL HEROICO CUERPO DE BOMBEROS DE LEÓN, GUANAJUATO.pdf') }}">Reglamento Del Heroico cuerpo de bomberos de León, Guanajuato</a></li>
-                        <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('static', filename='docs/CODIGO DE ETICA.pdf') }}">Código de ética</a></li>
-                        <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('static', filename='docs/CODIGO-DE-CONDUCTA.pdf') }}">Código de conducta</a></li>
-                        <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('static', filename='docs/REGLAMENTO INTERIOR DE LA ADMINISTRACIÓN PÚBLICA MUNICIPAL DE LEÓN, GUANAJUATO.pdf') }}">Reglamento interior de la administración pública municipal de León, Guanajuato</a></li>
-                        <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('static', filename='docs/LEY DE RESPONSABILIDADES ADMINISTRATIVAS PARA EL ESTADO DE GUANAJUATO.pdf') }}">Ley de responsabilidades administrativas para el estado de Guanajuato</a></li>
-                        <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('static', filename='docs/CONSTITUCION POLITICA DE LOS ESTADOS UNIDOS MEXICANOS.pdf') }}">Constitución politica del estado de Guanajuato</a></li>
-                        <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('static', filename='docs/CONSTITUCIÓN POLITICA DEL ESTADO DE GUANAJUATO.pdf') }}">Constitución politica de los Estados Unidos Mexicanos</a></li>
-                        <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('static', filename='docs/REGLAMENTO DE CONTROL INTERNO PARA LA ADMINISTRACIÓN PÚBLICA MUNICIPAL DE LEÓN, GUANAJUATO.pdf') }}">Reglamento de control interno para la administración pública municipal de León, Guanajuato</a></li>
-                        <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('static', filename='docs/REGLAMENTO DE ADQUISICIONES, ENAJENACIONES, ARRENDAMIENTOS, COMODATOS Y CONTRATACIÓN DE SERVICIOS PARA EL MUNICIPIO DE LEÓN, GUANAJUATO.pdf') }}">Reglamento de Adquisiciones, enajenaciones, arrendamientos, comodatos y contratación de servicios para el municipio de León, Guanajuato</a></li>
-                        <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('static', filename='docs/LEY PARA EL GOBIERNO Y ADMINISTRACIÓN DE LOS MUNICIPIOS DEL ESTADO DE GUANAJUATO.pdf') }}">Ley para el gobierno y administración de los municipios del estado de Guanajuato</a></li>
-                    </ul>
-                </div>
-            </nav>
-            <main class="col-md-10 ms-sm-auto p-3 d-flex flex-column" style="height: 90vh; margin-top: 90px;">
-                <div class="row h-100">
+    <!-- WRAPPER -->
+    <div class="wrapper">
+        <!-- SIDEBAR -->
+        <nav id="sidebar">
+            <ul class="nav flex-column">
+                <li class="sidebar-title"><span>📋 NORMATIVIDAD</span></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('static', filename='docs/REGLAMENTO DEL HEROICO CUERPO DE BOMBEROS DE LEÓN, GUANAJUATO.pdf') }}" target="_blank"><i class="bi bi-file-pdf"></i> Reglamento</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('static', filename='docs/CODIGO DE ETICA.pdf') }}" target="_blank"><i class="bi bi-file-pdf"></i> Código Ética</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('static', filename='docs/CODIGO-DE-CONDUCTA.pdf') }}" target="_blank"><i class="bi bi-file-pdf"></i> Código Conducta</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('static', filename='docs/REGLAMENTO INTERIOR DE LA ADMINISTRACIÓN PÚBLICA MUNICIPAL DE LEÓN, GUANAJUATO.pdf') }}" target="_blank"><i class="bi bi-file-pdf"></i> Reglamento Interior</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('static', filename='docs/LEY DE RESPONSABILIDADES ADMINISTRATIVAS PARA EL ESTADO DE GUANAJUATO.pdf') }}" target="_blank"><i class="bi bi-file-pdf"></i> Responsabilidades</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('static', filename='docs/CONSTITUCIÓN POLITICA DEL ESTADO DE GUANAJUATO.pdf') }}" target="_blank"><i class="bi bi-file-pdf"></i> Const. Guanajuato</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('static', filename='docs/CONSTITUCION POLITICA DE LOS ESTADOS UNIDOS MEXICANOS.pdf') }}" target="_blank"><i class="bi bi-file-pdf"></i> Const. México</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('static', filename='docs/REGLAMENTO DE CONTROL INTERNO PARA LA ADMINISTRACIÓN PÚBLICA MUNICIPAL DE LEÓN, GUANAJUATO.pdf') }}" target="_blank"><i class="bi bi-file-pdf"></i> Control Interno</a></li>
+            </ul>
+        </nav>
+
+        <!-- MAIN CONTENT -->
+        <main>
+            <div class="content-wrapper">
+                <!-- LEFT SECTION -->
+                <div class="left-section">
                     {% if current_user.id == 2 %}
-                    <a href="/admin/noticias" class="btn btn-primary">EDITAR NOTICIAS</a>
+                    <div><a href="/admin/noticias" class="btn btn-primary"><i class="bi bi-pencil"></i> Editar Noticias</a></div>
                     {% endif %}
-                    <div class="col-md-8 d-flex flex-column h-100">
-                        <div id="carouselNoticias" class="carousel slide carousel-fade mb-3 flex-grow-1" data-bs-ride="carousel" style="max-height: 550px;">
+
+                    <!-- CAROUSEL -->
+                    <div class="card">
+                        <div id="carouselNoticias" class="carousel slide carousel-fade" data-bs-ride="carousel">
                             <div class="carousel-inner">
                                 {% for noticia in noticias %}
                                 <div class="carousel-item {% if loop.first %}active{% endif %}">
-                                    <img src="{{ url_for('static', filename='img/' + noticia.imagen) }}" class="d-block w-100 img-fluid" alt="{{ noticia.titulo }}">
+                                    <img src="{{ url_for('static', filename='img/' + noticia.imagen) }}" class="d-block w-100" alt="{{ noticia.titulo }}">
                                 </div>
                                 {% endfor %}
                             </div>
                             <button class="carousel-control-prev" type="button" data-bs-target="#carouselNoticias" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
                             <button class="carousel-control-next" type="button" data-bs-target="#carouselNoticias" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
                         </div>
-                        <div class="row g-2 four-cards">
-                            <div class="col-12 col-sm-6 col-md-6">
-                                <a href="https://denuncia.leon.gob.mx/" target="_blank" style="text-decoration: none;">
-                                    <div class="card text-white bg-azulpastel text-center d-flex flex-column">
-                                        <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                                            <h5 style="font-weight: bold;">Denuncia León</h5>
-                                            <i class="bi bi-journal-text"></i>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="col-12 col-sm-6 col-md-6">
-                                <div class="card text-white bg-azulpastel text-center d-flex flex-column calendario-btn">
-                                    <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                                        <h5 style="font-weight: bold;">Calendario De Nómina 2025</h5>
-                                        <i class="bi bi-calendar-event-fill"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-12 mt-1.5" style="height: auto;">
-                                <a href="#" data-bs-toggle="modal" data-bs-target="#avisoPrivacidadModal" style="text-decoration: none;">
-                                    <div class="card text-white bg-limonpastel text-center d-flex flex-column extra-btn">
-                                        <div class="card-body d-flex flex-column align-items-center justify-content-center">
-                                            <h5 style="font-weight: bold;">Aviso de Privacidad Integral</h5>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                        <div id="contenido"></div>
                     </div>
-                    <div class="col-md-4 d-flex flex-column gap-3">
-                        <div class="accordion" id="mainAccordion">
-                            <div class="accordion-item">
-                                <h2 class="accordion-header d-flex justify-content-between align-items-center" id="headingAvisos">
-                                    <button class="accordion-button collapsed" type="button" data-target-id="collapseAvisos">AVISOS PARA TODO EL PERSONAL</button>
+
+                    <!-- QUICK ACCESS -->
+                    <div class="quick-access">
+                        <a href="https://denuncia.leon.gob.mx/" target="_blank" class="quick-card card-purple">
+                            <i class="bi bi-journal-text"></i>
+                            <span class="quick-card-text">Denuncia León</span>
+                        </a>
+                        <a href="#" class="quick-card card-pink" onclick="alert('Próximamente'); return false;">
+                            <i class="bi bi-calendar-event-fill"></i>
+                            <span class="quick-card-text">Calendario 2025</span>
+                        </a>
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#avisoPrivacidadModal" class="quick-card card-cyan" style="grid-column: 1/-1;">
+                            <i class="bi bi-shield-lock"></i>
+                            <span class="quick-card-text">Aviso de Privacidad</span>
+                        </a>
+                    </div>
+
+                    <div id="contenido"></div>
+                </div>
+
+                <!-- RIGHT SECTION -->
+                <div class="right-section">
+                    <!-- ACCORDION -->
+                    <div class="accordion" id="mainAccordion">
+                        <!-- AVISOS -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAvisos">
+                                    <i class="bi bi-bell"></i> AVISOS
                                     {% if current_user.id == 2 %}
-                                    <button class="btn btn-light btn-sm fw-bold ms-2" data-bs-toggle="modal" data-bs-target="#avisoModal">➕</button>
+                                    <button class="btn btn-light btn-sm ms-auto me-2" data-bs-toggle="modal" data-bs-target="#avisoModal" onclick="event.stopPropagation()">➕</button>
                                     {% endif %}
-                                </h2>
-                                <div id="collapseAvisos" class="accordion-collapse collapse" aria-labelledby="headingAvisos">
-                                    <div class="accordion-body">
-                                        <div id="avisosContainer">
-                                            {% if avisos %}
-                                            {% for aviso in avisos %}
-                                            <div class="card mb-3 position-relative border-0 shadow-sm rounded-3">
-                                                {% if current_user.id == 2 %}
-                                                <button class="btn btn-sm delete-aviso-btn position-absolute top-0 end-0" data-aviso-id="{{ aviso.id }}">✖</button>
-                                                {% endif %}
-                                                <div class="card-body">
-                                                    <p class="mb-1 fw-semibold">{{ aviso.descripcion }}</p>
-                                                    {% if current_user.id == 2 %}<small class="text-muted">📅 Caduca: {{ aviso.fecha_caducidad.strftime('%d de %B del %Y').upper() }}</small><br>{% endif %}
-                                                    <small class="text-muted">🕒 Creado: {{ aviso.fecha_creacion.strftime('%Y-%m-%d %H:%M') }}</small>
+                                </button>
+                            </h2>
+                            <div id="collapseAvisos" class="accordion-collapse collapse show" data-bs-parent="#mainAccordion">
+                                <div class="accordion-body">
+                                    <div id="avisosContainer">
+                                        {% if avisos %}
+                                        {% for aviso in avisos %}
+                                        <div class="card mb-2" style="border-left: 3px solid var(--accent);">
+                                            <div class="card-body py-2">
+                                                <div style="display: flex; justify-content: space-between; align-items: start; gap: 1rem;">
+                                                    <div style="flex: 1;">
+                                                        <p class="mb-1 fw-bold" style="font-size: 0.95rem;">{{ aviso.descripcion }}</p>
+                                                        <small class="text-muted">{{ aviso.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</small>
+                                                    </div>
+                                                    {% if current_user.id == 2 %}<button class="btn btn-sm btn-link delete-aviso-btn" data-aviso-id="{{ aviso.id }}">✖</button>{% endif %}
                                                 </div>
-                                            </div>
-                                            {% endfor %}
-                                            {% else %}<p>No hay avisos disponibles.</p>{% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="accordion-item">
-                                <h2 class="accordion-header d-flex justify-content-between align-items-center" id="headingPortales">
-                                    <button class="accordion-button collapsed" type="button" data-target-id="collapsePortales">PORTALES WEB</button>
-                                    {% if current_user.id == 2 %}
-                                    <button class="btn btn-light btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#portalModal">➕</button>
-                                    {% endif %}
-                                </h2>
-                                <div id="collapsePortales" class="accordion-collapse collapse" aria-labelledby="headingPortales">
-                                    <div class="accordion-body" id="portales-web-container">
-                                        {% for portal in portales %}
-                                        <div class="portal-item position-relative d-flex align-items-center gap-2">
-                                            <img src="{{ url_for('static', filename='img/favicon.png') }}" alt="{{ portal.nombre }}">
-                                            <a href="{{ portal.url }}" target="_blank">{{ portal.nombre }}</a>
-                                            {% if current_user.id == 2 %}
-                                            <button class="btn btn-sm delete-portal-btn text-danger border-0 position-absolute top-0 end-0" data-portal-id="{{ portal.id }}">✖</button>
-                                            {% endif %}
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="accordion-item">
-                                <h2 class="accordion-header d-flex justify-content-between align-items-center" id="headingDocumentos">
-                                    <button class="accordion-button collapsed" type="button" data-target-id="collapseDocumentos">CONVOCATORIAS PARA EL PERSONAL</button>
-                                    {% if current_user.id == 2 %}
-                                    <button class="btn btn-light btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#uploadModal">📤</button>
-                                    {% endif %}
-                                </h2>
-                                <div id="collapseDocumentos" class="accordion-collapse collapse" aria-labelledby="headingDocumentos">
-                                    <div class="accordion-body" id="documentosContainer">
-                                        <ul class="list-group" id="file-list">
-                                            {% for file in files %}
-                                            <li class="list-group-item d-flex justify-content-between align-items-center" data-filename="{{ file.filename }}">
-                                                <span>📄 {{ file.filename }}</span>
-                                                <div>
-                                                    <a href="{{ url_for('main.serve_uploaded_file', filename=file.filename) }}" class="btn btn-sm btn-outline-primary">⬇️</a>
-                                                    {% if current_user.id == 2 %}
-                                                    <a href="#" class="btn btn-sm btn-outline-danger delete-file-btn" data-filename="{{ file.filename }}">❌</a>
-                                                    {% endif %}
-                                                </div>
-                                            </li>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="accordion-item">
-                                <h2 class="accordion-header d-flex justify-content-between align-items-center" id="headingDocumentos2">
-                                    <button class="accordion-button collapsed" type="button" data-target-id="collapseDocumentos2">CONTROL INTERNO</button>
-                                    {% if current_user.id == 2 %}
-                                    <button class="btn btn-light btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#uploadModal">📤</button>
-                                    {% endif %}
-                                </h2>
-                                <div id="collapseDocumentos2" class="accordion-collapse collapse" aria-labelledby="headingDocumentos2">
-                                    <div class="accordion-body" id="documentosContainer2">
-                                        <ul class="list-group" id="file-list">
-                                            {% for file in files %}
-                                            <li class="list-group-item d-flex justify-content-between align-items-center" data-filename="{{ file.filename }}">
-                                                <span>📄 {{ file.filename }}</span>
-                                                <div>
-                                                    <a href="{{ url_for('main.serve_uploaded_file', filename=file.filename) }}" class="btn btn-sm btn-outline-primary">⬇️</a>
-                                                    {% if current_user.id == 2 %}
-                                                    <a href="#" class="btn btn-sm btn-outline-danger delete-file-btn" data-filename="{{ file.filename }}">❌</a>
-                                                    {% endif %}
-                                                </div>
-                                            </li>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="accordion-item">
-                                <h2 class="accordion-header d-flex justify-content-between align-items-center" id="headingEventos">
-                                    <button class="accordion-button collapsed" type="button" data-target-id="collapseEventos">PRÓXIMOS EVENTOS</button>
-                                    {% if current_user.id == 2 %}
-                                    <button id="addEventoBtn" class="btn btn-light btn-sm fw-bold ms-2" data-bs-toggle="modal" data-bs-target="#eventoModal" data-url="{{ url_for('main.add_evento') }}">➕</button>
-                                    {% endif %}
-                                </h2>
-                                <div id="collapseEventos" class="accordion-collapse collapse" aria-labelledby="headingEventos">
-                                    <div class="accordion-body" id="eventosContainer">
-                                        {% if eventos %}
-                                        {% for evento in eventos %}
-                                        <div class="card mb-3 position-relative border-0 shadow-sm rounded-3">
-                                            {% if current_user.id == 2 %}
-                                            <button class="btn btn-sm delete-evento-btn position-absolute top-0 end-0" data-evento-id="{{ evento.id }}">✖</button>
-                                            {% endif %}
-                                            <div class="card-body">
-                                                <p class="mb-1 fw-semibold">{{ evento.descripcion }}</p>
-                                                <small class="text-muted">📅 Fecha: {{ evento.fecha }}</small>
                                             </div>
                                         </div>
                                         {% endfor %}
-                                        {% else %}<p id="noEventosTexto">No hay eventos programados.</p>{% endif %}
+                                        {% else %}<p class="text-muted text-center py-3">Sin avisos</p>{% endif %}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="toast align-items-center position-fixed bottom-0 end-0 m-3" id="toastEvento" role="alert" aria-live="assertive" aria-atomic="true">
-                            <div class="d-flex">
-                                <div class="toast-body" id="toastEventoBody"></div>
-                                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+
+                        <!-- PORTALES -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePortales">
+                                    <i class="bi bi-globe"></i> PORTALES WEB
+                                    {% if current_user.id == 2 %}<button class="btn btn-light btn-sm ms-auto me-2" data-bs-toggle="modal" data-bs-target="#portalModal" onclick="event.stopPropagation()">➕</button>{% endif %}
+                                </button>
+                            </h2>
+                            <div id="collapsePortales" class="accordion-collapse collapse" data-bs-parent="#mainAccordion">
+                                <div class="accordion-body">
+                                    {% for portal in portales %}
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color); justify-content: space-between;">
+                                        <a href="{{ portal.url }}" target="_blank" style="text-decoration: none; color: var(--primary); font-weight: 600; flex: 1; display: flex; align-items: center; gap: 0.5rem;">
+                                            <i class="bi bi-link-45deg"></i> {{ portal.nombre }}
+                                        </a>
+                                        {% if current_user.id == 2 %}<button class="btn btn-sm btn-link text-danger delete-portal-btn" data-portal-id="{{ portal.id }}">✖</button>{% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CONVOCATORIAS -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDocumentos">
+                                    <i class="bi bi-file-earmark"></i> CONVOCATORIAS
+                                    {% if current_user.id == 2 %}<button class="btn btn-light btn-sm ms-auto me-2" data-bs-toggle="modal" data-bs-target="#uploadModal" onclick="event.stopPropagation()">📤</button>{% endif %}
+                                </button>
+                            </h2>
+                            <div id="collapseDocumentos" class="accordion-collapse collapse" data-bs-parent="#mainAccordion">
+                                <div class="accordion-body">
+                                    <ul class="list-group list-group-flush" id="file-list">
+                                        {% for file in files %}<li class="list-group-item" data-filename="{{ file.filename }}">
+                                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                                <span><i class="bi bi-file-pdf"></i> {{ file.filename }}</span>
+                                                <div>
+                                                    <a href="{{ url_for('main.serve_uploaded_file', filename=file.filename) }}" class="btn btn-sm btn-link text-primary">⬇️</a>
+                                                    {% if current_user.id == 2 %}<a href="#" class="btn btn-sm btn-link text-danger delete-file-btn" data-filename="{{ file.filename }}">❌</a>{% endif %}
+                                                </div>
+                                            </div>
+                                        </li>{% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- EVENTOS -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEventos">
+                                    <i class="bi bi-calendar2-event"></i> EVENTOS
+                                    {% if current_user.id == 2 %}<button id="addEventoBtn" class="btn btn-light btn-sm ms-auto me-2" data-bs-toggle="modal" data-bs-target="#eventoModal" data-url="{{ url_for('main.add_evento') }}" onclick="event.stopPropagation()">➕</button>{% endif %}
+                                </button>
+                            </h2>
+                            <div id="collapseEventos" class="accordion-collapse collapse" data-bs-parent="#mainAccordion">
+                                <div class="accordion-body">
+                                    {% if eventos %}
+                                    {% for evento in eventos %}
+                                    <div class="card mb-2" style="border-left: 3px solid var(--secondary);">
+                                        <div class="card-body py-2">
+                                            <div style="display: flex; justify-content: space-between; align-items: start; gap: 1rem;">
+                                                <div style="flex: 1;">
+                                                    <p class="mb-1 fw-bold" style="font-size: 0.95rem;">{{ evento.descripcion }}</p>
+                                                    <small class="text-muted"><i class="bi bi-calendar"></i> {{ evento.fecha }}</small>
+                                                </div>
+                                                {% if current_user.id == 2 %}<button class="btn btn-sm btn-link delete-evento-btn" data-evento-id="{{ evento.id }}">✖</button>{% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                    {% else %}<p class="text-muted text-center py-3" id="noEventosTexto">Sin eventos</p>{% endif %}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal fade" id="avisoModal" tabindex="-1" aria-labelledby="avisoModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <form id="avisoForm" data-url="{{ url_for('main.add_aviso') }}">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="avisoModalLabel">Añadir Aviso</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <textarea id="descripcion" name="descripcion" class="form-control" placeholder="Describe el aviso" required></textarea>
-                                    <label class="mt-2">INGRESE LA FECHA DE TERMINACIÓN</label>
-                                    <input type="date" id="fecha_caducidad" name="fecha_caducidad" class="form-control mt-2" placeholder="Ingrese la fecha que caduque">
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                    <button type="submit" class="btn btn-primary">Enviar</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+            </div>
+
+            <div class="toast align-items-center position-fixed bottom-0 end-0 m-3" id="toastEvento" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body" id="toastEventoBody"></div>
+                    <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
                 </div>
-                <div class="modal fade" id="eventoModal" tabindex="-1" aria-labelledby="eventoModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <form id="eventoForm" data-url="{{ url_for('main.add_evento') }}">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="eventoModalLabel">Añadir Evento</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <textarea id="eventoDescripcion" name="descripcion" class="form-control" placeholder="Describe el evento" required></textarea>
-                                    <label class="mt-2">FECHA DEL EVENTO</label>
-                                    <input type="date" id="eventoFecha" name="fecha" class="form-control mt-2">
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                    <button type="submit" class="btn btn-primary">Enviar</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODALS -->
+    <div class="modal fade" id="avisoPrivacidadModal" tabindex="-1" aria-labelledby="avisoPrivacidadLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="avisoPrivacidadLabel"><i class="bi bi-shield-lock"></i> Aviso de Privacidad</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
-                <div class="modal fade" id="avisoPrivacidadModal" tabindex="-1" aria-labelledby="avisoPrivacidadLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="avisoPrivacidadLabel">Aviso de Privacidad</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                            </div>
-                            <div class="modal-body" style="text-align: justify; font-size: 14px;">
-                                <p>Con fundamento en lo dispuesto en los artículos 3 fracción I 34, 35, 36, 37, 38, 39, 40, 42 así como lo dispuesto en el titulo tercero, capítulo primero de la Ley de Protección de Datos Personales en Posesión de Sujetos Obligados para el Estado de Guanajuato, publicada en el periódico oficial del Gobierno del Estado de Guanajuato el 14 de julio del 2017, se hace de su conocimiento lo siguiente:</p>
-                                <p>Patronato de Bomberos de León, Gto, con domicilio en Apolo 309, Col. Obrera, León, Guanajuato, no podrá requerirle información que exceda los fines para los cuales se solicita.</p>
-                                <p><strong>Datos que se recaban:</strong><br>- Nombre completo<br>- Teléfono<br>- Domicilio<br>- Día y mes de nacimiento<br>- Correo electrónico</p>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                            </div>
-                        </div>
-                    </div>
+                <div class="modal-body">
+                    <p>Con fundamento en lo dispuesto en los artículos 3 fracción I 34, 35, 36, 37, 38, 39, 40, 42 así como lo dispuesto en el titulo tercero, capítulo primero de la Ley de Protección de Datos Personales en Posesión de Sujetos Obligados para el Estado de Guanajuato...</p>
+                    <p><strong>Patronato de Bomberos de León, Gto:</strong> Apolo 309, Col. Obrera, León, Guanajuato.</p>
+                    <p><strong>Datos que se recaban:</strong> Nombre completo, Teléfono, Domicilio, Día y mes de nacimiento, Correo electrónico</p>
                 </div>
-            </main>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendido</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="avisoModal" tabindex="-1" aria-labelledby="avisoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="avisoForm" data-url="{{ url_for('main.add_aviso') }}">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="avisoModalLabel"><i class="bi bi-bell"></i> Añadir Aviso</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <textarea id="descripcion" name="descripcion" class="form-control" placeholder="Describe el aviso" required></textarea>
+                        <label for="fecha_caducidad" class="form-label mt-3">Fecha de Caducidad</label>
+                        <input type="date" id="fecha_caducidad" name="fecha_caducidad" class="form-control">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Enviar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="eventoModal" tabindex="-1" aria-labelledby="eventoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="eventoForm" data-url="{{ url_for('main.add_evento') }}">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="eventoModalLabel"><i class="bi bi-calendar2-event"></i> Añadir Evento</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <textarea id="eventoDescripcion" name="descripcion" class="form-control" placeholder="Describe el evento" required></textarea>
+                        <label for="eventoFecha" class="form-label mt-3">Fecha del Evento</label>
+                        <input type="date" id="eventoFecha" name="fecha" class="form-control">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Enviar</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -701,12 +871,12 @@
             <div class="modal-content">
                 <form id="portalForm">
                     <div class="modal-header">
-                        <h5 class="modal-title">Añadir Portal</h5>
+                        <h5 class="modal-title" id="portalModalLabel"><i class="bi bi-globe"></i> Añadir Portal</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                     </div>
                     <div class="modal-body">
-                        <input type="text" id="nombrePortal" name="nombre" class="form-control mb-2" placeholder="Nombre del portal" required>
-                        <input type="text" id="urlPortal" name="url" class="form-control mb-2" placeholder="URL del portal" required>
+                        <input type="text" id="nombrePortal" name="nombre" class="form-control mb-3" placeholder="Nombre del portal" required>
+                        <input type="text" id="urlPortal" name="url" class="form-control" placeholder="URL del portal" required>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -721,7 +891,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="uploadModalLabel">Subir Archivo</h5>
+                    <h5 class="modal-title" id="uploadModalLabel"><i class="bi bi-upload"></i> Subir Archivo</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
                 </div>
                 <div class="modal-body">
@@ -744,7 +914,7 @@
     {% if ya_respondio %}
     <script>
         window.onload = function () {
-            alert("🚫 Ya has respondído anteriormente.");
+            alert("🚫 Ya has respondido anteriormente.");
             setTimeout(() => {
                 window.location.href = "{{ url_for('main.dashboard') }}";
             }, 0);
@@ -752,33 +922,19 @@
     </script>
     {% endif %}
 
-    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/shepherd.js@8.0.0/dist/js/shepherd.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const accordionButtons = document.querySelectorAll('.accordion-button');
-            accordionButtons.forEach(button => {
-                button.addEventListener('click', function () {
-                    const targetId = this.getAttribute('data-target-id');
-                    const target = document.getElementById(targetId);
-                    const isOpen = target.classList.contains('show');
-                    document.querySelectorAll('.accordion-collapse.show').forEach(openItem => {
-                        const collapseInstance = bootstrap.Collapse.getInstance(openItem) || new bootstrap.Collapse(openItem, { toggle: false });
-                        collapseInstance.hide();
-                    });
-                    accordionButtons.forEach(btn => btn.classList.add('collapsed'));
-                    if (!isOpen) {
-                        const collapseInstance = bootstrap.Collapse.getInstance(target) || new bootstrap.Collapse(target, { toggle: false });
-                        collapseInstance.show();
-                        this.classList.remove('collapsed');
-                    }
-                });
-            });
-        });
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('show');
+        }
+        function toggleNavbar() {
+            document.getElementById('navbarNav').classList.toggle('show');
+        }
     </script>
 </body>
 </html>
