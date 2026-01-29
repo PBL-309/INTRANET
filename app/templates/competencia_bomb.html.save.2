@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Registro - Bombero Challenge</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background-color: #f0f0f0; /* gris claro */
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .form-container {
+            background-color: white;
+            padding: 30px;
+            border: 3px solid #d32f2f; /* rojo fuerte */
+            border-radius: 16px;
+            box-shadow: 0 0 15px rgba(211, 47, 47, 0.4); /* sombra roja suave */
+            max-width: 650px;
+            width: 100%;
+        }
+        h3 {
+            color: #d32f2f;
+            text-align: center;
+            margin-bottom: 24px;
+            font-weight: bold;
+        }
+        label {
+            font-weight: 600;
+            color: #444;
+        }
+        .question {
+            margin-bottom: 24px;
+        }
+        /* Turno input estilo original (texto simple) */
+        input[name="turno"] {
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            padding: 8px 12px;
+            width: 60px;
+            font-size: 1rem;
+            text-transform: lowercase;
+        }
+        /* Categoría radiobuttons */
+        .radio-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .radio-group input[type="radio"] {
+            display: none;
+        }
+        .radio-group label {
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 1px solid #d32f2f;
+            cursor: pointer;
+            background-color: #fff5f5;
+            color: #d32f2f;
+            transition: all 0.3s ease;
+            user-select: none;
+            font-weight: 600;
+        }
+        .radio-group input[type="radio"]:checked + label {
+            background-color: #d32f2f;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 0 8px rgba(211, 47, 47, 0.7);
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="number"] {
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            padding: 8px 12px;
+            width: 100%;
+            font-size: 1rem;
+        }
+        .btn-custom {
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            font-weight: 700;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            transition: background-color 0.3s ease;
+        }
+        .btn-custom:hover {
+            background-color: #a52727;
+        }
+        .row > div {
+            flex: 1;
+        }
+	@media (max-width: 600px) {
+    	body {
+        	padding: 10px;
+    	}
+
+    	.form-container {
+        	padding: 20px;
+        	border-width: 2px;
+        	border-radius: 12px;
+    	}
+
+    	h3 {
+        	font-size: 1.4rem;
+    	}
+
+    	label, .radio-group label {
+        	font-size: 1rem;
+    	}
+
+    	input[type="text"],
+    	input[type="email"],
+    	input[type="number"],
+    	input[name="turno"] {
+        	font-size: 1.1rem;
+        	padding: 10px;
+    	}
+
+    	.btn-custom {
+        	font-size: 1.2rem;
+        	padding: 14px;
+    	}
+
+    	.radio-group {
+        	flex-direction: column;
+        	gap: 10px;
+    	}
+
+   	.radio-group label {
+        	width: 100%;
+        	text-align: center;
+    	}
+	}
+
+    </style>
+</head>
+<body>
+<div class="form-container">
+    <h3>🔥 Registro Competencia 🔥 </h3>
+    <h3>    BOMBERO CHALLENGE 2025 </h3>
+    <form method="POST" action="{{ url_for('main.submit_competencia') }}">
+        <div class="question">
+            <label for="nombre">Nombre completo:</label>
+            <input type="text" id="nombre" name="nombre" required />
+        </div>
+
+        <div class="question">
+            <label for="nomina">No. Nómina:</label>
+            <input type="text" id="nomina" name="nomina" required />
+        </div>
+
+      <div class="question">
+        <label>Turno:</label>
+        <select class="form-select" name="turno" required>
+          <option value="">Selecciona turno</option>
+          <option value="a">A</option>
+          <option value="b">B</option>
+          <option value="c">C</option>
+        </select>
+      </div>
+
+        <div class="question">
+            <label>Categoría:</label>
+            <div class="radio-group">
+                <input type="radio" id="femenil" name="categoria" value="femenil" required />
+                <label for="femenil">Femenil</label>
+
+                <input type="radio" id="varonil" name="categoria" value="varonil" />
+                <label for="varonil">Varonil</label>
+
+                <input type="radio" id="master" name="categoria" value="master" />
+                <label for="master">Master</label>
+            </div>
+        </div>
+
+        <div class="question">
+            <label>Acompañantes (máx 3 en total):</label>
+            <div class="row">
+                <div>
+                    <label for="ninos">Niños:</label>
+                    <input type="number" id="ninos" name="ninos" min="0" max="3" value="0" onchange="validarTotal()" />
+                </div>
+                <div>
+                    <label for="adultos">Adultos:</label>
+                    <input type="number" id="adultos" name="adultos" min="0" max="3" value="0" onchange="validarTotal()" />
+                </div>
+            </div>
+            <small id="acomError" style="color: red; display: none;">⚠️ Solo se permiten hasta 3 acompañantes en total.</small>
+        </div>
+
+        <div class="question">
+            <label for="correo">Correo electrónico:</label>
+            <input type="email" id="correo" name="correo" required />
+        </div>
+	<!-- Agrega esto justo antes del botón de envío del formulario -->
+	<div class="alert alert-danger text-center fw-bold mt-4" role="alert">
+    		⚠️ NO SE PODRÁ REGISTRAR COMPETIDORES DESPUÉS DE LAS 9 AM, EL DÍA 11 DE JULIO ⚠️
+	</div>
+        <button type="submit" class="btn-custom">Enviar</button>
+    </form>
+</div>
+
+<script>
+    function validarTotal() {
+        const ninos = parseInt(document.getElementById('ninos').value) || 0;
+        const adultos = parseInt(document.getElementById('adultos').value) || 0;
+        const total = ninos + adultos;
+        const error = document.getElementById('acomError');
+        if (total > 3) {
+            error.style.display = 'block';
+        } else {
+            error.style.display = 'none';
+        }
+    }
+</script>
+</body>
+</html>

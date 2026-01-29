@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard de Evaluaciones</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom right, #e3f2fd, #f8f9fa);
+      overflow: hidden;
+    }
+
+    .dashboard {
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 280px;
+      background: #1e2a38;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    .sidebar h3 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+    }
+
+    .sidebar input,
+    .sidebar select {
+      background: #2f3b4a;
+      color: white;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      width: 100%;
+      font-size: 1rem;
+    }
+
+    .sidebar button {
+      background: none;
+      border: none;
+      color: #cfd8dc;
+      padding: 0.5rem;
+      text-align: left;
+      border-radius: 8px;
+      transition: background 0.2s, color 0.2s;
+      width: 100%;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .sidebar button:hover,
+    .sidebar button.active {
+      background: #3b4c61;
+      color: #ffffff;
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      gap: 1rem;
+      overflow: hidden;
+    }
+
+    .main-top {
+      display: flex;
+      height: 45%;
+      gap: 1rem;
+      min-height: 250px;
+    }
+
+    .chart-container {
+      flex: 1;
+      background: white;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .selected-question {
+      margin-top: auto;
+      background: #e3f2fd;
+      border: 1px solid #90caf9;
+      border-radius: 8px;
+      padding: 0.75rem;
+      font-weight: bold;
+      color: #1565c0;
+      font-size: 0.95rem;
+      user-select: none;
+    }
+
+    .meaning-card {
+      width: 40%;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      overflow-y: auto;
+      padding: 1rem;
+    }
+
+    .card-header {
+      background-color: #3498db;
+      color: white;
+      font-weight: 600;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      padding: 0.75rem 1rem;
+      font-size: 1.1rem;
+    }
+
+    .card-body {
+      padding: 1rem 0;
+      max-height: 100%;
+      overflow-y: auto;
+      font-size: 0.9rem;
+      color: #222;
+    }
+
+    .main-bottom {
+      flex: 1;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      overflow-y: auto;
+      padding: 1rem;
+    }
+
+    .user-response {
+      display: none;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .user-response.active {
+      display: block;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .no-results {
+      color: #ccc;
+      font-style: italic;
+      padding: 1rem;
+      user-select: none;
+    }
+
+    .highlighted-cell {
+      background-color: #e3f2fd !important;
+      font-weight: bold;
+      color: #0d47a1;
+      cursor: pointer;
+    }
+
+    table.table {
+      font-size: 0.9rem;
+    }
+
+    table.table thead th {
+      background-color: #f1f1f1;
+    }
+  </style>
+</head>
+<body>
+
+<div class="dashboard">
+  <div class="sidebar">
+    <h3>Evaluaciones</h3>
+    <input type="text" id="searchInput" placeholder="Buscar nombre..." onkeyup="filterUsers()" aria-label="Buscar evaluaciones" />
+    <select id="sortSelect" onchange="sortUsers()" aria-label="Ordenar evaluaciones">
+      <option value="">Ordenar por promedio</option>
+      <option value="asc">Menor a mayor</option>
+      <option value="desc">Mayor a menor</option>
+    </select>
+
+    <div id="userList" role="list" aria-live="polite">
+      {% for evaluacion in evaluaciones %}
+      <button 
+        role="listitem"
+        data-target="user-{{ loop.index }}" 
+        data-username="{{ evaluacion.nombre | lower }}"
+        data-promedio="{{ evaluacion.promedio }}"
+        tabindex="0">
+        {{ evaluacion.nombre }}
+      </button>
+      {% endfor %}
+    </div>
+
+    <div id="noResults" class="no-results d-none">No se encontraron evaluaciones.</div>
+  </div>
+
+  <div class="main">
+    <div class="main-top">
+      <div class="chart-container" aria-label="Gráfico de promedios por rubro">
+        <canvas id="promediosChart" role="img" aria-describedby="selectedQuestion"></canvas>
+        <div class="selected-question" id="selectedQuestion" aria-live="polite">
+          Haz clic en una pregunta para ver su significado aquí.
+        </div>
+      </div>
+      <div class="meaning-card" aria-label="Significado de preguntas">
+        <div class="card-header">Significado de preguntas</div>
+        <div class="card-body">
+<div class="row">
+ <div class="col-12 mb-1"><strong>Q1:</strong> Conozco mis funciones y mis responsabilidades</div>
+  <div class="col-12 mb-1"><strong>Q2:</strong> Al realizar mi trabajo, siempre doy resultados positivos</div>
+  <div class="col-12 mb-1"><strong>Q3:</strong> Las actividades que realizo me permiten desarrollar mis habilidades</div>
+  <div class="col-12 mb-1"><strong>Q4:</strong> Tengo conocimiento de las políticas y reglamentos de la institución</div>
+  <div class="col-12 mb-1"><strong>Q5:</strong> Puedo agilizar el trabajo actuando antes de que me lo pidan</div>
+  <div class="col-12 mb-1"><strong>Q6:</strong> Ofrezco ayuda sin necesidad de que lo soliciten</div>
+  <div class="col-12 mb-1"><strong>Q7:</strong> Me mantiene informado sobre asuntos que afectan a mi trabajo</div>
+  <div class="col-12 mb-1"><strong>Q8:</strong> Pone el ejemplo en la forma en la que debe ser nuestro desempeño</div>
+  <div class="col-12 mb-1"><strong>Q9:</strong> Soluciona los problemas de manera eficaz</div>
+  <div class="col-12 mb-1"><strong>Q10:</strong> Encomienda las actividades de trabajo de manera igualitaria entre los compañeros</div>
+  <div class="col-12 mb-1"><strong>Q11:</strong> Trata de igual manera a todo el personal y se comunica con respeto</div>
+  <div class="col-12 mb-1"><strong>Q12:</strong> Identifica áreas de mejora optimizando el desempeño de nuestras funciones</div>
+  <div class="col-12 mb-1"><strong>Q13:</strong> Siempre hay colaboración con mis compañeros para el buen desempeño del trabajo</div>
+  <div class="col-12 mb-1"><strong>Q14:</strong> Me siento parte de un equipo de trabajo</div>
+  <div class="col-12 mb-1"><strong>Q15:</strong> Es fácil expresar las opiniones ante compañeros y jefe inmediato</div>
+  <div class="col-12 mb-1"><strong>Q16:</strong> Se generan planes de trabajo positivos que motivan al personal</div>
+  <div class="col-12 mb-1"><strong>Q17:</strong> Se tiene un ambiente sano y cordial entre los compañeros de las otras estaciones</div>
+  <div class="col-12 mb-1"><strong>Q18:</strong> Existe colaboración entre los compañeros de toda la institución para la realización de las tareas</div>
+  <div class="col-12 mb-1"><strong>Q19:</strong> El nombre y prestigio de la institución me hacen sentir orgulloso de pertenecer a ella</div>
+  <div class="col-12 mb-1"><strong>Q20:</strong> Conozco el trabajo que realizan las diferentes áreas de la institución</div>
+  <div class="col-12 mb-1"><strong>Q21:</strong> Las estaciones cuentan con una instalación que permite sentirme a gusto</div>
+  <div class="col-12 mb-1"><strong>Q22:</strong> Recibo capacitaciones constantes que permiten actualizar mis conocimientos sobre el trabajo</div>
+  <div class="col-12 mb-1"><strong>Q23:</strong> Doy un buen uso y cuidado a las herramientas y equipo otorgado por la institución</div>
+  <div class="col-12 mb-1"><strong>Q24:</strong> Me gusta la estación a la que pertenezco</div>
+  <div class="col-12 mb-1"><strong>Q25:</strong> Descubro los intereses de mis compañeros e intento llevarlos a una meta en común</div>
+  <div class="col-12 mb-1"><strong>Q26:</strong> Intento ser honesto y transparente cuando hablo</div>
+  <div class="col-12 mb-1"><strong>Q27:</strong> Me considero una persona que explica con detalle cuando capacito a mis compañeros</div>
+  <div class="col-12 mb-1"><strong>Q28:</strong> Conozco a mis compañeros y tengo muy buena relación con ellos</div>
+  <div class="col-12 mb-1"><strong>Q29:</strong> Intento ofrecer todo mi apoyo cuando un compañero pasa por un momento de dificultad personal</div>
+  <div class="col-12 mb-1"><strong>Q30:</strong> Escucho, respeto y reflexiono sobre las opiniones de los demás antes de tomar decisiones</div>
+  <div class="col-12 mb-1"><strong>Q31:</strong> Me gusta dirigir las reuniones de trabajo para que todos participen</div>
+  <div class="col-12 mb-1"><strong>Q32:</strong> Supervisar de cerca el equipo es buena opción para asegurarme que las cosas salgan bien</div>
+  <div class="col-12 mb-1"><strong>Q33:</strong> Me cuesta trabajo admitir mis errores y suelo culpar a los demás</div>
+  <div class="col-12 mb-1"><strong>Q34:</strong> Es bueno que nos asignen tareas sin decidir si está bien o no</div>
+  <div class="col-12 mb-1"><strong>Q35:</strong> No acepto mis fracasos personales ni la opinión de que estoy equivocado en mi forma de ver las cosas</div>
+  <div class="col-12 mb-1"><strong>Q36:</strong> Exijo superar las metas que consigue mi equipo con el fin de seguir mejorando</div>
+  <div class="col-12 mb-1"><strong>Q37:</strong> Tengo una comunicación abierta con mis compañeros/personal a cargo y conozco lo que esperan de mí</div>
+  <div class="col-12 mb-1"><strong>Q38:</strong> Los errores y fracasos de los demás los utilizo como motivación para superarlos</div>
+  <div class="col-12 mb-1"><strong>Q39:</strong> Me gusta pensar de manera positiva para motivar al personal que me rodea y cumplir con los objetivos que se esperan en el trabajo</div>
+  <div class="col-12 mb-1"><strong>Q40:</strong> Me da miedo tomar el control y prefiero que otros se encarguen</div>
+  <div class="col-12 mb-1"><strong>Q41:</strong> Busco opiniones de mis compañeros para lograr ideas y proyectos nuevos</div>
+  <div class="col-12 mb-1"><strong>Q42:</strong> Conseguir resultados positivos es mi prioridad, la tensión es el precio a pagar por el éxito</div>
+  <div class="col-12 mb-1"><strong>Q43:</strong> Cuando hay problemas en mi equipo, me pongo muy nervioso y no sé cómo controlarme</div>
+  <div class="col-12 mb-1"><strong>Q44:</strong> Soy una persona protectora con los compañeros que piensan igual que yo y obedecen, respeto a los que me contradices pero me cuesta mucho confiar en los que mienten</div>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="main-bottom" tabindex="0" aria-label="Detalle de respuestas por usuario">
+      {% for evaluacion in evaluaciones %}
+      <div class="user-response" id="user-{{ loop.index }}" role="region" aria-hidden="true" tabindex="-1">
+        <div class="card-header">
+          {{ evaluacion.nombre }} - {{ evaluacion.fecha }}
+        </div>
+        <div class="card-body">
+          <table class="table table-sm table-bordered" role="table">
+            <thead class="table-light">
+              <tr>
+                <th scope="col">Rubro</th>
+                <th scope="col">Pregunta</th>
+                <th scope="col">Respuesta</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for rubro, preguntas_resp in evaluacion.respuestas.items() %}
+                {% for pregunta_num, respuesta in preguntas_resp.items() %}
+                <tr>
+                  <td>{{ rubro | capitalize }}</td>
+                  <td class="question-cell" data-pregunta="{{ pregunta_num }}" tabindex="0" role="button" aria-pressed="false">{{ pregunta_num }}</td>
+                  <td>{{ respuesta_texto[respuesta] }}</td>
+                </tr>
+                {% endfor %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Variables para los labels y datos del gráfico
+    const labels = ['Desempeño', 'Jefe Inmediato', 'Apoyo y Convivencia', 'Pertenencia', 'Clasificación'];
+    const promedios = [
+      {% for rubro, valores in promedios.items() %}
+        {{ (valores | sum) / (valores | length) }}{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ];
+
+    function getColor(p, border = false) {
+      if (p <= 1) return border ? '#c0392b' : '#e74c3c';
+      if (p <= 2) return border ? '#e67e22' : '#f39c12';
+      if (p <= 2.5) return border ? '#f1c40f' : '#f39c12';
+      if (p <= 4) return border ? '#27ae60' : '#2ecc71';
+      return border ? '#16a085' : '#1abc9c';
+    }
+
+    const ctx = document.getElementById('promediosChart').getContext('2d');
+    const promediosChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Promedio por Rubro',
+          data: promedios,
+          backgroundColor: promedios.map(p => getColor(p)),
+          borderColor: promedios.map(p => getColor(p, true)),
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 5,
+            ticks: { stepSize: 1 }
+          }
+        },
+        plugins: {
+          legend: { display: false }
+        },
+        animation: {
+          duration: 700,
+          easing: 'easeOutQuart'
+        }
+      }
+    });
+
+    // Manejo selección de usuario
+    const userButtons = document.querySelectorAll("#userList button");
+    let activeUserButton = null;
+    userButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (activeUserButton) activeUserButton.classList.remove("active");
+        btn.classList.add("active");
+        activeUserButton = btn;
+
+        document.querySelectorAll(".user-response").forEach(card => {
+          card.classList.remove("active");
+          card.setAttribute("aria-hidden", "true");
+        });
+        const target = btn.getAttribute("data-target");
+        const activeResponse = document.getElementById(target);
+        activeResponse.classList.add("active");
+        activeResponse.setAttribute("aria-hidden", "false");
+        activeResponse.focus();
+      });
+    });
+    // Filtrado de usuarios
+    document.getElementById("searchInput").addEventListener("input", () => {
+      const input = document.getElementById("searchInput").value.toLowerCase();
+      const buttons = document.querySelectorAll("#userList button");
+      let anyVisible = false;
+      buttons.forEach(btn => {
+        const name = btn.getAttribute("data-username");
+        const match = name.includes(input);
+        btn.classList.toggle("d-none", !match);
+        if (match) anyVisible = true;
+      });
+      document.getElementById("noResults").classList.toggle("d-none", anyVisible);
+    });
+    // Ordenar usuarios
+    document.getElementById("sortSelect").addEventListener("change", () => {
+      const sort = document.getElementById("sortSelect").value;
+      const list = document.getElementById("userList");
+      const buttons = Array.from(list.querySelectorAll("button"));
+      if (sort === "asc") {
+        buttons.sort((a, b) => parseFloat(a.dataset.promedio) - parseFloat(b.dataset.promedio));
+      } else if (sort === "desc") {
+        buttons.sort((a, b) => parseFloat(b.dataset.promedio) - parseFloat(a.dataset.promedio));
+      }
+      buttons.forEach(btn => list.appendChild(btn));
+    });
+    // Significado de preguntas
+    const significados = [
+      {% for p in preguntas % %}
+        "{{ p }}"{% if not loop.last %},{% endif %}
+      {% endfor %}
+    ];
+    let activeCell = null;
+    document.querySelectorAll(".question-cell").forEach(cell => {
+      cell.style.cursor = "pointer";
+      cell.setAttribute("tabindex", "0");
+      cell.setAttribute("role", "button");
+      cell.setAttribute("aria-pressed", "false");
+      cell.addEventListener("click", () => showMeaning(cell));
+      cell.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          showMeaning(cell);
+        }
+      });
+    });
+    function showMeaning(cell) {
+      const match = cell.dataset.pregunta.match(/\d+/);
+      if (!match) return;
+      const index = parseInt(match[0]) - 1;
+      const significado = significados[index] || "Pregunta no encontrada";
+      const selectedQuestion = document.getElementById("selectedQuestion");
+      selectedQuestion.textContent = `Q${index + 1}: ${significado}`;
+
+      if (activeCell) {
+        activeCell.classList.remove("highlighted-cell");
+        activeCell.setAttribute("aria-pressed", "false");
+      }
+      cell.classList.add("highlighted-cell");
+      cell.setAttribute("aria-pressed", "true");
+      activeCell = cell;
+    }
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

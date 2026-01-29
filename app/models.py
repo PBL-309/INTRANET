@@ -13,6 +13,7 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(128), nullable=False)
     image_file = db.Column(db.String(100), nullable=False, default='default.jpg')
     password_changed = db.Column(db.Boolean, default=False)
+    turno = db.Column(db.String(30))
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -126,3 +127,34 @@ class RegistroCompetencia(db.Model):
     fecha_registro = db.Column(db.DateTime, default=datetime.utcnow)
 
     user = db.relationship('User', backref='registros_competencia')
+
+class EvaluacionDesempeno(db.Model):
+    __tablename__ = 'evaluacion_desempeno'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    nombre = db.Column(db.String(100), nullable=False)
+    fecha = db.Column(db.Date, nullable=False)
+    area = db.Column(db.String(100), nullable=False)
+    estacion = db.Column(db.String(100), nullable=False)
+    nomina = db.Column(db.String(20), nullable=False)
+    puesto = db.Column(db.String(100), nullable=False)
+    respuestas = db.Column(db.JSON, nullable=False)  # Almacenamos las respuestas en formato JSON
+    evaluacion_general = db.Column(db.String(20), nullable=False)
+    comentario = db.Column(db.String(500), nullable=True)
+    fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref=db.backref('evaluaciones_desempeno', lazy=True))
+
+    def __repr__(self):
+        return f'<EvaluacionDesempeno {self.id}>'
+
+class AsistenciaFinAnio(db.Model):
+    __tablename__ = 'asistencia_fin_anio'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), unique=True, nullable=False)
+    nombre_usuario = db.Column(db.String(100), nullable=False)
+    asistencia = db.Column(db.String(5), nullable=False)        
+    lleva_acompanante = db.Column(db.String(5), nullable=False)
+    fecha_registro = db.Column(db.DateTime, default=db.func.current_timestamp())
+    user = db.relationship('User', backref='asistencia_evento', uselist=False)

@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Registro - Bombero Challenge</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
@@ -98,6 +99,49 @@
         .row > div {
             flex: 1;
         }
+	@media (max-width: 600px) {
+    	body {
+        	padding: 10px;
+    	}
+
+    	.form-container {
+        	padding: 20px;
+        	border-width: 2px;
+        	border-radius: 12px;
+    	}
+
+    	h3 {
+        	font-size: 1.4rem;
+    	}
+
+    	label, .radio-group label {
+        	font-size: 1rem;
+    	}
+
+    	input[type="text"],
+    	input[type="email"],
+    	input[type="number"],
+    	input[name="turno"] {
+        	font-size: 1.1rem;
+        	padding: 10px;
+    	}
+
+    	.btn-custom {
+        	font-size: 1.2rem;
+        	padding: 14px;
+    	}
+
+    	.radio-group {
+        	flex-direction: column;
+        	gap: 10px;
+    	}
+
+   	.radio-group label {
+        	width: 100%;
+        	text-align: center;
+    	}
+	}
+
     </style>
 </head>
 <body>
@@ -158,6 +202,11 @@
             <label for="correo">Correo electrónico:</label>
             <input type="email" id="correo" name="correo" required />
         </div>
+	<!-- Agrega esto justo antes del botón de envío del formulario -->
+	<div class="alert alert-danger text-center fw-bold mt-4" role="alert">
+    		⚠️ NO SE PODRÁ REGISTRAR COMPETIDORES DESPUÉS DE LAS 9 AM, EL DÍA 11 DE JULIO ⚠️
+	</div>
+
 
         <button type="submit" class="btn-custom">Enviar</button>
     </form>

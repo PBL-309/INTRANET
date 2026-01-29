@@ -1,21 +1,436 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirmación de Asistencia</title>
+    <title>Asistencia Confirmada 🎉</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-night: #031026;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            background: var(--bg-night);
+            color: #fff;
+            min-height: 100vh;
+            /* Estos 4 atributos centran el contenido */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        }
+
+        body::before,
+        body::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(.25px);
+            background-repeat: no-repeat;
+        }
+
+        body::before {
+            background-image:
+                radial-gradient(circle at 8% 18%, rgba(255, 255, 255, 1) 0.9px, transparent 2px),
+                radial-gradient(circle at 28% 65%, rgba(255, 255, 255, 1) 1px, transparent 2.4px),
+                radial-gradient(circle at 52% 34%, rgba(255, 255, 255, 1) 0.85px, transparent 2px),
+                radial-gradient(circle at 78% 12%, rgba(255, 255, 255, 1) 0.9px, transparent 2px);
+            opacity: 0.9;
+            animation: twinkle1 4.2s linear infinite;
+        }
+
+        body::after {
+            background-image:
+                radial-gradient(circle at 16% 42%, rgba(255, 255, 255, 1) 0.9px, transparent 2px),
+                radial-gradient(circle at 44% 78%, rgba(255, 255, 255, 1) 0.95px, transparent 2.4px),
+                radial-gradient(circle at 66% 28%, rgba(255, 255, 255, 1) 0.85px, transparent 2px),
+                radial-gradient(circle at 90% 55%, rgba(255, 255, 255, 1) 0.8px, transparent 2px);
+            opacity: 0.8;
+            animation: twinkle2 5.6s linear infinite;
+            animation-delay: -1.2s;
+        }
+
+        @keyframes twinkle1 {
+            0% {
+                opacity: 0.45;
+                transform: translateY(0);
+            }
+
+            25% {
+                opacity: 1;
+                transform: translateY(-0.2px);
+            }
+
+            50% {
+                opacity: 0.6;
+                transform: translateY(0);
+            }
+
+            75% {
+                opacity: 0.95;
+                transform: translateY(0.2px);
+            }
+
+            100% {
+                opacity: 0.45;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes twinkle2 {
+            0% {
+                opacity: 0.35;
+                transform: translateY(0);
+            }
+
+            20% {
+                opacity: 0.9;
+                transform: translateY(0.2px);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: translateY(0);
+            }
+
+            80% {
+                opacity: 1;
+                transform: translateY(-0.2px);
+            }
+
+            100% {
+                opacity: 0.35;
+                transform: translateY(0);
+            }
+        }
+
+        /* Centrado del contenedor uiRoot ya no es necesario, pero lo mantengo */
+        #uiRoot {
+            position: absolute; /* Cambiado a absolute para que el flexbox del body centre el otro div */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            /* display: flex; REMOVIDO */
+            /* align-items: center; REMOVIDO */
+            /* justify-content: center; REMOVIDO */
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        #innerUI {
+            pointer-events: auto;
+            display: inline-block;
+            transform-origin: center center;
+        }
+
+        /* Estirar el contenedor de las luces a todo el ancho */
+        .rope-container {
+            position: absolute;
+            top: 4vh;
+            left: 0;
+            width: 100%;
+            height: 18vh;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .rope-svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .rope-svg path {
+            stroke: #4d3724;
+            stroke-width: 7;
+            stroke-linecap: round;
+            fill: none;
+            filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.45));
+        }
+
+        .rope {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        .light {
+            position: absolute;
+            width: clamp(8px, 1.0vw, 14px);
+            height: clamp(12px, 1.8vw, 20px);
+            border-radius: 48% 48% 44% 44%;
+            transform-origin: 50% 20px;
+            background:
+                radial-gradient(circle at 40% 28%, rgba(255, 255, 255, 0.98) 10%, rgba(255, 255, 255, 0.6) 24%, rgba(255, 255, 255, 0.18) 40%, transparent 60%),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.08));
+            box-shadow:
+                0 0 8px 2px color-mix(in srgb, var(--light-color, #ff0000) 88%, rgba(255, 255, 255, 0.04)),
+                inset 0 -5px 6px rgba(0, 0, 0, 0.36),
+                0 1px 4px rgba(0, 0, 0, 0.22);
+            opacity: 1;
+            pointer-events: none;
+            transition: box-shadow 160ms linear, filter 160ms linear, transform 160ms linear;
+            filter: drop-shadow(0 5px 10px color-mix(in srgb, var(--light-color, #ff0000) 55%, rgba(0, 0, 0, 0.36)));
+            z-index: 5;
+            transform: translate(-50%, -10px) rotate(0deg);
+        }
+
+        .light::before {
+            content: "";
+            position: absolute;
+            top: -12%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: clamp(2px, 0.22vw, 4px);
+            height: clamp(8px, 1.0vw, 14px);
+            background: linear-gradient(180deg, #b78b60, #5e3b20);
+            border-radius: 3px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5), inset 0 -2px 3px rgba(0, 0, 0, 0.22);
+        }
+
+        .light::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: calc(180% + 4px);
+            height: calc(180% + 4px);
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 35%, color-mix(in srgb, var(--light-color, rgba(255, 0, 0, 0.9)) 70%, rgba(255, 255, 255, 0.6)) 0%, rgba(255, 255, 255, 0.06) 10%, transparent 40%);
+            filter: blur(6px);
+            opacity: 0.78;
+            mix-blend-mode: screen;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .light:hover {
+                filter: drop-shadow(0 10px 16px color-mix(in srgb, var(--light-color, #ff0000) 72%, rgba(0, 0, 0, 0.34)));
+                z-index: 6;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .light::after {
+                width: calc(220% + 4px);
+                height: calc(220% + 4px);
+                filter: blur(8px);
+                opacity: 0.72;
+            }
+
+            .light::before {
+                height: 9px;
+                width: 2.5px;
+            }
+
+            .light {
+                width: clamp(7px, 1.2vw, 12px);
+                height: clamp(10px, 1.8vw, 18px);
+            }
+        }
+
+        .snowflake {
+            position: fixed;
+            top: -10vh;
+            pointer-events: none;
+            z-index: 2;
+            background: radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 1) 40%, rgba(255, 255, 255, 0.9) 60%, rgba(255, 255, 255, 0.85) 70%, transparent 100%);
+            border-radius: 50%;
+            opacity: 0.9;
+            filter: blur(.3px);
+            will-change: transform;
+            animation-name: fall;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-10vh) translateX(0) rotate(0deg);
+                opacity: 0.95;
+            }
+
+            100% {
+                transform: translateY(110vh) translateX(var(--drift, 50px)) rotate(var(--rot, 360deg));
+                opacity: 0.95;
+            }
+        }
+
+        /* Estilos para centrar el cuadro de diálogo (ya se hace con body flex) */
+        .confirmation-box {
+            position: relative;
+            z-index: 5;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px) saturate(120%);
+            -webkit-backdrop-filter: blur(8px) saturate(120%);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 12px 30px rgba(2, 6, 23, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.02);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            width: 90%;
+            max-width: 450px;
+            color: #111;
+            text-align: center;
+            /* Aseguramos que el div se centre dentro del body */
+            margin: auto;
+        }
+
+        .confirmation-box h2 {
+            color: #0b7a2f;
+            font-weight: 800;
+        }
+    </style>
     <script type="text/javascript">
-        setTimeout(function(){
-            window.location.href = "{{ url_for('main.dashboard') }}";  
+        // La redirección usa Jinja/Flask, asumo que {{ url_for('main.dashboard') }} es válido
+        setTimeout(function () {
+            window.location.href = "{{ url_for('main.dashboard') }}";
         }, 5000);
     </script>
 </head>
-<body style="font-family: Arial, sans-serif; background-color: #f5f5f5; text-align: center; padding-top: 20%;">
-    <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 600px; margin: auto;">
-        <h2 style="color: #28a745;">¡Gracias, {{ nombre }}!</h2>
-        <p>Tu código QR ha sido enviado al correo <strong>{{ correo }}</strong>.</p>
-        <p>Se te redirigirá al dashboard en unos segundos...</p>
+
+<body>
+    <div id="uiRoot">
+        <div class="rope-container">
+            <svg class="rope-svg" id="ropeSVG" preserveAspectRatio="none">
+                <path id="ropePath"></path>
+            </svg>
+            <div class="rope" id="lightRope"></div>
+        </div>
+        </div>
+
+    <div class="confirmation-box">
+        <h2>¡Gracias, {{ nombre }}!</h2>
+        <p>Se ha confirmado tu asistencia (y la de tu acompañante, si aplica) al evento.</p>
+        <p style="font-size: 1.1em; margin-top: 20px;">Se te redirigirá al dashboard en unos segundos...</p>
         <p><strong>¡Nos vemos en el evento! 🎉</strong></p>
     </div>
+
+    <script>
+        const COLORS = ['#ff3b3b', '#ffd93b', '#4cff4c', '#3bd7ff', '#ff8bff', '#ffd1a9'];
+        const lightRope = document.getElementById('lightRope');
+        const NUM_LIGHTS = 36;
+
+        function createLights() {
+            for (let i = 0; i < NUM_LIGHTS; i++) {
+                const bulb = document.createElement('div');
+                bulb.className = 'light';
+                bulb.style.setProperty('--light-color', COLORS[i % COLORS.length]);
+                bulb.dataset.baseRotation = (Math.random() * 8 - 4).toString();
+                lightRope.appendChild(bulb);
+                (function (b) {
+                    // Animación de cambio de color
+                    setInterval(() => {
+                        const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+                        b.style.setProperty('--light-color', color);
+                        // No es necesario cambiar box-shadow y filter aquí si ya están definidas
+                        // b.style.boxShadow = `0 0 8px 2px ${color}, 0 2px 6px rgba(0,0,0,0.25)`;
+                        // b.style.filter = `drop-shadow(0 0 8px ${color})`;
+                    }, 700 + Math.random() * 1400);
+                })(bulb);
+            }
+        }
+
+        const SNOW_COUNT = 80;
+        function createSnow() {
+            for (let i = 0; i < SNOW_COUNT; i++) {
+                const s = document.createElement('div');
+                s.className = 'snowflake';
+                const size = 4 + Math.random() * 8;
+                s.style.width = `${size}px`;
+                s.style.height = `${size}px`;
+                const left = Math.random() * 100;
+                s.style.left = `${left}vw`;
+                const drift = Math.floor((Math.random() * 140) - 70);
+                const rot = Math.floor((Math.random() * 720) - 360) + 'deg';
+                s.style.setProperty('--drift', `${drift}px`);
+                s.style.setProperty('--rot', rot);
+                const duration = 8 + Math.random() * 15;
+                const delay = -Math.random() * duration;
+                s.style.animationDuration = `${duration}s`;
+                s.style.animationDelay = `${delay}s`;
+                s.style.opacity = (0.6 + Math.random() * 0.4).toString();
+                document.body.appendChild(s);
+            }
+        }
+
+        createLights();
+        createSnow();
+
+        function drawRopeCurve() {
+            const svg = document.getElementById("ropeSVG");
+            const path = document.getElementById("ropePath");
+            if (!svg || !path) return;
+            const width = Math.max(svg.clientWidth, 100);
+            const height = Math.max(svg.clientHeight, 60);
+            const baseline = height * 0.45;
+            const amplitude = Math.min(40, height * 0.32);
+            const freq = 2.5;
+            let d = `M 0 ${baseline}`;
+            const step = Math.max(6, Math.round(width / 160));
+            // Aseguramos que el bucle llegue al final del ancho.
+            for (let x = 0; x <= width; x += step) {
+                const pct = x / width;
+                const y = baseline + amplitude * Math.sin(pct * Math.PI * freq);
+                d += ` L ${x} ${y}`;
+            }
+            // Aseguramos el punto final exacto
+            const finalY = baseline + amplitude * Math.sin(Math.PI * freq);
+            d += ` L ${width} ${finalY}`; 
+            path.setAttribute("d", d);
+        }
+
+        function positionBulbsOnCurve() {
+            const path = document.getElementById("ropePath");
+            try {
+                const length = path.getTotalLength();
+                const bulbs = Array.from(document.querySelectorAll(".light"));
+                if (!bulbs.length || !length) return;
+                bulbs.forEach((bulb, i) => {
+                    const pct = (i + 0.5) / (bulbs.length); 
+                    const targetLen = length * pct;
+                    const pos = path.getPointAtLength(targetLen);
+                    const sampleAhead = Math.min(length, targetLen + Math.max(2, length * 0.004));
+                    const next = path.getPointAtLength(sampleAhead);
+                    const dx = next.x - pos.x;
+                    const dy = next.y - pos.y;
+                    const tangentDeg = Math.atan2(dy, dx) * 180 / Math.PI;
+                    const hangAngle = tangentDeg + 0 + (parseFloat(bulb.dataset.baseRotation || 0));
+                    bulb.style.left = pos.x + "px";
+                    bulb.style.top = pos.y + "px";
+                    bulb.style.transform = `translate(-50%,-4px) rotate(${hangAngle}deg)`;
+                });
+            } catch (e) {
+               
+            }
+        }
+        function rebuildRope() {
+            drawRopeCurve();
+            requestAnimationFrame(() => {
+                requestAnimationFrame(positionBulbsOnCurve);
+            });
+        }
+        window.addEventListener("resize", rebuildRope);
+        window.addEventListener("load", rebuildRope);
+        rebuildRope();
+    </script>
 </body>
+
 </html>

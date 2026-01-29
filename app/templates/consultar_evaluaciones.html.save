@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard de Evaluaciones</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #e3f2fd, #f8f9fa);
+      overflow: hidden;
+    }
+
+    .dashboard {
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 280px;
+      background: #1e2a38;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    .sidebar h3 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+    }
+
+    .sidebar input,
+    .sidebar select {
+      background: #2f3b4a;
+      color: white;
+      border: none;
+      padding: 0.5rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      width: 100%;
+    }
+
+    .sidebar button {
+      background: none;
+      border: none;
+      color: #cfd8dc;
+      padding: 0.5rem;
+      text-align: left;
+      border-radius: 8px;
+      transition: background 0.2s;
+      width: 100%;
+    }
+
+    .sidebar button:hover {
+      background: #3b4c61;
+      color: #ffffff;
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      gap: 1rem;
+    }
+
+    .main-top {
+      display: flex;
+      height: 45%;
+      gap: 1rem;
+    }
+
+    .chart-container {
+      flex: 1;
+      background: white;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .meaning-card {
+      width: 40%;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      overflow-y: auto;
+    }
+
+    .card-header {
+      background-color: #3498db;
+      color: white;
+      font-weight: 600;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      padding: 0.75rem 1rem;
+    }
+
+    .card-body {
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    .main-bottom {
+      flex: 1;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      overflow-y: auto;
+      padding: 1rem;
+    }
+
+    .user-response {
+      display: none;
+    }
+
+    .user-response.active {
+      display: block;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .no-results {
+      color: #ccc;
+      font-style: italic;
+      padding: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="dashboard">
+  <div class="sidebar">
+    <h3>Evaluaciones</h3>
+    <input type="text" id="searchInput" placeholder="Buscar nombre..." onkeyup="filterUsers()">
+    <select id="sortSelect" onchange="sortUsers()">
+      <option value="">Ordenar por promedio</option>
+      <option value="asc">Menor a mayor</option>
+      <option value="desc">Mayor a menor</option>
+    </select>
+
+    <div id="userList">
+      {% for evaluacion in evaluaciones %}
+      <button 
+        data-target="user-{{ loop.index }}" 
+        data-username="{{ evaluacion.nombre | lower }}"
+        data-promedio="{{ evaluacion.promedio }}">
+        {{ evaluacion.nombre }}
+      </button>
+      {% endfor %}
+    </div>
+
+    <div id="noResults" class="no-results d-none">No se encontraron evaluaciones.</div>
+  </div>
+
+  <div class="main">
+    <div class="main-top">
+      <div class="chart-container">
+        <canvas id="promediosChart"></canvas>
+      </div>
+	<div class="selected-question p-3 text-primary fw-bold" id="selectedQuestion">
+	  Haz clic en una pregunta para ver su significado aquí.
+	</div>
+
+      <div class="meaning-card">
+        <div class="card-header">Significado de preguntas</div>
+        <div class="card-body">
+          <div class="row">
+            {% for i in range(preguntas | length) %}
+              <div class="col-12 mb-1">
+                <strong>Q{{ i + 1 }}:</strong> {{ preguntas[i] }}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-bottom">
+      {% for evaluacion in evaluaciones %}
+      <div class="user-response" id="user-{{ loop.index }}">
+        <div class="card-header">
+          {{ evaluacion.nombre }} - {{ evaluacion.fecha }}
+        </div>
+        <div class="card-body">
+          <table class="table table-sm table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th>Rubro</th>
+                <th>Pregunta</th>
+                <th>Respuesta</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for rubro, preguntas in evaluacion.respuestas.items() %}
+                {% for pregunta_num, respuesta in preguntas.items() %}
+                <tr>
+                  <td>{{ rubro | capitalize }}</td>
+                  <td>{{ pregunta_num }}</td>
+                  <td>{{ respuesta_texto[respuesta] }}</td>
+                </tr>
+                {% endfor %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script>
+  const labels = ['Desempeño', 'Jefe Inmediato', 'Apoyo y Convivencia', 'Pertenencia', 'Clasificación'];
+  const promedios = [
+    {% for rubro, valores in promedios.items() %}
+      {{ (valores | sum) / valores | length }},
+    {% endfor %}
+  ];
+
+  new Chart(document.getElementById('promediosChart'), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Promedio por Rubro',
+        data: promedios,
+        backgroundColor: promedios.map(p => getColor(p)),
+        borderColor: promedios.map(p => getColor(p, true)),
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: { y: { beginAtZero: true, max: 5 } }
+    }
+  });
+
+  function getColor(p, border = false) {
+    if (p <= 1) return border ? '#c0392b' : '#e74c3c';
+    if (p <= 2) return border ? '#e67e22' : '#f39c12';
+    if (p <= 2.5) return border ? '#f1c40f' : '#f39c12';
+    if (p <= 4) return border ? '#27ae60' : '#2ecc71';
+    return border ? '#16a085' : '#1abc9c';
+  }
+
+  document.querySelectorAll("#userList button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".user-response").forEach(card => card.classList.remove("active"));
+      const target = btn.getAttribute("data-target");
+      document.getElementById(target).classList.add("active");
+    });
+  });
+
+  function filterUsers() {
+    const input = document.getElementById("searchInput").value.toLowerCase();
+    const buttons = document.querySelectorAll("#userList button");
+    let anyVisible = false;
+
+    buttons.forEach(btn => {
+      const name = btn.getAttribute("data-username");
+      const match = name.includes(input);
+      btn.classList.toggle("d-none", !match);
+      if (match) anyVisible = true;
+    });
+
+    document.getElementById("noResults").classList.toggle("d-none", anyVisible);
+  }
+
+  function sortUsers() {
+    const sort = document.getElementById("sortSelect").value;
+    const list = document.getElementById("userList");
+    const buttons = Array.from(list.querySelectorAll("button"));
+
+    if (sort === "asc") {
+      buttons.sort((a, b) => parseFloat(a.dataset.promedio) - parseFloat(b.dataset.promedio));
+    } else if (sort === "desc") {
+      buttons.sort((a, b) => parseFloat(b.dataset.promedio) - parseFloat(a.dataset.promedio));
+    }
+
+    buttons.forEach(btn => list.appendChild(btn));
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

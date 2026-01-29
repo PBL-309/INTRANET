@@ -1,262 +1,810 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
-    <title>Día del Bombero 👨‍🚒</title>
+    <title>Comida de Fin de Año 🎄</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #e3f2fd; 
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0;
-            padding: 10px;
+ <style>
+    :root {
+        --bg-night: #031026;
+    }
+
+    /* --- CONFIGURACIÓN GENERAL (MANTENIDA PARA PC) --- */
+    html,
+    body {
+        height: 100%;
+    }
+
+    body {
+        background: var(--bg-night);
+        color: #fff;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0;
+        padding: 0;
+        position: relative;
+        overflow: hidden; /* Mantiene el No-Scroll en PC */
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    body::before,
+    body::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        filter: blur(.25px);
+        background-repeat: no-repeat;
+    }
+
+    body::before {
+        background-image:
+            radial-gradient(circle at 8% 18%, rgba(255, 255, 255, 1) 0.9px, transparent 2px),
+            radial-gradient(circle at 28% 65%, rgba(255, 255, 255, 1) 1px, transparent 2.4px),
+            radial-gradient(circle at 52% 34%, rgba(255, 255, 255, 1) 0.85px, transparent 2px),
+            radial-gradient(circle at 78% 12%, rgba(255, 255, 255, 1) 0.9px, transparent 2px);
+        opacity: 0.9;
+        animation: twinkle1 4.2s linear infinite;
+    }
+
+    body::after {
+        background-image:
+            radial-gradient(circle at 16% 42%, rgba(255, 255, 255, 1) 0.9px, transparent 2px),
+            radial-gradient(circle at 44% 78%, rgba(255, 255, 255, 1) 0.95px, transparent 2.4px),
+            radial-gradient(circle at 66% 28%, rgba(255, 255, 255, 1) 0.85px, transparent 2px),
+            radial-gradient(circle at 90% 55%, rgba(255, 255, 255, 1) 0.8px, transparent 2px);
+        opacity: 0.8;
+        animation: twinkle2 5.6s linear infinite;
+        animation-delay: -1.2s;
+    }
+
+    @keyframes twinkle1 {
+        0% {
+            opacity: 0.45;
+            transform: translateY(0);
         }
+
+        25% {
+            opacity: 1;
+            transform: translateY(-0.2px);
+        }
+
+        50% {
+            opacity: 0.6;
+            transform: translateY(0);
+        }
+
+        75% {
+            opacity: 0.95;
+            transform: translateY(0.2px);
+        }
+
+        100% {
+            opacity: 0.45;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes twinkle2 {
+        0% {
+            opacity: 0.35;
+            transform: translateY(0);
+        }
+
+        20% {
+            opacity: 0.9;
+            transform: translateY(0.2px);
+        }
+
+        50% {
+            opacity: 0.5;
+            transform: translateY(0);
+        }
+
+        80% {
+            opacity: 1;
+            transform: translateY(-0.2px);
+        }
+
+        100% {
+            opacity: 0.35;
+            transform: translateY(0);
+        }
+    }
+
+    #uiRoot {
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    #innerUI {
+        pointer-events: auto;
+        display: inline-block;
+        transform-origin: center center;
+    }
+
+    .rope-container {
+        position: absolute;
+        top: 4vh;
+        left: 0;
+        width: 100%;
+        height: 18vh;
+        pointer-events: none;
+        z-index: 3;
+    }
+
+    .rope-svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    .rope-svg path {
+        stroke: #4d3724;
+        stroke-width: 7;
+        stroke-linecap: round;
+        fill: none;
+        filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.45));
+    }
+
+    .rope {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 4;
+    }
+
+    .light {
+        position: absolute;
+        width: clamp(8px, 1.0vw, 14px);
+        height: clamp(12px, 1.8vw, 20px);
+        border-radius: 48% 48% 44% 44%;
+        transform-origin: 50% 20px;
+        background:
+            radial-gradient(circle at 40% 28%, rgba(255, 255, 255, 0.98) 10%, rgba(255, 255, 255, 0.6) 24%, rgba(255, 255, 255, 0.18) 40%, transparent 60%),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.08));
+        box-shadow:
+            0 0 8px 2px color-mix(in srgb, var(--light-color, #ff0000) 88%, rgba(255, 255, 255, 0.04)),
+            inset 0 -5px 6px rgba(0, 0, 0, 0.36),
+            0 1px 4px rgba(0, 0, 0, 0.22);
+        opacity: 1;
+        pointer-events: none;
+        transition: box-shadow 160ms linear, filter 160ms linear, transform 160ms linear;
+        filter: drop-shadow(0 5px 10px color-mix(in srgb, var(--light-color, #ff0000) 55%, rgba(0, 0, 0, 0.36)));
+        z-index: 5;
+        transform: translate(-50%, -10px) rotate(0deg);
+    }
+
+    .light::before {
+        content: "";
+        position: absolute;
+        top: -12%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: clamp(2px, 0.22vw, 4px);
+        height: clamp(8px, 1.0vw, 14px);
+        background: linear-gradient(180deg, #b78b60, #5e3b20);
+        border-radius: 3px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5), inset 0 -2px 3px rgba(0, 0, 0, 0.22);
+    }
+
+    .light::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: calc(180% + 4px);
+        height: calc(180% + 4px);
+        border-radius: 50%;
+        background: radial-gradient(circle at 40% 35%, color-mix(in srgb, var(--light-color, rgba(255, 0, 0, 0.9)) 70%, rgba(255, 255, 255, 0.6)) 0%, rgba(255, 255, 255, 0.06) 10%, transparent 40%);
+        filter: blur(6px);
+        opacity: 0.78;
+        mix-blend-mode: screen;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+        .light:hover {
+            filter: drop-shadow(0 10px 16px color-mix(in srgb, var(--light-color, #ff0000) 72%, rgba(0, 0, 0, 0.34)));
+            z-index: 6;
+        }
+    }
+
+    @media (max-width: 600px) {
+        /* Desactivar animaciones de fondo pesadas para mejorar rendimiento */
+        body::before,
+        body::after {
+            display: none !important; 
+        }
+
+        /* Desactivar nieve (snowflake) */
+        .snowflake {
+            display: none !important;
+        }
+
+        /* 💡 CORRECCIÓN de botones y rendimiento del Overlay */
+        .welcome-overlay,
+        .restriction-overlay {
+            position: fixed; /* Solución para el problema de clic/toque */
+            z-index: 9999; 
+            /* Simplificar el filtro: usar solo color, eliminar 'backdrop-filter' que es costoso */
+            backdrop-filter: none; 
+            background-color: rgba(1, 6, 20, 0.85); /* Un poco más oscuro para simular el blur */
+        }
+
+        /* Simplificar el filtro del Formulario para mejorar rendimiento */
         .form-container {
-            background: linear-gradient(135deg, #fceabb, #f8b500); 
-            padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
-            filter: blur(5px);
-            transition: filter 0.3s ease;
-            width: 100%;
-            max-width: 1100px;
-            box-sizing: border-box;
+            padding: 16px;
+            backdrop-filter: none; /* ELIMINAR BLUR COSTOSO */
+            background: rgba(255, 255, 255, 0.08); /* Fondo simple, ligeramente más visible */
         }
-        .form-container.active {
-            filter: none;
-        }
+
+        /* El resto de estilos de tamaño móvil que ya tenías */
         .question {
-            background-color: #fffde7; 
-            padding: 22px;
-            border-radius: 8px;
-            margin-bottom: 36px;
-            border: 1px solid #ffca28;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-            font-size: 1.1rem;
-            color: #3e2723;
-            font-weight: bold;
+            font-size: 1rem;
+            padding: 16px;
+            margin-bottom: 20px;
         }
-        .radio-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 12px;
-        }
+
         .radio-group label {
-            padding: 10px 16px;
-            border-radius: 25px;
-            border: 1px solid #ccc;
-            cursor: pointer;
-            transition: background-color 0.3s, border-color 0.3s, transform 0.2s;
-            user-select: none;
-            font-size: 0.9rem;
-            color: #555;
-            background-color: #fffde7;
-        }
-        .radio-group label:hover {
-            background-color: #fff176;
-            border-color: #fdd835;
-            transform: scale(1.05);
-        }
-        .radio-group input[type="radio"] {
-            display: none;
-        }
-        .radio-group input[type="radio"]:checked + label {
-            background-color: #ffeb3b;
-            border-color: #fbc02d;
-            font-weight: bold;
-            color: #0d47a1;
-            transform: scale(1.1);
-        }
-        .welcome-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            backdrop-filter: blur(8px);
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 10;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .welcome-message {
-            background-color: #fff;
-            padding: 24px;
-            border-radius: 10px;
+            padding: 12px 18px;
+            font-size: 0.95rem;
+            display: block;
             text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            width: 90%;
-            max-width: 400px;
+            width: 100%;
         }
+
+        .welcome-message,
+        .restriction-message {
+            padding: 18px;
+            font-size: 0.98rem;
+        }
+
         .btn-custom {
-            padding: 8px 16px;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-            font-size: 0.9rem;
+            padding: 10px 20px;
+            font-size: 0.95rem;
         }
-        .btn-custom:hover {
-            background-color: #218838;
-            color: #fff;
+
+        .light {
+            width: 10px;
+            height: 14px;
         }
-        @media (max-width: 600px) {
-            .form-container {
-                padding: 16px;
-            }
-            .question {
-                font-size: 3rem;
-                padding: 24px;
-                margin-bottom: 40px;
-            }
-            .radio-group {
-                flex-direction: column;
-            }
-            .radio-group label {
-                padding: 14px 24px;
-                font-size: 2.8rem;
-                display: block;
-                text-align: center;
-                width: 100%;
-            }
-            .welcome-message {
-                padding: 20px;
-                font-size: 2.5rem;
-            }
-            .btn-custom {
-                padding: 14px 24px;
-                font-size: 2.5rem;
-            }
+
+        .seccion-dependencia {
+            font-size: 0.96rem;
+            gap: 8px;
+            padding: 8px 10px;
         }
-        @media (min-width: 601px) and (max-width: 1024px) {
-            .form-container {
-                padding: 18px;
-            }
-            .question {
-                font-size: 2.8rem;
-                padding: 22px;
-                margin-bottom: 40px;
-            }
-            .radio-group {
-                flex-direction: column;
-            }
-            .radio-group label {
-                padding: 12px 20px;
-                font-size: 2.8rem;
-                width: 100%;
-            }
-            .welcome-message {
-                padding: 22px;
-                font-size: 2.8rem;
-            }
-            .btn-custom {
-                padding: 16px 26px;
-                font-size: 2.8rem;
-            }
+
+        .siren {
+            font-size: 1.05rem;
         }
-        @media (min-width: 1025px) {
-            .question {
-                font-size: 1.1rem;
-            }
-    
-            .radio-group label {
-                padding: 10px 16px;
-                font-size: 0.9rem;
-            }
-    
-            .welcome-message {
-                padding: 24px;
-                font-size: 1.1rem;
-            }
-    
-            .btn-custom {
-                padding: 8px 16px;
-                font-size: 0.9rem;
-            }
+    }
+
+    .snowflake {
+        position: fixed;
+        top: -10vh;
+        pointer-events: none;
+        z-index: 2;
+        background: radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 1) 40%, rgba(255, 255, 255, 0.9) 60%, rgba(255, 255, 255, 0.85) 70%, transparent 100%);
+        border-radius: 50%;
+        opacity: 0.9;
+        filter: blur(.3px);
+        will-change: transform;
+        animation-name: fall;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+    }
+
+    @keyframes fall {
+        0% {
+            transform: translateY(-10vh) translateX(0) rotate(0deg);
+            opacity: 0.95;
         }
-    </style>
+
+        100% {
+            transform: translateY(110vh) translateX(var(--drift, 50px)) rotate(var(--rot, 360deg));
+            opacity: 0.95;
+        }
+    }
+
+    .form-wrapper {
+        position: relative;
+        z-index: 5;
+        width: 100%;
+        max-width: 1280px;
+        padding: 10px;
+        box-sizing: border-box;
+        margin: 0 auto;
+    }
+
+    .form-container {
+        background: rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(8px) saturate(120%);
+        -webkit-backdrop-filter: blur(8px) saturate(120%);
+        padding: 24px;
+        border-radius: 12px;
+        box-shadow: 0 12px 30px rgba(2, 6, 23, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.02);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        width: 100%;
+    }
+
+    .form-container.active {
+        transform: translateY(0);
+        box-shadow: 0 20px 40px rgba(2, 6, 23, 0.8);
+    }
+
+    .question {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.03));
+        padding: 22px;
+        border-radius: 8px;
+        margin-bottom: 28px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+        font-size: 1.05rem;
+        color: #f5f5f5;
+        font-weight: 700;
+        backdrop-filter: blur(4px);
+    }
+
+    .radio-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 12px;
+    }
+
+    .radio-group label {
+        padding: 10px 16px;
+        border-radius: 25px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        cursor: pointer;
+        transition: background-color 0.25s, border-color 0.25s, transform 0.2s;
+        user-select: none;
+        font-size: 0.95rem;
+        color: #f0f0f0;
+        background-color: rgba(255, 255, 255, 0.03);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+    }
+
+    .radio-group label:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.12);
+        transform: scale(1.03);
+    }
+
+    .radio-group input[type="radio"] {
+        display: none;
+    }
+
+    .radio-group input[type="radio"]:checked+label {
+        background-color: rgba(76, 175, 80, 0.95);
+        border-color: rgba(56, 142, 60, 0.95);
+        font-weight: 800;
+        color: #fff;
+        transform: scale(1.06);
+    }
+
+    /* CONFIGURACIÓN BASE DE OVERLAY (MANTENIDA PARA PC) */
+    .welcome-overlay,
+    .restriction-overlay {
+        position: absolute; /* Mantenido 'absolute' para PC */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        backdrop-filter: blur(6px) saturate(120%);
+        background-color: rgba(1, 6, 20, 0.6);
+        z-index: 9; /* Mantenido '9' para PC */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .welcome-message,
+    .restriction-message {
+        background-color: rgba(255, 255, 255, 0.96);
+        color: #111;
+        padding: 22px;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
+        width: 90%;
+        max-width: 420px;
+    }
+
+    .btn-custom {
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 700;
+        transition: background-color 0.25s;
+        font-size: 0.95rem;
+    }
+
+    .btn-custom.btn-primary {
+        background-color: #0b66b3;
+        border: none;
+        color: white;
+    }
+
+    .btn-custom.btn-success {
+        background-color: #0b7a2f;
+        border: none;
+        color: white;
+    }
+
+    .btn-custom.btn-success:hover {
+        background-color: #8b0000;
+        color: #fff;
+    }
+    .seccion-dependencia {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-weight: 900;
+        letter-spacing: 0.4px;
+        font-size: 1.02rem;
+        color: #fff;
+        background: linear-gradient(90deg, rgba(11,102,179,0.12), rgba(7,122,47,0.06));
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        box-shadow: 0 6px 18px rgba(2,6,23,0.55), inset 0 1px 0 rgba(255,255,255,0.02);
+        text-align: center;
+    }
+
+    .siren {
+        font-size: 1.25rem;
+        line-height: 1;
+        filter: drop-shadow(0 6px 10px rgba(0,0,0,0.45));
+        animation: sirenBlink 1.2s linear infinite;
+    }
+
+    @keyframes sirenBlink {
+        0% {
+            transform: scale(1);
+            opacity: 1;
+            text-shadow: 0 0 6px rgba(255, 0, 0, 0.8);
+        }
+
+        50% {
+            transform: scale(1.08);
+            opacity: 0.95;
+            text-shadow: 0 0 18px rgba(255, 0, 0, 1);
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 1;
+            text-shadow: 0 0 6px rgba(255, 0, 0, 0.8);
+        }
+    }
+
+    /* --- CORRECCIÓN PARA MÓVILES (SOLO AQUÍ) --- */
+    @media (max-width: 600px) {
+        
+        /* 💡 SOLUCIÓN CLAVE: Aumentar la prioridad del Overlay */
+        .welcome-overlay,
+        .restriction-overlay {
+            /* Cambiar a 'fixed' hace que el overlay cubra toda la ventana de vista (viewport),
+               lo que ayuda a asegurar que los toques se registren correctamente. */
+            position: fixed;
+            /* Usar un z-index MUCHO más alto que cualquier cosa (incluyendo el z-index: 5 del formulario)
+               asegura que el botón reciba el evento de click/tap. */
+            z-index: 9999; 
+        }
+
+        .form-container {
+            padding: 16px;
+        }
+
+        .question {
+            font-size: 1rem;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .radio-group label {
+            padding: 12px 18px;
+            font-size: 0.95rem;
+            display: block;
+            text-align: center;
+            width: 100%;
+        }
+
+        .welcome-message,
+        .restriction-message {
+            padding: 18px;
+            font-size: 0.98rem;
+        }
+
+        .btn-custom {
+            padding: 10px 20px;
+            font-size: 0.95rem;
+        }
+
+        .light {
+            width: 10px;
+            height: 14px;
+        }
+
+        .seccion-dependencia {
+            font-size: 0.96rem;
+            gap: 8px;
+            padding: 8px 10px;
+        }
+
+        .siren {
+            font-size: 1.05rem;
+        }
+    }
+</style>
 </head>
+
 <body>
-<div class="welcome-overlay" id="welcomeOverlay">
-    <div class="welcome-message">
-        <h2>Registro Día del Bombero</h2>
-        <p>Confirma tu asistencia al evento. Tu respuesta nos ayuda a planear mejor.</p>
-        <button class="btn btn-primary btn-custom" onclick="hideOverlay()">De acuerdo</button>
-    </div>
-</div>
-<div class="form-container" id="formContainer">
-    <form method="POST" action="{{ url_for('main.submit_bombero') }}">
-        <h3 class="text-center mb-4">👩‍🚒 Confirmación de Asistencia - Día del Bombero</h3>
-        <div class="question">
-            <p>1️⃣ ¿Asistirás al evento?</p>
-            <div class="radio-group">
-                <input type="radio" id="asistire" name="asistencia" value="sí" required onclick="toggleAcompanante(true)">
-                <label for="asistire">✅ Asistiré</label>
+    <div id="uiRoot">
+        <div class="rope-container">
+            <svg class="rope-svg" id="ropeSVG" preserveAspectRatio="none">
+                <path id="ropePath"></path>
+            </svg>
+            <div class="rope" id="lightRope"></div>
+        </div>
 
-                <input type="radio" id="no-asistire" name="asistencia" value="no" onclick="toggleAcompanante(false)">
-                <label for="no-asistire">❌ No asistiré</label>
+        <div id="innerUI">
+            <div class="welcome-overlay" id="welcomeOverlay">
+                <div class="welcome-message">
+                    <h2>Registro de Fin de Año</h2>
+                    <p>Confirma tu asistencia al evento. Tu respuesta nos ayuda a planear mejor.</p>
+                    <button class="btn btn-primary btn-custom" onclick="hideOverlay()">De acuerdo</button>
+                </div>
+            </div>
+            <div class="restriction-overlay" id="advertenciaAcompanante" style="display: none;">
+                <div class="restriction-message">
+                    <h3>⚠️ ¡Aviso Importante!</h3>
+                    <p>Solo está permitido llevar a UN SOLO acompañante. Si intenta llevar más de uno, la(s) persona(s)
+                        adicional(es) no podrá(n) tener acceso al evento.</p>
+                    <p>Por favor, respete esta restricción.</p>
+                    <div
+                        style="text-align:left; margin:12px 0; display:flex; align-items:center; gap:10px; justify-content:center;">
+                        <input type="checkbox" id="agreeCheck"
+                            onchange="document.getElementById('advertenciaBtn').disabled = !this.checked">
+                        <label for="agreeCheck" style="user-select:none; font-weight:700; color:#111;">Estoy de
+                            acuerdo</label>
+                    </div>
+                    <div style="text-align:center;">
+                        <button id="advertenciaBtn" class="btn btn-success btn-custom" disabled
+                            onclick="ocultarAdvertencia()">Continuar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="form-wrapper">
+            <div class="form-container" id="formContainer">
+                <form method="POST" action="{{ url_for('main.submit_fin') }}">
+                    <h3 class="text-center mb-4">Confirmación de Asistencia - Fin de año</h3>
+                    
+                    <div class="seccion-dependencia">
+                        <span class="siren" aria-hidden="true">🚨</span>
+                        <span>Seguridad Pública y Protección Ciudadana</span>
+                        <span class="siren" aria-hidden="true">👮‍♀️🚓</span>
+                    </div>
+
+                        <div class="question">
+                            <p>¿Asistirás al evento?</p>
+                            <div class="radio-group">
+                                <input type="radio" id="asistire" name="asistencia" value="sí" required
+
+
+                                    onclick="toggleAcompanante(true)">
+                                <label for="asistire">✅ Asistiré</label>
+                                <input type="radio" id="no-asistire" name="asistencia" value="no"
+                                    onclick="toggleAcompanante(false)">
+                                <label for="no-asistire">❌ No asistiré</label>
+                            </div>
+                        </div>
+                        <div class="question" id="acompanantePregunta" style="display: none;">
+                            <p>¿Llevarás acompañante?</p>
+                            <div class="radio-group">
+                                <input type="radio" id="llevara-si" name="lleva_acompanante" value="sí"
+                                    onclick="mostrarCampoNombre(true)">
+                                <label for="llevara-si">👫 Sí</label>
+                                <input type="radio" id="llevara-no" name="lleva_acompanante" value="no"
+                                    onclick="mostrarCampoNombre(false)">
+                                <label for="llevara-no">🚶 No</label>
+                            </div>
+                            <div
+                                style="text-align: center; margin-top: 20px; margin-bottom: 15px; padding: 10px; border: 1px dashed #007bff; border-radius: 5px; background-color: #e9f5ff; font-weight: bold; color: #0056b3;">
+                                Fechas probables: 15, 16, 17 dic.
+                          </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success btn-custom w-100">Enviar</button> 
+                    </form>
+                </div>
             </div>
         </div>
-        <div class="question" id="acompanantePregunta" style="display: none;">
-            <p>2️⃣ ¿Llevarás acompañante?</p>
-            <div class="radio-group">
-                <input type="radio" id="llevara-si" name="lleva_acompanante" value="sí" onclick="mostrarCampoNombre(true)">
-                <label for="llevara-si">👫 Sí</label>
-
-                <input type="radio" id="llevara-no" name="lleva_acompanante" value="no" onclick="mostrarCampoNombre(false)">
-                <label for="llevara-no">🚶 No</label>
-            </div>
-        </div>
-        <div class="question" id="correoPregunta" style="display: none;">
-            <p>📧 Por favor, escribe tu correo electrónico:</p>
-            <input type="email" name="correo" class="form-control" placeholder="tucorreo@ejemplo.com" required>
-        </div>
-        <div class="question" id="nombreAcompanante" style="display: none;">
-            <p>✍️ Nombre del acompañante:</p>
-            <input type="text" name="nombre_acompanante" class="form-control" placeholder="Escribe el nombre aquí">
-        </div>
-        <div class="question" id="tipoAcompanante" style="display: none;">
-    <p>👤 ¿El acompañante es niño o adulto?</p>
-    <div class="radio-group">
-        <input type="radio" id="acompanante-nino" name="tipo_acompanante" value="niño">
-        <label for="acompanante-nino">🧒 Niño</label>
-
-        <input type="radio" id="acompanante-adulto" name="tipo_acompanante" value="adulto">
-        <label for="acompanante-adulto">🧑 Adulto</label>
     </div>
-</div>
+    <script>
+        const COLORS = ['#ff3b3b', '#ffd93b', '#4cff4c', '#3bd7ff', '#ff8bff', '#ffd1a9'];
+        const lightRope = document.getElementById('lightRope');
+        const NUM_LIGHTS = 36;
+        function toggleAcompanante(show) {
+            const el = document.getElementById('acompanantePregunta');
+            if (!el) return;
+            el.style.display = show ? 'block' : 'none';
 
-        <button type="submit" class="btn btn-success btn-custom w-100">Enviar</button>
-    </form>
-</div>
-
-<script>
-    function hideOverlay() {
-        document.getElementById('welcomeOverlay').style.display = 'none';
-        document.getElementById('formContainer').classList.add('active');
-    }
-
-    function toggleAcompanante(mostrar) {
-        const acomp = document.getElementById('acompanantePregunta');
-        const email = document.getElementById('correoPregunta');
-        acomp.style.display = mostrar ? 'block' : 'none';
-        email.style.display = mostrar ? 'block' : 'none';
-        if (!mostrar) {
-            document.getElementById('nombreAcompanante').style.display = 'none';
+            if (!show) {
+                const yes = document.getElementById('llevara-si');
+                const no = document.getElementById('llevara-no');
+                if (yes) yes.checked = false;
+                if (no) no.checked = false;
+                const adv = document.getElementById('advertenciaAcompanante');
+                if (adv) adv.style.display = 'none';
+            }
+            debouncedFit();
         }
-    }
+        function mostrarCampoNombre(willBring) {
+            const adv = document.getElementById('advertenciaAcompanante');
+            if (!adv) return;
+            if (willBring) {
+                adv.style.display = 'flex';
+                const cb = document.getElementById('agreeCheck');
+                if (cb) cb.checked = false;
+                const btn = document.getElementById('advertenciaBtn');
+                if (btn) btn.disabled = true;
+            } else {
+                adv.style.display = 'none';
+                const cb = document.getElementById('agreeCheck');
+                if (cb) cb.checked = false;
+                const btn = document.getElementById('advertenciaBtn');
+                if (btn) btn.disabled = true;
+            }
+            debouncedFit();
+        }
 
-    function mostrarCampoNombre(mostrar) {
-        const nombre = document.getElementById('nombreAcompanante');
-        const tipo = document.getElementById('tipoAcompanante');
-        nombre.style.display = mostrar ? 'block' : 'none';
-        tipo.style.display = mostrar ? 'block' : 'none';
-    }
+        function createLights() {
+            for (let i = 0; i < NUM_LIGHTS; i++) {
+                const bulb = document.createElement('div');
+                bulb.className = 'light';
+                bulb.style.setProperty('--light-color', COLORS[i % COLORS.length]);
+                bulb.dataset.baseRotation = (Math.random() * 8 - 4).toString();
+                lightRope.appendChild(bulb);
+                (function (b) {
+                    setInterval(() => {
+                        const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+                        b.style.setProperty('--light-color', color);
+                        b.style.boxShadow = `0 0 8px 2px ${color}, 0 2px 6px rgba(0,0,0,0.25)`;
+                        b.style.filter = `drop-shadow(0 0 8px ${color})`;
+                    }, 700 + Math.random() * 1400);
+                })(bulb);
+            }
+        }
+        const SNOW_COUNT = 80;
+        function createSnow() {
+            for (let i = 0; i < SNOW_COUNT; i++) {
+                const s = document.createElement('div');
+                s.className = 'snowflake';
+                const size = 4 + Math.random() * 8;
+                s.style.width = `${size}px`;
+                s.style.height = `${size}px`;
+                const left = Math.random() * 100;
+                s.style.left = `${left}vw`;
+                const drift = Math.floor((Math.random() * 140) - 70);
+                const rot = Math.floor((Math.random() * 720) - 360) + 'deg';
+                s.style.setProperty('--drift', `${drift}px`);
+                s.style.setProperty('--rot', rot);
+                const duration = 8 + Math.random() * 15;
+                const delay = -Math.random() * duration;
+                s.style.animationDuration = `${duration}s`;
+                s.style.animationDelay = `${delay}s`;
+                s.style.opacity = (0.6 + Math.random() * 0.4).toString();
+                document.body.appendChild(s);
+            }
+        }
+        function hideOverlay() {
+            document.getElementById('welcomeOverlay').style.display = 'none';
+            document.getElementById('formContainer').classList.add('active');
+            debouncedFit();
+        }
+        function ocultarAdvertencia() {
+            document.getElementById('advertenciaAcompanante').style.display = 'none';
+            debouncedFit();
+        }
+        createLights();
+        createSnow();
+        function drawRopeCurve() {
+            const svg = document.getElementById("ropeSVG");
+            const path = document.getElementById("ropePath");
+            const width = Math.max(svg.clientWidth, 100);
+            const height = Math.max(svg.clientHeight, 60);
+            const baseline = height * 0.45;
+            const amplitude = Math.min(40, height * 0.32);
+            const freq = 2.5;
+            let d = `M 0 ${baseline}`;
+            const step = Math.max(6, Math.round(width / 160));
+            for (let x = 0; x <= width; x += step) {
+                const pct = x / width;
+                const y = baseline + amplitude * Math.sin(pct * Math.PI * freq);
+                d += ` L ${x} ${y}`;
+            }
+            d += ` L ${width} ${baseline + amplitude * Math.sin(Math.PI * freq)}`;
+            path.setAttribute("d", d);
+        }
+        function positionBulbsOnCurve() {
+            const svg = document.getElementById("ropeSVG");
+            const path = document.getElementById("ropePath");
+            try {
+                const length = path.getTotalLength();
+                const bulbs = Array.from(document.querySelectorAll(".light"));
+                if (!bulbs.length || !length) return;
+                bulbs.forEach((bulb, i) => {
+                    const pct = i / (bulbs.length - 1);
+                    const targetLen = length * pct;
+                    const pos = path.getPointAtLength(targetLen);
+                    const sampleAhead = Math.min(length, targetLen + Math.max(2, length * 0.004));
+                    const next = path.getPointAtLength(sampleAhead);
+                    const dx = next.x - pos.x;
+                    const dy = next.y - pos.y;
+                    const tangentDeg = Math.atan2(dy, dx) * 180 / Math.PI;
+                    const hangAngle = tangentDeg + 0 + (parseFloat(bulb.dataset.baseRotation || 0));
+                    bulb.style.left = pos.x + "px";
+                    bulb.style.top = pos.y + "px";
+                    bulb.style.transform = `translate(-50%,-4px) rotate(${hangAngle}deg)`;
+                });
+            } catch (e) {
+            }
+        }
+        function rebuildRope() {
+            drawRopeCurve();
+            requestAnimationFrame(() => {
+                requestAnimationFrame(positionBulbsOnCurve);
+            });
+        }
+        window.addEventListener("resize", () => { rebuildRope(); debouncedFit(); });
+        window.addEventListener("load", () => { rebuildRope(); debouncedFit(); });
+        const inner = document.getElementById('innerUI');
+        const uiRoot = document.getElementById('uiRoot');
 
-</script>
+        function fitUI() {
+            if (!inner) return;
+            inner.style.transform = 'none';
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            const pad = 28;
+            const naturalW = inner.scrollWidth;
+            const naturalH = inner.scrollHeight;
+            const scaleW = (vw - pad) / naturalW;
+            const scaleH = (vh - pad) / naturalH;
+            let scale = Math.min(1, scaleW, scaleH);
+            scale = Math.max(scale, 0.55);
+            inner.style.transformOrigin = 'center center';
+            inner.style.transform = `scale(${scale})`;
+        }
+        let fitTimer = null;
+        function debouncedFit(delay = 80) {
+            clearTimeout(fitTimer);
+            fitTimer = setTimeout(() => {
+                fitUI();
+            }, delay);
+        }
+        const observer = new MutationObserver(() => debouncedFit(40));
+        observer.observe(document.getElementById('innerUI'), { childList: true, subtree: true, attributes: true, characterData: false });
+        document.addEventListener('change', () => debouncedFit(40));
+        setTimeout(() => debouncedFit(), 120);
+    </script>
 </body>
 </html>

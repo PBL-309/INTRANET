@@ -1,13 +1,14 @@
 import datetime
 from flask_mail import Mail, Message
 import pandas as pd
-from flask import Blueprint, current_app, json, jsonify, render_template, request, redirect, session, url_for, send_from_directory, flash
+from flask import Blueprint, current_app, json, jsonify, render_template, request, redirect, session, url_for, send_from_directory, flash, send_file 
 from flask_login import current_user, login_user, logout_user, login_required
 import qrcode
 from werkzeug.utils import secure_filename
 from app import db
+from io import BytesIO # Necesario para manejar el archivo en memoria
 import os
-from app.models import Aviso, Evento, File, Folder, FormularioRespuesta, PortalWeb, Respuesta, User, VacationRequest, Noticia, RegistroCompetencia
+from app.models import Aviso, Evento, File, Folder, FormularioRespuesta, PortalWeb, Respuesta, User, VacationRequest, Noticia, RegistroCompetencia, EvaluacionDesempeno, AsistenciaFinAnio
 from app.forms import LoginForm
 from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
@@ -16,6 +17,7 @@ from email.mime.base import MIMEBase
 from email import encoders
 from app import mail
 import smtplib
+import openpyxl
 USUARIOS_RESTRINGIDOS_P5 = {
 
 }
@@ -29,6 +31,286 @@ def filtrar_portales_para_usuario(user_id):
     return portales_filtrados
 
 main = Blueprint('main', __name__)
+
+@main.route('/consultar_evaluaciones')
+@login_required
+def consultar_evaluaciones():
+    allowed_ids = [304]  # IDs autorizados
+    if current_user.id not in allowed_ids:
+        return """
+        <script>
+            alert("No tienes los permisos necesarios para ver esta información.");
+            window.location.href = "/";
+        </script>
+        """
+    preguntas = [
+    "Conozco mis funciones y mis responsabilidades",
+    "Al realizar mi trabajo, siempre doy resultados positivos",
+    "Las actividades que realizo me permiten desarrollar mis habilidades",
+    "Tengo conocimiento de las políticas y reglamentos de la institución",
+    "Puedo agilizar el trabajo actuando antes de que me lo pidan",
+    "Ofrezco ayuda sin necesidad de que lo soliciten",
+    "Me mantiene informado sobre asuntos que afectan a mi trabajo",
+    "Pone el ejemplo en la forma en la que debe ser nuestro desempeño",
+    "Soluciona los problemas de manera eficaz",
+    "Encomienda las actividades de trabajo de manera igualitaria entre los compañeros",
+    "Trata de igual manera a todo el personal y se comunica con respeto",
+    "Identifica áreas de mejora optimizando el desempeño de nuestras funciones",
+    "Siempre hay colaboración con mis compañeros para el buen desempeño del trabajo",
+    "Me siento parte de un equipo de trabajo",
+    "Es fácil expresar las opiniones ante compañeros y jefe inmediato",
+    "Se generan planes de trabajo positivos que motivan al personal",
+    "Se tiene un ambiente sano y cordial entre los compañeros de las otras estaciones",
+    "Existe colaboración entre los compañeros de toda la institución para la realización de las tareas",
+    "El nombre y prestigio de la institución me hacen sentir orgulloso de pertenecer a ella",
+    "Conozco el trabajo que realizan las diferentes áreas de la institución",
+    "Las estaciones cuentan con una instalación que permite sentirme a gusto",
+    "Recibo capacitaciones constantes que permiten actualizar mis conocimientos sobre el trabajo",
+    "Doy un buen uso y cuidado a las herramientas y equipo otorgado por la institución",
+    "Me gusta la estación a la que pertenezco",
+    "Descubro los intereses de mis compañeros e intento llevarlos a una meta en común",
+    "Intento ser honesto y transparente cuando hablo",
+    "Me considero una persona que explica con detalle cuando capacito a mis compañeros",
+    "Conozco a mis compañeros y tengo muy buena relación con ellos",
+    "Intento ofrecer todo mi apoyo cuando un compañero pasa por un momento de dificultad personal",
+    "Escucho, respeto y reflexiono sobre las opiniones de los demás antes de tomar decisiones",
+    "Me gusta dirigir las reuniones de trabajo para que todos participen",
+    "Supervisar de cerca el equipo es buena opción para asegurarme que las cosas salgan bien",
+    "Me cuesta trabajo admitir mis errores y suelo culpar a los demás",
+    "Es bueno que nos asignen tareas sin decidir si está bien o no",
+    "No acepto mis fracasos personales ni la opinión de que estoy equivocado en mi forma de ver las cosas",
+    "Exijo superar las metas que consigue mi equipo con el fin de seguir mejorando",
+    "Tengo una comunicación abierta con mis compañeros/personal a cargo y conozco lo que esperan de mí",
+    "Los errores y fracasos de los demás los utilizo como motivación para superarlos",
+    "Me gusta pensar de manera positiva para motivar al personal que me rodea y cumplir con los objetivos que se esperan en el trabajo",
+    "Me da miedo tomar el control y prefiero que otros se encarguen",
+    "Busco opiniones de mis compañeros para lograr ideas y proyectos nuevos",
+    "Conseguir resultados positivos es mi prioridad, la tensión es el precio a pagar por el éxito",
+    "Cuando hay problemas en mi equipo, me pongo muy nervioso y no sé cómo controlarme",
+    "Soy una persona protectora con los compañeros que piensan igual que yo y obedecen, respeto a los que me contradices pero me cuesta mucho confiar en los que mienten"
+]
+
+    respuesta_texto = {
+        "1": "Totalmente en desacuerdo",
+        "2": "En desacuerdo",
+        "3": "Indiferente",
+        "4": "De acuerdo",
+        "5": "Totalmente de acuerdo"
+    }
+
+    orden = request.args.get("orden", "desc")  
+    seleccionado_id = request.args.get("id")  
+
+    if seleccionado_id:  
+        evaluaciones = EvaluacionDesempeno.query.filter_by(id=seleccionado_id).all()
+    else:
+        evaluaciones = EvaluacionDesempeno.query.all()
+
+    evaluaciones_data = []
+    for evaluacion in evaluaciones:
+        respuestas = evaluacion.respuestas
+        total = 0
+        count = 0
+        promedios_rubro = {
+            "Desempeño": 0,
+            "Jefe Inmediato": 0,
+            "Apoyo y Convivencia": 0,
+            "Pertenencia": 0,
+            "Clasificación": 0
+        }
+
+        # Calcular promedio general y por rubro
+        for rubro, preguntas in respuestas.items():
+            valores = [int(v) for v in preguntas.values() if v]
+            if valores:
+                promedio_rubro = round(sum(valores) / len(valores), 2)
+            else:
+                promedio_rubro = 0
+
+            if rubro == "desempeno":
+                promedios_rubro["Desempeño"] = promedio_rubro
+            elif rubro == "jefe_inmediato":
+                promedios_rubro["Jefe Inmediato"] = promedio_rubro
+            elif rubro == "apoyo_convivencia":
+                promedios_rubro["Apoyo y Convivencia"] = promedio_rubro
+            elif rubro == "pertenencia":
+                promedios_rubro["Pertenencia"] = promedio_rubro
+            elif rubro == "clasificacion":
+                promedios_rubro["Clasificación"] = promedio_rubro
+
+            total += sum(valores)
+            count += len(valores)
+
+        promedio = round(total / count, 2) if count > 0 else 0
+
+        evaluaciones_data.append({
+            "id": evaluacion.id,
+            "nombre": evaluacion.nombre,
+            "respuestas": respuestas,
+            "promedio": promedio,
+            "promedios_rubro": promedios_rubro
+        })
+
+    # ordenar lista
+    reverse = (orden == "desc")
+    evaluaciones_data.sort(key=lambda x: x["promedio"], reverse=reverse)
+
+    # Calcular promedios generales
+    promedios = {
+        "Desempeño": [],
+        "Jefe Inmediato": [],
+        "Apoyo y Convivencia": [],
+        "Pertenencia": [],
+        "Clasificación": []
+    }
+    conteo = {k: 0 for k in promedios}
+
+    for e in evaluaciones:
+        for rubro, preguntas in e.respuestas.items():
+            valores = [int(v) for v in preguntas.values() if v]
+            if valores:
+                promedio_rubro = round(sum(valores) / len(valores), 2)
+                if rubro == "desempeno":
+                    promedios["Desempeño"].append(promedio_rubro)
+                    conteo["Desempeño"] += 1
+                elif rubro == "jefe_inmediato":
+                    promedios["Jefe Inmediato"].append(promedio_rubro)
+                    conteo["Jefe Inmediato"] += 1
+                elif rubro == "apoyo_convivencia":
+                    promedios["Apoyo y Convivencia"].append(promedio_rubro)
+                    conteo["Apoyo y Convivencia"] += 1
+                elif rubro == "pertenencia":
+                    promedios["Pertenencia"].append(promedio_rubro)
+                    conteo["Pertenencia"] += 1
+                elif rubro == "clasificacion":
+                    promedios["Clasificación"].append(promedio_rubro)
+                    conteo["Clasificación"] += 1
+
+    # promedio final por rubro
+    promedios_finales = []
+    for rubro, valores in promedios.items():
+        if valores:
+            promedios_finales.append(round(sum(valores) / len(valores), 2))
+        else:
+            promedios_finales.append(0)
+
+    return render_template(
+        'consultar_evaluaciones.html',
+        evaluaciones=evaluaciones_data,
+        promedios=promedios_finales,
+        respuesta_texto=respuesta_texto,
+        orden=orden,
+        seleccionado_id=seleccionado_id  
+    )
+
+@main.route('/descargar_asistencia_excel_formato')
+@login_required
+def descargar_asistencia_excel_formato():
+    asistentes_data = db.session.query(
+        AsistenciaFinAnio.nombre_usuario,
+        User.username,
+        User.turno,  
+        AsistenciaFinAnio.lleva_acompanante,
+        AsistenciaFinAnio.fecha_registro
+    ).join(User, AsistenciaFinAnio.user_id == User.id) \
+     .filter(AsistenciaFinAnio.asistencia == 'sí') \
+     .order_by(AsistenciaFinAnio.nombre_usuario) \
+     .all()
+    data = []
+    for nombre_usuario, username, turno, lleva_acompanante, fecha_registro in asistentes_data:
+        lleva_acompanante_str = "Sí" if lleva_acompanante == 'sí' else "No"
+        data.append({
+            'Nombre del Empleado': nombre_usuario,
+            'Username': username,
+            'Turno': turno if turno else 'N/A', 
+            'Asistencia': 'Sí',
+            'Lleva Acompañante': lleva_acompanante_str,
+            'Fecha de Registro': fecha_registro.strftime('%Y-%m-%d %H:%M:%S')
+        })
+    df = pd.DataFrame(data)
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, sheet_name='Asistentes', index=False)
+        worksheet = writer.sheets['Asistentes']
+        header_font = openpyxl.styles.Font(bold=True)
+        side_border = openpyxl.styles.Side(style='thin')
+        full_border = openpyxl.styles.Border(left=side_border, 
+                                             right=side_border, 
+                                             top=side_border, 
+                                             bottom=side_border)
+        for col_num, value in enumerate(df.columns, 1):
+            cell = worksheet.cell(row=1, column=col_num)
+            cell.value = value
+            cell.font = header_font
+            cell.border = full_border
+        for col in worksheet.columns:
+            max_length = 0
+            column = col[0].column_letter 
+            for cell in col:
+                try:
+                    cell.border = full_border
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = (max_length + 2)
+            worksheet.column_dimensions[column].width = adjusted_width
+    output.seek(0)
+    filename = "Lista_Asistencia_Fin_Anio.xlsx"
+    
+    return send_file(
+        output,
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        as_attachment=True,
+        download_name=filename
+    )        
+
+
+@main.route('/registro_fin_anio12w', methods=['GET', 'POST'])
+@login_required
+def submit_fin():
+    if request.method == 'POST':
+        asistencia = request.form.get('asistencia')
+        lleva_acompanante = request.form.get('lleva_acompanante')
+        user_id = current_user.id
+        nombre_del_usuario = current_user.nombre 
+        
+        if not asistencia or not lleva_acompanante:
+            flash('Por favor, responde a todas las preguntas de asistencia.', 'danger')
+            return redirect(url_for('main.submit_fin'))
+            
+        registro_existente = AsistenciaFinAnio.query.filter_by(user_id=user_id).first()
+        
+        try:
+            if registro_existente:
+                registro_existente.asistencia = asistencia
+                registro_existente.lleva_acompanante = lleva_acompanante
+                registro_existente.nombre_usuario = nombre_del_usuario 
+                flash('✅ Tu registro de asistencia ha sido **actualizado** exitosamente.', 'success')
+            else:
+                nuevo_registro = AsistenciaFinAnio(
+                    user_id=user_id,
+                    nombre_usuario=nombre_del_usuario, 
+                    asistencia=asistencia,
+                    lleva_acompanante=lleva_acompanante
+                )
+                db.session.add(nuevo_registro)
+                flash('💾 Tu registro ha sido **guardado** exitosamente. ¡Gracias!', 'success')
+            db.session.commit()
+            if asistencia == 'sí': 
+
+                return redirect(url_for('main.confirmacion_exitosa'))
+
+            else:
+                return redirect(url_for('main.cancelacion'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'❌ Ocurrió un error al guardar tu respuesta: {e}', 'danger')
+            return redirect(url_for('main.submit_fin'))
+    registro = AsistenciaFinAnio.query.filter_by(user_id=current_user.id).first()
+    return render_template('confirmation.html', registro=registro)
+
+
 
 @main.route('/dashboard')
 @login_required
@@ -113,6 +395,102 @@ def logout():
     logout_user()
     flash('Has cerrado sesión.', 'info')
     return redirect(url_for('main.login'))
+
+@main.route('/submit_evaluacion', methods=['POST'])
+@login_required
+def submit_evaluacion():
+    # Recibimos las respuestas del formulario
+    nombre = request.form.get('nombre')
+    fecha_str = request.form.get('fecha')
+    fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+    area = request.form.get('area')
+    estacion = request.form.get('estacion')
+    nomina = request.form.get('nomina')
+    puesto = request.form.get('puesto')
+    
+    # Almacenamos las respuestas del formulario en un diccionario
+    respuestas = {
+        'desempeno': {
+            'q1': request.form.get('q1'),
+            'q2': request.form.get('q2'),
+            'q3': request.form.get('q3'),
+            'q4': request.form.get('q4'),
+            'q5': request.form.get('q5'),
+            'q6': request.form.get('q6')
+        },
+        'jefe_inmediato': {
+            'q7': request.form.get('q7'),
+            'q8': request.form.get('q8'),
+            'q9': request.form.get('q9'),
+            'q10': request.form.get('q10'),
+            'q11': request.form.get('q11'),
+            'q12': request.form.get('q12')
+        },
+        'apoyo_convivencia': {
+            'q13': request.form.get('q13'),
+            'q14': request.form.get('q14'),
+            'q15': request.form.get('q15'),
+            'q16': request.form.get('q16'),
+            'q17': request.form.get('q17'),
+            'q18': request.form.get('q18')
+        },
+        'pertenencia': {
+            'q19': request.form.get('q19'),
+            'q20': request.form.get('q20'),
+            'q21': request.form.get('q21'),
+            'q22': request.form.get('q22'),
+            'q23': request.form.get('q23'),
+            'q24': request.form.get('q24')
+        },
+        'clasificacion': {
+            'q25': request.form.get('q25'),
+            'q26': request.form.get('q26'),
+            'q27': request.form.get('q27'),
+            'q28': request.form.get('q28'),
+            'q29': request.form.get('q29'),
+            'q30': request.form.get('q30'),
+            'q31': request.form.get('q31'),
+            'q32': request.form.get('q32'),
+            'q33': request.form.get('q33'),
+            'q34': request.form.get('q34'),
+            'q35': request.form.get('q35'),
+            'q36': request.form.get('q36'),
+            'q37': request.form.get('q37'),
+            'q38': request.form.get('q38'),
+            'q39': request.form.get('q39'),
+            'q40': request.form.get('q40'),
+            'q41': request.form.get('q41'),
+            'q42': request.form.get('q42'),
+            'q43': request.form.get('q43'),
+            'q44': request.form.get('q44')
+        }
+    }
+
+    evaluacion_general = request.form.get('evaluacion_general')
+    comentario = request.form.get('comentario')
+
+    # Crear un objeto de la evaluación
+    evaluacion = EvaluacionDesempeno(
+        user_id=current_user.id,
+        nombre=nombre,
+        fecha=fecha,
+        area=area,
+        estacion=estacion,
+        nomina=nomina,
+        puesto=puesto,
+        respuestas=respuestas,
+        evaluacion_general=evaluacion_general,
+        comentario=comentario
+    )
+
+    # Guardar la evaluación en la base de datos
+    db.session.add(evaluacion)
+    db.session.commit()
+
+    flash("Formulario enviado con éxito", "success")  # Mostrar un mensaje de éxito
+
+    # Redirigir al dashboard
+    return redirect(url_for('main.dashboard'))
 
 
 @main.route('/submit_form', methods=['POST'])
@@ -201,6 +579,58 @@ def ver_excel():
 def profile():
     return render_template('profile.html')
 
+@main.route('/export_competencia_excel')
+@login_required
+def export_competencia_excel():
+    # Obtener todos los registros de la tabla RegistroCompetencia
+    registros = RegistroCompetencia.query.all()
+
+    # Crear lista de diccionarios para convertir a DataFrame
+    datos = []
+    for r in registros:
+        datos.append({
+            "Número Competidor": r.numero_competidor,
+            "User ID": r.user_id,
+            "Nombre": r.nombre,
+            "Nómina": r.nomina,
+            "Turno": r.turno,
+            "Categoría": r.categoria,
+            "Niños": r.ninos,
+            "Adultos": r.adultos,
+            "Correo": r.correo,
+        })
+
+    # Crear DataFrame
+    df = pd.DataFrame(datos)
+
+    # Opcional: reordenar columnas si quieres
+    columnas_orden = ["Número Competidor", "User ID", "Nombre", "Nómina", "Turno", "Categoría", "Niños", "Adultos", "Correo"]
+    df = df[columnas_orden]
+
+    # Crear archivo Excel en memoria
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False, sheet_name='Registro Competencia')
+
+        # Formato: ajustar ancho columnas
+        workbook = writer.book
+        worksheet = writer.sheets['Registro Competencia']
+
+        for i, col in enumerate(df.columns):
+            # Ajustar ancho con base en la longitud del contenido y el nombre de la columna
+            max_len = max(
+                df[col].astype(str).map(len).max(),
+                len(col)
+            ) + 2  # espacio extra
+            worksheet.set_column(i, i, max_len)
+
+    output.seek(0)
+
+    # Enviar archivo para descargar
+    return send_file(output,
+                     mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                     download_name='registro_competencia.xlsx',
+                     as_attachment=True)
 
 @main.route('/gestor_contenido', defaults={'folder_id': None})
 @main.route('/gestor_contenido/<int:folder_id>')
@@ -323,26 +753,27 @@ def add_aviso():
 def formulario():
     return render_template('formulario.html')
 
-@main.route('/dia_bombero')
+@main.route('/evaluacion_del_desempeño')
 @login_required
-def dia_bombero():
-    if current_user.id == 2:
-        return redirect(url_for('main.scanner_asistencia'))
-    respuesta_existente = Respuesta.query.filter_by(user_id=current_user.id, respondido=True).first()
+def evaluacion():
+    return render_template('evaluacion.html')
 
+@main.route('/findeaño12w')
+@login_required
+def fin_anio():
+    respuesta_existente = AsistenciaFinAnio.query.filter_by(user_id=current_user.id).first()
     if respuesta_existente:
-        return render_template('dashboard.html', ya_respondio=True)
-    return render_template('dia_bombero.html', ya_respondio=False)
+        return render_template('dashboard.html', ya_respondio=True, registro=respuesta_existente)
+    else:
+        return render_template('dia_bombero.html', ya_respondio=False)
+
 @main.route('/competencia_bomb')
 @login_required
 def competencia_bomb():
     registro_existente = RegistroCompetencia.query.filter_by(user_id=current_user.id).first()
 
     if registro_existente:
-        # Ya se registró → lo rediriges o das un aviso
         return render_template('dashboard.html', ya_respondio=True)
-
-    # Aún no se ha registrado → muestra el formulario
     return render_template('competencia_bomb.html')
 
 @main.route('/scanner_asistencia')
@@ -439,6 +870,55 @@ def submit_bombero():
     mail.send(msg)
 
     return render_template('confirmation.html', nombre=nombre, correo=correo)
+
+import io
+import pandas as pd
+from flask import send_file
+
+@main.route('/descargar_registros_excel', methods=['GET'])
+@login_required
+def descargar_registros_excel():
+    # Obtener todos los registros
+    registros = Respuesta.query.all()
+
+    # Preparar los datos para el DataFrame
+    data = []
+    for r in registros:
+        tiene_acompanante = bool(r.nombre_acompanante and r.nombre_acompanante.strip())
+        data.append({
+            "Nombre": r.user.nombre if r.user else "Desconocido",
+            "Correo": r.correo,
+            "Acompañante": r.nombre_acompanante if tiene_acompanante else "",
+            "Tipo Acompañante": r.tipo_acompanante if tiene_acompanante else "",
+            "Con Acompañante": "Sí" if tiene_acompanante else "No"
+        })
+
+    # Crear el DataFrame
+    df = pd.DataFrame(data)
+
+    # Escribir a un archivo Excel en memoria
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df.to_excel(writer, sheet_name='Participantes', index=False)
+        workbook  = writer.book
+        worksheet = writer.sheets['Participantes']
+
+        # Estilo para resaltar en amarillo
+        highlight_format = workbook.add_format({'bg_color': '#FFFF00'})
+
+        # Aplicar formato a filas con acompañante
+        for i, row in df.iterrows():
+            if row['Con Acompañante'] == 'Sí':
+                worksheet.set_row(i + 1, None, highlight_format)  # +1 por encabezado
+
+    output.seek(0)
+
+    return send_file(output,
+                     download_name="registros_bombero.xlsx",
+                     as_attachment=True,
+                     mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+
 @main.route('/submit_competencia', methods=['POST'])
 @login_required
 def submit_competencia():
