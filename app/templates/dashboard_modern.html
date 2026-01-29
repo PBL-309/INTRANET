@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intranet Bomberos - Dashboard</title>
+    
+    <!-- Bootstrap & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    
+    <!-- Custom CSS moderno -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard_modern.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body>
+    <!-- Navbar superior -->
+    <nav class="navbar">
+        <a href="/dashboard" class="navbar-brand">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" style="width: 40px; height: 40px; border-radius: 50%;">
+            <span style="display: none;" class="d-none d-md-inline">INTRANET BOMBEROS</span>
+        </a>
+        
+        <ul class="navbar-nav" id="navbarMenu">
+            <li class="nav-item">
+                <a class="nav-link" href="/dashboard"><i class="bi bi-house"></i> Inicio</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#"><i class="bi bi-bell"></i> Noticias</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#"><i class="bi bi-calendar"></i> Eventos</a>
+            </li>
+        </ul>
+        
+        <div class="user-section">
+            <div class="user-avatar" title="{{ current_user.nombre }}">
+                {{ current_user.nombre[0].upper() }}
+            </div>
+            <span class="user-name">{{ current_user.nombre.split()[0] }}</span>
+            <a href="#" onclick="logout()" style="color: white; margin-left: 16px;">
+                <i class="bi bi-box-arrow-right"></i>
+            </a>
+        </div>
+
+        <button class="navbar-toggler" onclick="toggleSidebar()">
+            <i class="bi bi-list"></i>
+        </button>
+    </nav>
+
+    <!-- Contenedor principal -->
+    <div class="container-main">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="/dashboard" class="active"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                <li><a href="/noticias"><i class="bi bi-newspaper"></i> Noticias</a></li>
+                <li><a href="/eventos"><i class="bi bi-calendar-event"></i> Eventos</a></li>
+                <li><a href="/documentos"><i class="bi bi-file-earmark"></i> Documentos</a></li>
+                <li><a href="/directorio"><i class="bi bi-telephone"></i> Directorio</a></li>
+                <li><a href="/descargas"><i class="bi bi-download"></i> Descargas</a></li>
+                <li><a href="#" data-bs-toggle="modal" data-bs-target="#logoutModal"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a></li>
+            </ul>
+        </aside>
+
+        <!-- Contenido principal -->
+        <main id="contenido" class="main-content">
+            <!-- Bienvenida -->
+            <div style="margin-bottom: 32px;">
+                <h1 class="page-title"><i class="bi bi-wave"></i> Bienvenido, {{ current_user.nombre }}!</h1>
+                <p class="page-subtitle">Aquí encontrarás toda la información importante de la institución.</p>
+            </div>
+
+            <!-- Sección de noticias/carousel -->
+            <div class="card" style="margin-bottom: 32px;">
+                <div style="position: relative; width: 100%; max-height: 400px; overflow: hidden; border-radius: 8px;">
+                    <img src="{{ url_for('static', filename='img/FLAYERS BOMBEROS.png') }}" 
+                         style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                </div>
+            </div>
+
+            <!-- Sección de atajos rápidos -->
+            <div style="margin-bottom: 32px;">
+                <h2 style="font-size: 1.3rem; font-weight: 600; margin-bottom: 16px; color: #202124;">
+                    <i class="bi bi-star"></i> Accesos Rápidos
+                </h2>
+                <div class="grid">
+                    <div class="dashboard-item" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <i class="bi bi-file-earmark-text"></i>
+                        <h3>Noticias</h3>
+                        <p>Lee las últimas noticias</p>
+                    </div>
+                    <div class="dashboard-item" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <i class="bi bi-calendar3"></i>
+                        <h3>Calendario</h3>
+                        <p>Eventos y fechas importantes</p>
+                    </div>
+                    <div class="dashboard-item" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <i class="bi bi-telephone"></i>
+                        <h3>Directorio</h3>
+                        <p>Contactos de emergencia</p>
+                    </div>
+                    <div class="dashboard-item" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        <i class="bi bi-download"></i>
+                        <h3>Descargas</h3>
+                        <p>Documentos útiles</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acordeones de información -->
+            <div style="margin-bottom: 32px;">
+                <h2 style="font-size: 1.3rem; font-weight: 600; margin-bottom: 16px; color: #202124;">
+                    <i class="bi bi-info-circle"></i> Información Importante
+                </h2>
+                
+                <div class="accordion">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span><i class="bi bi-book"></i> Reglamentos y Normas</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    <div class="accordion-content">
+                        <p>Accede a los reglamentos internos y normas de funcionamiento de la institución.</p>
+                        <a href="#" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Ver Más</a>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span><i class="bi bi-shield-check"></i> Código de Ética</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    <div class="accordion-content">
+                        <p>Consulta el código de ética y conducta de nuestra institución.</p>
+                        <a href="#" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Ver Más</a>
+                    </div>
+                </div>
+
+                <div class="accordion">
+                    <button class="accordion-header" onclick="toggleAccordion(this)">
+                        <span><i class="bi bi-exclamation-triangle"></i> Aviso de Privacidad</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    <div class="accordion-content">
+                        <p>Lee nuestro aviso integral de privacidad y tratamiento de datos.</p>
+                        <a href="#" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Ver Más</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de logout -->
+    <div class="modal fade" id="logoutModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-exclamation-circle"></i> Cerrar Sesión</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que deseas cerrar sesión?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <a href="{{ url_for('main.logout') }}" class="btn btn-danger">Cerrar Sesión</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('show');
+        }
+
+        function toggleAccordion(header) {
+            const content = header.nextElementSibling;
+            content.classList.toggle('active');
+            header.classList.toggle('active');
+        }
+
+        function logout() {
+            const modal = new bootstrap.Modal(document.getElementById('logoutModal'));
+            modal.show();
+        }
+
+        // Cerrar sidebar cuando se hace click en un link (mobile)
+        document.querySelectorAll('.sidebar-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth < 768) {
+                    document.getElementById('sidebar').classList.remove('show');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
