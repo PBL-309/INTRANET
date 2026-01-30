@@ -606,28 +606,37 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!portalForm) return;
     portalForm.addEventListener("submit", function (event) {
         event.preventDefault();
-        agregarPortal();
+        // DEBUG
+        const nombre = document.getElementById("nombrePortal").value;
+        const url = document.getElementById("urlPortal").value;
+        alert("DEBUG: Click en agregar portal: " + nombre + ", " + url);
+        console.log("DEBUG: Click en agregar portal", nombre, url);
+        fetch("/agregar_portal", {
+            method: "POST",
+            body: new URLSearchParams({ nombre, url }),
+            headers: { 
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => {
+            console.log("DEBUG: Respuesta fetch agregar_portal", response);
+            return response.json();
+        })
+        .then(data => {
+            alert("DEBUG: Respuesta agregar_portal: " + JSON.stringify(data));
+            if (data.success) {
+                location.reload();  
+            } else {
+                alert("Error al agregar el portal.");
+            }
+        })
+        .catch(error => {
+            alert("DEBUG: Error en agregar_portal: " + error);
+            console.error("Error agregando portal:", error);
+        });
     });
 });
-function agregarPortal() {
-    const nombre = document.getElementById("nombrePortal").value;
-    const url = document.getElementById("urlPortal").value;
-    fetch("/agregar_portal", {
-        method: "POST",
-        body: new URLSearchParams({ nombre, url }),
-        headers: { 
-            "Content-Type": "application/x-www-form-urlencoded",
-            "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();  
-        }
-    })
-    .catch(error => console.error("Error agregando portal:", error));
-}
 document.addEventListener("DOMContentLoaded", function () {
     const mainAccordion = document.getElementById("mainAccordion");
     
@@ -639,6 +648,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!button) return;
 
         const portalId = button.getAttribute("data-portal-id");
+        alert("DEBUG: Click en eliminar portal ID: " + portalId);
+        console.log("DEBUG: Click en eliminar portal", portalId);
 
         if (confirm("¿Seguro que quieres eliminar este portal?")) {
             fetch("/eliminar_portal", {
@@ -649,8 +660,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log("DEBUG: Respuesta fetch eliminar_portal", response);
+                return response.json();
+            })
             .then(data => {
+                alert("DEBUG: Respuesta eliminar_portal: " + JSON.stringify(data));
                 if (data.success) {
                     // Try to remove the row. 
                     // Structure: div[data-portal-row] -> div -> button
@@ -661,7 +676,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     alert("Error al eliminar el portal.");
                 }
             })
-            .catch(error => console.error("Error:", error));
+            .catch(error => {
+                alert("DEBUG: Error en eliminar_portal: " + error);
+                console.error("Error:", error);
+            });
         }
     });
 });
