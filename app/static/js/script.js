@@ -79,9 +79,12 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 document.addEventListener("DOMContentLoaded", function () {
-    document.querySelector(".propuesta-vacacional-btn").addEventListener("click", function () {
-        iniciarCalendario();
-    });
+    const propuestaBtn = document.querySelector(".propuesta-vacacional-btn");
+    if (propuestaBtn) {
+        propuestaBtn.addEventListener("click", function () {
+            iniciarCalendario();
+        });
+    }
 });
 function iniciarCalendario() {
     document.getElementById("carouselNoticias").style.display = "none";
@@ -246,7 +249,9 @@ function highlightSelectedDates() {
     if (secondStageDate) markDates(secondStageDate, "auto-selected");
 }
 document.addEventListener("DOMContentLoaded", function () {
-    document.querySelector(".calendarioop-btn").addEventListener("click", function () {
+    const calendarioOpBtn = document.querySelector(".calendarioop-btn");
+    if (!calendarioOpBtn) return;
+    calendarioOpBtn.addEventListener("click", function () {
         document.querySelector(".four-cards").style.display = "none";
         document.getElementById("carouselNoticias").style.display = "none";
         let excelContainer = document.getElementById("contenido");
@@ -278,7 +283,9 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 document.addEventListener("DOMContentLoaded", function () {
-    document.querySelector(".calendariopre-btn").addEventListener("click", function () {
+    const calendarioPreBtn = document.querySelector(".calendariopre-btn");
+    if (!calendarioPreBtn) return;
+    calendarioPreBtn.addEventListener("click", function () {
         document.querySelector(".four-cards").style.display = "none";
         document.getElementById("carouselNoticias").style.display = "none";
         let excelContainer = document.getElementById("contenido");
@@ -335,7 +342,9 @@ document.addEventListener("DOMContentLoaded", function () {
         tour.start();
     }
 document.addEventListener("DOMContentLoaded", function () {
-    document.querySelector(".calendario-btn").addEventListener("click", function () {
+    const calendarioBtn = document.querySelector(".calendario-btn");
+    if (!calendarioBtn) return;
+    calendarioBtn.addEventListener("click", function () {
         document.querySelector(".four-cards").style.display = "none";
         document.getElementById("carouselNoticias").style.display = "none";
         document.getElementById("contenido").innerHTML = `
@@ -356,9 +365,12 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 document.addEventListener("DOMContentLoaded", function () {
-    document.querySelector(".propuesta-vacacional-btn").addEventListener("click", function () {
-        verificarPropuestaVacacional();
-    });
+    const propuestaBtn2 = document.querySelector(".propuesta-vacacional-btn");
+    if (propuestaBtn2) {
+        propuestaBtn2.addEventListener("click", function () {
+            verificarPropuestaVacacional();
+        });
+    }
 });
 function verificarPropuestaVacacional() {
     fetch(`/check_vacation_status`)
@@ -378,7 +390,8 @@ function verificarPropuestaVacacional() {
 function downloadFile(fileId) {
     window.location.href = `/download/${fileId}`;
 }
-document.getElementById('avisoForm').addEventListener('submit', function(event) {
+const avisoForm = document.getElementById('avisoForm');
+if (avisoForm) avisoForm.addEventListener('submit', function(event) {
     event.preventDefault();
     const descripcion = document.getElementById('descripcion').value;
     const fechaCaducidad = document.getElementById('fecha_caducidad').value;
@@ -472,7 +485,7 @@ function toggleNavbar() {
 document.querySelectorAll(".navbar-nav .nav-link").forEach(function (link) {
     link.addEventListener("click", function () {
         const navbarCollapse = document.getElementById("navbarNav");
-        if (navbarCollapse.classList.contains("show")) {
+        if (navbarCollapse && navbarCollapse.classList.contains("show")) {
             navbarCollapse.classList.remove("show");
         }
     });
@@ -482,6 +495,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const eventosContainer = document.getElementById("eventosContainer");
     const toastEvento = new bootstrap.Toast(document.getElementById("toastEvento"));
     const toastEventoBody = document.getElementById("toastEventoBody");
+    if (!eventoForm || !eventosContainer) return;
     const addEventoUrl = eventoForm.getAttribute("data-url");
     eventoForm.addEventListener("submit", function (event) {
         event.preventDefault();
@@ -568,7 +582,9 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("portalForm").addEventListener("submit", function (event) {
+    const portalForm = document.getElementById("portalForm");
+    if (!portalForm) return;
+    portalForm.addEventListener("submit", function (event) {
         event.preventDefault();
         agregarPortal();
     });
@@ -663,7 +679,8 @@ function volverAlPrimerFormulario() {
     var modal1 = new bootstrap.Modal(document.getElementById('formModal'));
     modal1.show();
 }
-document.getElementById("form2").addEventListener("submit", async function (e) {
+const denunciaForm2 = document.getElementById("form2");
+if (denunciaForm2) denunciaForm2.addEventListener("submit", async function (e) {
     e.preventDefault();
     let formData = new FormData(this);
     let datosPrevios = JSON.parse(sessionStorage.getItem("datosDenuncia") || "{}");
@@ -689,4 +706,160 @@ document.getElementById("form2").addEventListener("submit", async function (e) {
         console.error("Error enviando:", error);
         alert("Hubo un error al enviar la denuncia.");
     }
+});
+
+// ==============================
+// Dashboard UX: búsqueda + favoritos + contadores
+// ==============================
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("globalSearch");
+    const favContainer = document.getElementById("portalFavs");
+    const favItems = document.getElementById("portalFavsItems");
+
+    const statAvisos = document.getElementById("statAvisos");
+    const statPortales = document.getElementById("statPortales");
+    const statDocs = document.getElementById("statDocs");
+    const statEventos = document.getElementById("statEventos");
+
+    const FAV_KEY = "intranet_portal_favs_v1";
+
+    function safeJSONParse(raw, fallback) {
+        try {
+            return JSON.parse(raw);
+        } catch {
+            return fallback;
+        }
+    }
+
+    function getFavIds() {
+        const raw = localStorage.getItem(FAV_KEY);
+        const arr = safeJSONParse(raw || "[]", []);
+        return Array.isArray(arr) ? arr.map(String) : [];
+    }
+
+    function setFavIds(ids) {
+        const unique = Array.from(new Set((ids || []).map(String)));
+        localStorage.setItem(FAV_KEY, JSON.stringify(unique));
+    }
+
+    function updateFavButtons() {
+        const favIds = new Set(getFavIds());
+        document.querySelectorAll(".portal-fav-btn").forEach(btn => {
+            const id = String(btn.getAttribute("data-portal-id") || "");
+            const icon = btn.querySelector("i");
+            const isFav = favIds.has(id);
+            btn.classList.toggle("is-fav", isFav);
+            if (icon) {
+                icon.classList.toggle("bi-star", !isFav);
+                icon.classList.toggle("bi-star-fill", isFav);
+            }
+            btn.setAttribute("aria-label", isFav ? "Quitar de favoritos" : "Marcar como favorito");
+        });
+    }
+
+    function rebuildFavList() {
+        if (!favContainer || !favItems) return;
+        const favIds = getFavIds();
+        const rows = Array.from(document.querySelectorAll("[data-portal-row]"));
+        const byId = new Map(rows.map(r => [String(r.getAttribute("data-portal-id")), r]));
+
+        favItems.innerHTML = "";
+        const validRows = favIds.map(id => byId.get(String(id))).filter(Boolean);
+        if (validRows.length === 0) {
+            favContainer.classList.add("d-none");
+            return;
+        }
+
+        favContainer.classList.remove("d-none");
+        validRows.forEach(row => {
+            const name = row.getAttribute("data-portal-name") || "Portal";
+            const url = row.getAttribute("data-portal-url") || "#";
+            const a = document.createElement("a");
+            a.className = "portal-fav-pill";
+            a.href = url;
+            a.target = "_blank";
+            a.rel = "noopener";
+            a.innerHTML = `<i class="bi bi-star-fill"></i> ${name}`;
+            favItems.appendChild(a);
+        });
+    }
+
+    function updateStats() {
+        if (!statAvisos && !statPortales && !statDocs && !statEventos) return;
+
+        const avisosCards = document.querySelectorAll("#avisosContainer .card");
+        const avisosCount = avisosCards ? avisosCards.length : 0;
+        const portalesRows = document.querySelectorAll("[data-portal-row]");
+        const portalesCount = portalesRows ? portalesRows.length : 0;
+        const docsRows = document.querySelectorAll("#file-list li");
+        const docsCount = docsRows ? docsRows.length : 0;
+        const eventosCards = document.querySelectorAll("#eventosContainer .card");
+        const eventosCount = eventosCards ? eventosCards.length : 0;
+
+        if (statAvisos) statAvisos.textContent = String(avisosCount);
+        if (statPortales) statPortales.textContent = String(portalesCount);
+        if (statDocs) statDocs.textContent = String(docsCount);
+        if (statEventos) statEventos.textContent = String(eventosCount);
+    }
+
+    function textOf(el) {
+        return (el && (el.textContent || "") || "").toLowerCase();
+    }
+
+    function filterList(selector, query) {
+        const items = document.querySelectorAll(selector);
+        items.forEach(el => {
+            const match = textOf(el).includes(query);
+            el.style.display = match ? "" : "none";
+        });
+    }
+
+    function applyGlobalSearch(queryRaw) {
+        const query = (queryRaw || "").trim().toLowerCase();
+        if (!query) {
+            [
+                "#avisosContainer .card",
+                "[data-portal-row]",
+                "#file-list li",
+                "#eventosContainer .card"
+            ].forEach(sel => {
+                document.querySelectorAll(sel).forEach(el => (el.style.display = ""));
+            });
+            return;
+        }
+        filterList("#avisosContainer .card", query);
+        filterList("[data-portal-row]", query);
+        filterList("#file-list li", query);
+        filterList("#eventosContainer .card", query);
+    }
+
+    // Click favoritos
+    document.addEventListener("click", function (event) {
+        const btn = event.target.closest ? event.target.closest(".portal-fav-btn") : null;
+        if (!btn) return;
+
+        event.preventDefault();
+        const id = String(btn.getAttribute("data-portal-id") || "");
+        if (!id) return;
+
+        const favs = getFavIds();
+        const set = new Set(favs.map(String));
+        if (set.has(id)) set.delete(id);
+        else set.add(id);
+        setFavIds(Array.from(set));
+
+        updateFavButtons();
+        rebuildFavList();
+    });
+
+    // Buscador global
+    if (searchInput) {
+        searchInput.addEventListener("input", function () {
+            applyGlobalSearch(searchInput.value);
+        });
+    }
+
+    updateFavButtons();
+    rebuildFavList();
+    updateStats();
 });

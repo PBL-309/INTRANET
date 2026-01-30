@@ -66,7 +66,10 @@
             align-items: center;
             justify-content: space-between;
             padding: 0.75rem 1.25rem;
-            background: rgba(255, 255, 255, 0.92);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.90)),
+                radial-gradient(900px 260px at 18% 0%, rgba(196, 30, 58, 0.18), transparent 55%),
+                radial-gradient(700px 240px at 88% 0%, rgba(255, 183, 3, 0.14), transparent 60%);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border-color);
             border-top: 5px solid var(--primary);
@@ -78,6 +81,37 @@
             align-items: center;
             gap: 0.85rem;
             min-width: 0;
+        }
+
+        .global-search {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.55rem 0.8rem;
+            border-radius: 999px;
+            border: 1px solid rgba(15, 23, 42, 0.10);
+            background: rgba(255, 255, 255, 0.94);
+            box-shadow: var(--shadow-sm);
+            width: clamp(240px, 26vw, 520px);
+        }
+
+        .global-search i {
+            color: var(--primary);
+            font-size: 1.05rem;
+        }
+
+        #globalSearch {
+            border: none;
+            outline: none;
+            width: 100%;
+            background: transparent;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        #globalSearch::placeholder {
+            color: rgba(31, 41, 55, 0.55);
+            font-weight: 700;
         }
 
         .brand {
@@ -261,19 +295,141 @@
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: 1.35fr 1fr;
+            grid-template-columns: 1fr 1.35fr;
             grid-template-areas:
-                "hero panel"
-                "quick panel"
-                "content panel";
+                "stats stats"
+                "panel hero"
+                "panel quick"
+                "content content";
             gap: 1.25rem;
             align-items: start;
         }
 
+        .dash-stats { grid-area: stats; }
         .dash-hero { grid-area: hero; }
         .dash-panel { grid-area: panel; }
         .dash-quick { grid-area: quick; }
         .dash-content { grid-area: content; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1.1rem 1.2rem;
+            background: rgba(255, 255, 255, 0.94);
+        }
+
+        .stat-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+            min-width: 0;
+        }
+
+        .stat-label {
+            font-size: 0.78rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-size: 1.35rem;
+            font-weight: 950;
+            color: var(--text-primary);
+            line-height: 1.1;
+        }
+
+        .stat-badge {
+            width: 46px;
+            height: 46px;
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 12px 22px rgba(15, 23, 42, 0.12);
+            flex: 0 0 auto;
+        }
+
+        .stat-badge--red { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); }
+        .stat-badge--gold { background: linear-gradient(135deg, var(--accent), #FB8500); }
+        .stat-badge--teal { background: linear-gradient(135deg, var(--success), #048763); }
+        .stat-badge--pink { background: linear-gradient(135deg, var(--secondary), #EF476F); }
+
+        .portal-favs {
+            border: 1px dashed rgba(196, 30, 58, 0.28);
+            background: rgba(196, 30, 58, 0.05);
+            border-radius: 14px;
+            padding: 0.75rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .portal-favs__title {
+            font-weight: 950;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .portal-favs__items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .portal-fav-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.45rem 0.7rem;
+            border-radius: 999px;
+            border: 1px solid rgba(196, 30, 58, 0.18);
+            background: rgba(255, 255, 255, 0.92);
+            text-decoration: none;
+            color: var(--primary-dark);
+            font-weight: 900;
+            font-size: 0.9rem;
+        }
+
+        .portal-fav-pill:hover {
+            background: rgba(196, 30, 58, 0.08);
+        }
+
+        .portal-fav-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            border: 1px solid rgba(15, 23, 42, 0.10);
+            background: rgba(255, 255, 255, 0.94);
+            box-shadow: var(--shadow-sm);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(31, 41, 55, 0.75);
+            transition: transform 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+
+        .portal-fav-btn:hover {
+            transform: translateY(-1px);
+            border-color: rgba(196, 30, 58, 0.25);
+            color: var(--primary-dark);
+        }
+
+        .portal-fav-btn.is-fav {
+            color: var(--accent);
+            border-color: rgba(255, 183, 3, 0.35);
+        }
 
         /* CARDS */
         .card {
@@ -613,10 +769,15 @@
             .dashboard-grid {
                 grid-template-columns: 1fr;
                 grid-template-areas:
+                    "stats"
                     "hero"
                     "quick"
                     "panel"
                     "content";
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
         }
 
@@ -668,6 +829,10 @@
             .brand span {
                 font-size: 0.95rem;
             }
+
+            .global-search {
+                display: none;
+            }
         }
 
         /* RESPONSIVE - SMALL MOBILE (480px) */
@@ -681,6 +846,10 @@
             }
 
             .quick-access {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -728,6 +897,10 @@
                     <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="navbar-logo">
                     <span>INTRANET BOMBEROS</span>
                 </a>
+                <div class="global-search" role="search" aria-label="Buscar">
+                    <i class="bi bi-search"></i>
+                    <input id="globalSearch" type="search" placeholder="Buscar avisos, portales, documentos, eventos…">
+                </div>
             </div>
             <div class="app-header__right">
                 <div class="top-links" id="navbarNav">
@@ -761,6 +934,39 @@
 
         <main>
             <div class="dashboard-grid">
+                <section class="dash-stats">
+                    <div class="stats-grid">
+                        <div class="card stat-card">
+                            <div class="stat-meta">
+                                <div class="stat-label">Avisos</div>
+                                <div class="stat-value" id="statAvisos">—</div>
+                            </div>
+                            <span class="stat-badge stat-badge--red" aria-hidden="true"><i class="bi bi-bell"></i></span>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-meta">
+                                <div class="stat-label">Portales</div>
+                                <div class="stat-value" id="statPortales">—</div>
+                            </div>
+                            <span class="stat-badge stat-badge--gold" aria-hidden="true"><i class="bi bi-globe"></i></span>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-meta">
+                                <div class="stat-label">Convocatorias</div>
+                                <div class="stat-value" id="statDocs">—</div>
+                            </div>
+                            <span class="stat-badge stat-badge--teal" aria-hidden="true"><i class="bi bi-file-earmark"></i></span>
+                        </div>
+                        <div class="card stat-card">
+                            <div class="stat-meta">
+                                <div class="stat-label">Eventos</div>
+                                <div class="stat-value" id="statEventos">—</div>
+                            </div>
+                            <span class="stat-badge stat-badge--pink" aria-hidden="true"><i class="bi bi-calendar2-event"></i></span>
+                        </div>
+                    </div>
+                </section>
+
                 <section class="dash-hero">
                     <div class="card">
                         <div id="carouselNoticias" class="carousel slide carousel-fade" data-bs-ride="carousel">
@@ -822,12 +1028,21 @@
                             </h2>
                             <div id="collapsePortales" class="accordion-collapse collapse" data-bs-parent="#mainAccordion">
                                 <div class="accordion-body">
+                                    <div id="portalFavs" class="portal-favs d-none">
+                                        <div class="portal-favs__title">Favoritos</div>
+                                        <div class="portal-favs__items" id="portalFavsItems"></div>
+                                    </div>
                                     {% for portal in portales %}
-                                    <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color); justify-content: space-between;">
+                                    <div data-portal-row data-portal-id="{{ portal.id }}" data-portal-name="{{ portal.nombre }}" data-portal-url="{{ portal.url }}" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color); justify-content: space-between;">
                                         <a href="{{ portal.url }}" target="_blank" style="text-decoration: none; color: var(--primary); font-weight: 600; flex: 1; display: flex; align-items: center; gap: 0.5rem;">
                                             <i class="bi bi-link-45deg"></i> {{ portal.nombre }}
                                         </a>
-                                        {% if current_user.id == 2 %}<button class="btn btn-sm btn-link text-danger delete-portal-btn" data-portal-id="{{ portal.id }}">✖</button>{% endif %}
+                                        <div style="display:flex; align-items:center; gap:0.35rem;">
+                                            <button type="button" class="portal-fav-btn" data-portal-id="{{ portal.id }}" data-portal-name="{{ portal.nombre }}" data-portal-url="{{ portal.url }}" aria-label="Marcar como favorito">
+                                                <i class="bi bi-star"></i>
+                                            </button>
+                                            {% if current_user.id == 2 %}<button class="btn btn-sm btn-link text-danger delete-portal-btn" data-portal-id="{{ portal.id }}">✖</button>{% endif %}
+                                        </div>
                                     </div>
                                     {% endfor %}
                                 </div>
@@ -869,21 +1084,23 @@
                             </h2>
                             <div id="collapseEventos" class="accordion-collapse collapse" data-bs-parent="#mainAccordion">
                                 <div class="accordion-body">
-                                    {% if eventos %}
-                                    {% for evento in eventos %}
-                                    <div class="card mb-2" style="border-left: 3px solid var(--secondary);">
-                                        <div class="card-body py-2">
-                                            <div style="display: flex; justify-content: space-between; align-items: start; gap: 1rem;">
-                                                <div style="flex: 1;">
-                                                    <p class="mb-1 fw-bold" style="font-size: 0.95rem;">{{ evento.descripcion }}</p>
-                                                    <small class="text-muted"><i class="bi bi-calendar"></i> {{ evento.fecha }}</small>
+                                    <div id="eventosContainer">
+                                        {% if eventos %}
+                                        {% for evento in eventos %}
+                                        <div class="card mb-2" style="border-left: 3px solid var(--secondary);">
+                                            <div class="card-body py-2">
+                                                <div style="display: flex; justify-content: space-between; align-items: start; gap: 1rem;">
+                                                    <div style="flex: 1;">
+                                                        <p class="mb-1 fw-bold" style="font-size: 0.95rem;">{{ evento.descripcion }}</p>
+                                                        <small class="text-muted"><i class="bi bi-calendar"></i> {{ evento.fecha }}</small>
+                                                    </div>
+                                                    {% if current_user.id == 2 %}<button class="btn btn-sm btn-link delete-evento-btn" data-evento-id="{{ evento.id }}">✖</button>{% endif %}
                                                 </div>
-                                                {% if current_user.id == 2 %}<button class="btn btn-sm btn-link delete-evento-btn" data-evento-id="{{ evento.id }}">✖</button>{% endif %}
                                             </div>
                                         </div>
+                                        {% endfor %}
+                                        {% else %}<p class="text-muted text-center py-3" id="noEventosTexto">Sin eventos</p>{% endif %}
                                     </div>
-                                    {% endfor %}
-                                    {% else %}<p class="text-muted text-center py-3" id="noEventosTexto">Sin eventos</p>{% endif %}
                                 </div>
                             </div>
                         </div>
