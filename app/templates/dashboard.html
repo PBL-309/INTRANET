@@ -1448,13 +1448,13 @@
                     <div class="accordion" id="mainAccordion">
                         <!-- <i class="bi bi-bell"></i> AVISOS -->
                         <div class="accordion-item">
-                            <h2 class="accordion-header">
+                            <h2 class="accordion-header position-relative">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAvisos">
                                     <i class="bi bi-bell"></i> AVISOS
-                                    {% if current_user.id == 2 %}
-                                    <button class="btn btn-light btn-sm ms-auto me-2" data-bs-toggle="modal" data-bs-target="#avisoModal" onclick="event.stopPropagation()">➕</button>
-                                    {% endif %}
                                 </button>
+                                {% if current_user.id == 2 %}
+                                <button class="btn btn-light btn-sm position-absolute top-50 end-0 translate-middle-y me-5" style="z-index: 5;" data-bs-toggle="modal" data-bs-target="#avisoModal">➕</button>
+                                {% endif %}
                             </h2>
                             <div id="collapseAvisos" class="accordion-collapse collapse" data-bs-parent="#mainAccordion">
                                 <div class="accordion-body">
@@ -1481,11 +1481,11 @@
 
                         <!-- PORTALES -->
                         <div class="accordion-item">
-                            <h2 class="accordion-header">
+                            <h2 class="accordion-header position-relative">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePortales">
                                     <i class="bi bi-globe"></i> PORTALES WEB
-                                    {% if current_user.id == 2 %}<button class="btn btn-light btn-sm ms-auto me-2" data-bs-toggle="modal" data-bs-target="#portalModal" onclick="event.stopPropagation()">➕</button>{% endif %}
                                 </button>
+                                {% if current_user.id == 2 %}<button class="btn btn-light btn-sm position-absolute top-50 end-0 translate-middle-y me-5" style="z-index: 5;" data-bs-toggle="modal" data-bs-target="#portalModal">➕</button>{% endif %}
                             </h2>
                             <div id="collapsePortales" class="accordion-collapse collapse" data-bs-parent="#mainAccordion">
                                 <div class="accordion-body">
@@ -1512,11 +1512,11 @@
 
                         <!-- <i class="bi bi-file-earmark"></i> CONVOCATORIAS -->
                         <div class="accordion-item">
-                            <h2 class="accordion-header">
+                            <h2 class="accordion-header position-relative">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDocumentos">
                                     <i class="bi bi-file-earmark"></i> CONVOCATORIAS
-                                    {% if current_user.id == 2 %}<button class="btn btn-light btn-sm ms-auto me-2" data-bs-toggle="modal" data-bs-target="#uploadModal" onclick="event.stopPropagation()">📤</button>{% endif %}
                                 </button>
+                                {% if current_user.id == 2 %}<button class="btn btn-light btn-sm position-absolute top-50 end-0 translate-middle-y me-5" style="z-index: 5;" data-bs-toggle="modal" data-bs-target="#uploadModal">📤</button>{% endif %}
                             </h2>
                             <div id="collapseDocumentos" class="accordion-collapse collapse" data-bs-parent="#mainAccordion">
                                 <div class="accordion-body">
@@ -1537,11 +1537,11 @@
 
                         <!-- <i class="bi bi-calendar2-event"></i> EVENTOS -->
                         <div class="accordion-item">
-                            <h2 class="accordion-header">
+                            <h2 class="accordion-header position-relative">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEventos">
                                     <i class="bi bi-calendar2-event"></i> EVENTOS
-                                    {% if current_user.id == 2 %}<button id="addEventoBtn" class="btn btn-light btn-sm ms-auto me-2" data-bs-toggle="modal" data-bs-target="#eventoModal" data-url="{{ url_for('main.add_evento') }}" onclick="event.stopPropagation()">➕</button>{% endif %}
                                 </button>
+                                {% if current_user.id == 2 %}<button id="addEventoBtn" class="btn btn-light btn-sm position-absolute top-50 end-0 translate-middle-y me-5" style="z-index: 5;" data-bs-toggle="modal" data-bs-target="#eventoModal" data-url="{{ url_for('main.add_evento') }}">➕</button>{% endif %}
                             </h2>
                             <div id="collapseEventos" class="accordion-collapse collapse" data-bs-parent="#mainAccordion">
                                 <div class="accordion-body">
