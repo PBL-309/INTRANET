@@ -23,7 +23,10 @@ document.addEventListener("DOMContentLoaded", function () {
             const formData = new FormData(uploadForm);
             fetch(uploadUrl, {
                 method: "POST",
-                body: formData
+                body: formData,
+                headers: {
+                    "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
             })
             .then(response => response.json())
             .then(data => {
@@ -60,7 +63,10 @@ document.addEventListener("DOMContentLoaded", function () {
             const listItem = event.target.closest("li");
             if (confirm(`¿Seguro que deseas eliminar el archivo ${filename}?`)) {
                 fetch(`/delete_file/${filename}`, {
-                    method: "DELETE"
+                    method: "DELETE",
+                    headers: {
+                        "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -140,7 +146,10 @@ function iniciarCalendario() {
         let autoAssignedDate = secondStageDate.toISOString().split('T')[0];
         fetch('/save_vacation_date', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
             body: JSON.stringify({ 
                 selected_date: selectedDate, 
                 assigned_date: autoAssignedDate 
@@ -412,7 +421,7 @@ if (avisoForm) avisoForm.addEventListener('submit', function(event) {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "X-CSRFToken": "{{ csrf_token() }}"
+            "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         },
         body: JSON.stringify({ descripcion, fecha_caducidad: fechaCaducidad })
     })
@@ -505,7 +514,10 @@ document.addEventListener("DOMContentLoaded", function () {
         fetch(addEventoUrl, {
             method: "POST",
             body: JSON.stringify({ descripcion, fecha }),
-            headers: { "Content-Type": "application/json" }
+            headers: { 
+                "Content-Type": "application/json",
+                "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
         })
         .then(response => response.json())
         .then(data => {
@@ -544,7 +556,10 @@ document.addEventListener("DOMContentLoaded", function () {
             const eventoId = event.target.getAttribute("data-evento-id");
 
             fetch(`/delete_evento/${eventoId}`, {
-                method: "DELETE"
+                method: "DELETE",
+                headers: {
+                    "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
             })
             .then(res => res.json())
             .then(data => {
@@ -571,6 +586,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 method: "POST",
                 headers: {
                     "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
             })
             .then(response => response.json())
@@ -599,7 +615,10 @@ function agregarPortal() {
     fetch("/agregar_portal", {
         method: "POST",
         body: new URLSearchParams({ nombre, url }),
-        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+        headers: { 
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
     })
     .then(response => response.json())
     .then(data => {
@@ -625,7 +644,10 @@ document.addEventListener("DOMContentLoaded", function () {
             fetch("/eliminar_portal", {
                 method: "POST",
                 body: JSON.stringify({ id: portalId }),
-                headers: { "Content-Type": "application/json" }
+                headers: { 
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
             })
             .then(response => response.json())
             .then(data => {
@@ -712,7 +734,10 @@ if (denunciaForm2) denunciaForm2.addEventListener("submit", async function (e) {
     try {
         let response = await fetch("/enviar_denuncia", {
             method: "POST",
-            body: formData
+            body: formData,
+            headers: {
+                "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
         });
         let result = await response.json();
         alert(result.mensaje || "Error en el servidor");
