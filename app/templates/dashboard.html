@@ -230,7 +230,7 @@
             background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(10px);
             border-right: 1px solid var(--border-color);
-            overflow-y: auto;
+            overflow: hidden;
             padding: 1rem;
         }
 
@@ -289,81 +289,54 @@
         /* MAIN */
         main {
             grid-row: 2;
-            overflow: auto;
-            padding: clamp(1rem, 2vw, 2.25rem);
+            overflow: hidden;
+            height: calc(100vh - 76px);
+            padding: clamp(0.75rem, 1.6vw, 1.5rem);
         }
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: 1fr 1.35fr;
+            height: 100%;
+            grid-template-columns: 1.35fr 1fr;
+            grid-template-rows: minmax(0, 1fr) auto;
             grid-template-areas:
-                "stats stats"
-                "panel hero"
-                "panel quick"
-                "content content";
+                "hero panel"
+                "quick panel";
             gap: 1.25rem;
             align-items: start;
         }
 
-        .dash-stats { grid-area: stats; }
         .dash-hero { grid-area: hero; }
         .dash-panel { grid-area: panel; }
         .dash-quick { grid-area: quick; }
         .dash-content { grid-area: content; }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 1rem;
-        }
-
-        .stat-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-            padding: 1.1rem 1.2rem;
+        /* Sidebar docs picker */
+        .sidebar-card {
+            border: 1px solid rgba(15, 23, 42, 0.10);
+            border-radius: var(--radius);
             background: rgba(255, 255, 255, 0.94);
+            box-shadow: var(--shadow-sm);
+            padding: 1rem;
         }
 
-        .stat-meta {
-            display: flex;
-            flex-direction: column;
-            gap: 0.15rem;
-            min-width: 0;
-        }
-
-        .stat-label {
-            font-size: 0.78rem;
-            font-weight: 900;
+        .sidebar-card__title {
+            font-weight: 950;
             letter-spacing: 1px;
             text-transform: uppercase;
+            font-size: 0.72rem;
             color: var(--text-secondary);
+            margin-bottom: 0.6rem;
         }
 
-        .stat-value {
-            font-size: 1.35rem;
-            font-weight: 950;
-            color: var(--text-primary);
-            line-height: 1.1;
+        .doc-select {
+            width: 100%;
+            border-radius: 14px;
+            border: 1px solid rgba(15, 23, 42, 0.12);
+            padding: 0.75rem 0.9rem;
+            font-weight: 800;
+            background: rgba(255, 255, 255, 0.98);
         }
-
-        .stat-badge {
-            width: 46px;
-            height: 46px;
-            border-radius: 16px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            box-shadow: 0 12px 22px rgba(15, 23, 42, 0.12);
-            flex: 0 0 auto;
-        }
-
-        .stat-badge--red { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); }
-        .stat-badge--gold { background: linear-gradient(135deg, var(--accent), #FB8500); }
-        .stat-badge--teal { background: linear-gradient(135deg, var(--success), #048763); }
-        .stat-badge--pink { background: linear-gradient(135deg, var(--secondary), #EF476F); }
 
         .portal-favs {
             border: 1px dashed rgba(196, 30, 58, 0.28);
@@ -525,10 +498,12 @@
             overflow: hidden;
             box-shadow: var(--shadow-md);
             border: 1px solid rgba(15, 23, 42, 0.10);
+            height: 100%;
         }
 
         .carousel-inner {
-            min-height: clamp(220px, 26vw, 420px);
+            height: 100%;
+            min-height: 0;
         }
 
         .carousel-item img {
@@ -553,6 +528,7 @@
         /* ACCORDION */
         .accordion {
             gap: 1rem;
+            height: 100%;
         }
 
         .accordion-item {
@@ -561,6 +537,61 @@
             border-radius: var(--radius);
             overflow: hidden;
             box-shadow: var(--shadow-sm);
+        }
+
+        .dash-panel {
+            min-height: 0;
+        }
+
+        .dash-panel .accordion {
+            overflow: hidden;
+        }
+
+        .dash-panel .accordion-collapse {
+            max-height: clamp(180px, 24vh, 260px);
+            overflow: auto;
+        }
+        /* Overlay de contenido dinámico (para mantener funciones sin scrollear la página) */
+        .contenido-overlay {
+            position: fixed;
+            inset: 76px 0 0 0;
+            background:
+                radial-gradient(1100px 520px at 15% 0%, rgba(196, 30, 58, 0.12), transparent 55%),
+                radial-gradient(900px 520px at 90% 10%, rgba(255, 183, 3, 0.10), transparent 60%),
+                rgba(248, 249, 250, 0.96);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: none;
+        }
+
+        .contenido-overlay.show {
+            display: block;
+        }
+
+        .contenido-overlay__panel {
+            height: calc(100vh - 76px);
+            padding: clamp(0.75rem, 1.6vw, 1.5rem);
+            overflow: auto;
+        }
+
+        .contenido-overlay__bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.75rem 0.9rem;
+            border-radius: var(--radius);
+            background: rgba(255, 255, 255, 0.94);
+            border: 1px solid rgba(15, 23, 42, 0.10);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1rem;
+        }
+
+        .contenido-overlay__title {
+            font-weight: 950;
+            letter-spacing: 0.4px;
+            margin: 0;
+            font-size: 1rem;
         }
 
         .accordion-button {
@@ -769,15 +800,19 @@
             .dashboard-grid {
                 grid-template-columns: 1fr;
                 grid-template-areas:
-                    "stats"
                     "hero"
                     "quick"
                     "panel"
-                    "content";
+                    "panel";
             }
 
-            .stats-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
+            main {
+                overflow: auto;
+                height: auto;
+            }
+
+            #sidebar {
+                overflow: auto;
             }
         }
 
@@ -833,6 +868,11 @@
             .global-search {
                 display: none;
             }
+
+            main {
+                overflow: auto;
+                height: auto;
+            }
         }
 
         /* RESPONSIVE - SMALL MOBILE (480px) */
@@ -849,9 +889,6 @@
                 grid-template-columns: 1fr;
             }
 
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
         }
     </style>
 </head>
@@ -919,54 +956,24 @@
 
         <aside id="sidebar" class="app-nav">
             <div class="app-nav__head">Normatividad</div>
-            <ul class="nav flex-column">
-                <li class="sidebar-title"><span>Documentos</span></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('static', filename='docs/REGLAMENTO DEL HEROICO CUERPO DE BOMBEROS DE LEÓN, GUANAJUATO.pdf') }}" target="_blank"><i class="bi bi-file-pdf"></i> Reglamento</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('static', filename='docs/CODIGO DE ETICA.pdf') }}" target="_blank"><i class="bi bi-file-pdf"></i> Código Ética</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('static', filename='docs/CODIGO-DE-CONDUCTA.pdf') }}" target="_blank"><i class="bi bi-file-pdf"></i> Código Conducta</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('static', filename='docs/REGLAMENTO INTERIOR DE LA ADMINISTRACIÓN PÚBLICA MUNICIPAL DE LEÓN, GUANAJUATO.pdf') }}" target="_blank"><i class="bi bi-file-pdf"></i> Reglamento Interior</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('static', filename='docs/LEY DE RESPONSABILIDADES ADMINISTRATIVAS PARA EL ESTADO DE GUANAJUATO.pdf') }}" target="_blank"><i class="bi bi-file-pdf"></i> Responsabilidades</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('static', filename='docs/CONSTITUCIÓN POLITICA DEL ESTADO DE GUANAJUATO.pdf') }}" target="_blank"><i class="bi bi-file-pdf"></i> Const. Guanajuato</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('static', filename='docs/CONSTITUCION POLITICA DE LOS ESTADOS UNIDOS MEXICANOS.pdf') }}" target="_blank"><i class="bi bi-file-pdf"></i> Const. México</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('static', filename='docs/REGLAMENTO DE CONTROL INTERNO PARA LA ADMINISTRACIÓN PÚBLICA MUNICIPAL DE LEÓN, GUANAJUATO.pdf') }}" target="_blank"><i class="bi bi-file-pdf"></i> Control Interno</a></li>
-            </ul>
+            <div class="sidebar-card">
+                <div class="sidebar-card__title">Documentos</div>
+                <select class="doc-select" id="docSelect" aria-label="Seleccionar documento">
+                    <option value="" selected>Selecciona un documento…</option>
+                    <option value="{{ url_for('static', filename='docs/REGLAMENTO DEL HEROICO CUERPO DE BOMBEROS DE LEÓN, GUANAJUATO.pdf') }}">Reglamento</option>
+                    <option value="{{ url_for('static', filename='docs/CODIGO DE ETICA.pdf') }}">Código de Ética</option>
+                    <option value="{{ url_for('static', filename='docs/CODIGO-DE-CONDUCTA.pdf') }}">Código de Conducta</option>
+                    <option value="{{ url_for('static', filename='docs/REGLAMENTO INTERIOR DE LA ADMINISTRACIÓN PÚBLICA MUNICIPAL DE LEÓN, GUANAJUATO.pdf') }}">Reglamento Interior</option>
+                    <option value="{{ url_for('static', filename='docs/LEY DE RESPONSABILIDADES ADMINISTRATIVAS PARA EL ESTADO DE GUANAJUATO.pdf') }}">Responsabilidades</option>
+                    <option value="{{ url_for('static', filename='docs/CONSTITUCIÓN POLITICA DEL ESTADO DE GUANAJUATO.pdf') }}">Constitución (Guanajuato)</option>
+                    <option value="{{ url_for('static', filename='docs/CONSTITUCION POLITICA DE LOS ESTADOS UNIDOS MEXICANOS.pdf') }}">Constitución (México)</option>
+                    <option value="{{ url_for('static', filename='docs/REGLAMENTO DE CONTROL INTERNO PARA LA ADMINISTRACIÓN PÚBLICA MUNICIPAL DE LEÓN, GUANAJUATO.pdf') }}">Control Interno</option>
+                </select>
+            </div>
         </aside>
 
         <main>
             <div class="dashboard-grid">
-                <section class="dash-stats">
-                    <div class="stats-grid">
-                        <div class="card stat-card">
-                            <div class="stat-meta">
-                                <div class="stat-label">Avisos</div>
-                                <div class="stat-value" id="statAvisos">—</div>
-                            </div>
-                            <span class="stat-badge stat-badge--red" aria-hidden="true"><i class="bi bi-bell"></i></span>
-                        </div>
-                        <div class="card stat-card">
-                            <div class="stat-meta">
-                                <div class="stat-label">Portales</div>
-                                <div class="stat-value" id="statPortales">—</div>
-                            </div>
-                            <span class="stat-badge stat-badge--gold" aria-hidden="true"><i class="bi bi-globe"></i></span>
-                        </div>
-                        <div class="card stat-card">
-                            <div class="stat-meta">
-                                <div class="stat-label">Convocatorias</div>
-                                <div class="stat-value" id="statDocs">—</div>
-                            </div>
-                            <span class="stat-badge stat-badge--teal" aria-hidden="true"><i class="bi bi-file-earmark"></i></span>
-                        </div>
-                        <div class="card stat-card">
-                            <div class="stat-meta">
-                                <div class="stat-label">Eventos</div>
-                                <div class="stat-value" id="statEventos">—</div>
-                            </div>
-                            <span class="stat-badge stat-badge--pink" aria-hidden="true"><i class="bi bi-calendar2-event"></i></span>
-                        </div>
-                    </div>
-                </section>
-
                 <section class="dash-hero">
                     <div class="card">
                         <div id="carouselNoticias" class="carousel slide carousel-fade" data-bs-ride="carousel">
@@ -1124,13 +1131,18 @@
                     </div>
                 </section>
 
-                <section class="dash-content">
-                    {% if current_user.id == 2 %}
-                    <div class="mb-3"><a href="/admin/noticias" class="btn btn-primary"><i class="bi bi-pencil"></i> Editar Noticias</a></div>
-                    {% endif %}
-                    <div id="contenido"></div>
-                </section>
             </div>
+    <div class="contenido-overlay" id="contenidoOverlay" aria-hidden="true">
+        <div class="contenido-overlay__panel">
+            <div class="contenido-overlay__bar">
+                <h3 class="contenido-overlay__title">Contenido</h3>
+                <button type="button" class="icon-btn" id="closeContenido" aria-label="Cerrar">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div id="contenido"></div>
+        </div>
+    </div>
 
             <div class="toast align-items-center position-fixed bottom-0 end-0 m-3" id="toastEvento" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="d-flex">
@@ -1274,6 +1286,49 @@
         function toggleNavbar() {
             document.getElementById('navbarNav').classList.toggle('show');
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const docSelect = document.getElementById('docSelect');
+            if (docSelect) {
+                docSelect.addEventListener('change', function () {
+                    const url = docSelect.value;
+                    if (!url) return;
+                    window.open(url, '_blank', 'noopener');
+                    docSelect.value = '';
+                });
+            }
+
+            // Si alguna función del JS escribe en #contenido, lo mostramos en overlay.
+            const overlay = document.getElementById('contenidoOverlay');
+            const contenido = document.getElementById('contenido');
+            const closeBtn = document.getElementById('closeContenido');
+
+            function openOverlay() {
+                if (!overlay) return;
+                overlay.classList.add('show');
+                overlay.setAttribute('aria-hidden', 'false');
+            }
+
+            function closeOverlay() {
+                if (!overlay) return;
+                overlay.classList.remove('show');
+                overlay.setAttribute('aria-hidden', 'true');
+            }
+
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function () {
+                    closeOverlay();
+                });
+            }
+
+            if (contenido) {
+                const observer = new MutationObserver(function () {
+                    const hasContent = (contenido.textContent || '').trim().length > 0 || contenido.children.length > 0;
+                    if (hasContent) openOverlay();
+                });
+                observer.observe(contenido, { childList: true, subtree: true, characterData: true });
+            }
+        });
     </script>
 </body>
 </html>
