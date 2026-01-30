@@ -1065,11 +1065,21 @@ def admin_noticias():
     noticias = Noticia.query.all()
     return render_template('admin_noticias.html', noticias=noticias)
 
-@main.route('/admin/noticias/delete/<int:id>')
+@main.route('/admin/noticias/delete/<int:id>', methods=['GET', 'DELETE'])
+@login_required
 def delete_noticia(id):
-    noticia = Noticia.query.get_or_404(id)
-    db.session.delete(noticia)
-    db.session.commit()
+    try:
+        noticia = Noticia.query.get_or_404(id)
+        db.session.delete(noticia)
+        db.session.commit()
+        if request.method == 'DELETE':
+            return jsonify({'success': True, 'message': 'Noticia eliminada correctamente'})
+        flash('Noticia eliminada correctamente', 'success')
+    except Exception as e:
+        db.session.rollback()
+        if request.method == 'DELETE':
+            return jsonify({'success': False, 'message': str(e)}), 500
+        flash(f'Error al eliminar noticia: {str(e)}', 'error')
     return redirect(url_for('main.admin_noticias'))
 @main.route('/delete_file/<filename>', methods=['DELETE'])
 @login_required
