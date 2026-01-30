@@ -560,9 +560,13 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 document.addEventListener("DOMContentLoaded", function() {
-    document.querySelectorAll(".delete-aviso-btn").forEach(button => {
-        button.addEventListener("click", function() {
-            const avisoId = this.getAttribute("data-aviso-id");
+    const avisosContainer = document.getElementById("avisosContainer");
+    if (avisosContainer) {
+        avisosContainer.addEventListener("click", function(event) {
+            const button = event.target.closest(".delete-aviso-btn");
+            if (!button) return;
+            
+            const avisoId = button.getAttribute("data-aviso-id");
             fetch(`/delete_aviso/${avisoId}`, {
                 method: "POST",
                 headers: {
@@ -572,14 +576,14 @@ document.addEventListener("DOMContentLoaded", function() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    this.closest(".card").remove();  
+                    button.closest(".card").remove();  
                 } else {
                     alert("Error: " + data.message);
                 }
             })
             .catch(error => console.error("Error:", error));
         });
-    });
+    }
 });
 document.addEventListener("DOMContentLoaded", () => {
     const portalForm = document.getElementById("portalForm");
@@ -606,27 +610,37 @@ function agregarPortal() {
     .catch(error => console.error("Error agregando portal:", error));
 }
 document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".delete-portal-btn").forEach(button => {
-        button.addEventListener("click", function () {
-            const portalId = this.getAttribute("data-portal-id");
+    const mainAccordion = document.getElementById("mainAccordion");
+    
+    // We attach listener to mainAccordion or specific collapse area if possible to catch bubbled events
+    // Assuming buttons are inside accordion items which bubble up.
+    // Or we can attach to document for simplicity since portales might be refreshed.
+    document.addEventListener("click", function(event) {
+        const button = event.target.closest(".delete-portal-btn");
+        if (!button) return;
 
-            if (confirm("¿Seguro que quieres eliminar este portal?")) {
-                fetch("/eliminar_portal", {
-                    method: "POST",
-                    body: JSON.stringify({ id: portalId }),
-                    headers: { "Content-Type": "application/json" }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        this.parentElement.remove(); 
-                    } else {
-                        alert("Error al eliminar el portal.");
-                    }
-                })
-                .catch(error => console.error("Error:", error));
-            }
-        });
+        const portalId = button.getAttribute("data-portal-id");
+
+        if (confirm("¿Seguro que quieres eliminar este portal?")) {
+            fetch("/eliminar_portal", {
+                method: "POST",
+                body: JSON.stringify({ id: portalId }),
+                headers: { "Content-Type": "application/json" }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Try to remove the row. 
+                    // Structure: div[data-portal-row] -> div -> button
+                    const row = button.closest("[data-portal-row]");
+                    if (row) row.remove();
+                    else button.parentElement.remove(); // Fallback
+                } else {
+                    alert("Error al eliminar el portal.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
     });
 });
 function mostrarFormulario(event) {
