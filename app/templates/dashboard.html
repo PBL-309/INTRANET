@@ -11,17 +11,17 @@
     <link rel="stylesheet" href="https://unpkg.com/shepherd.js@8.0.0/dist/css/shepherd.css">
     <style>
         :root {
-            --primary: #C41E3A;
-            --primary-dark: #8B1528;
-            --primary-light: #E63946;
-            --secondary: #F77F88;
-            --accent: #FFB703;
-            --danger: #D62828;
-            --success: #06A77D;
+            --primary: #8B1528;
+            --primary-dark: #5e0d1b;
+            --primary-light: #A41F33;
+            --secondary: #6B7280;
+            --accent: #DAA520;
+            --danger: #991B1B;
+            --success: #046E55;
             --bg-light: #F8F9FA;
             --bg-card: #FFFFFF;
-            --text-primary: #1F2937;
-            --text-secondary: #6B7280;
+            --text-primary: #212529;
+            --text-secondary: #4B5563;
             --border-color: #E5E7EB;
             --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
             --shadow-md: 0 10px 24px rgba(15, 23, 42, 0.08);
@@ -54,10 +54,7 @@
             display: grid;
             grid-template-columns: clamp(240px, 18vw, 320px) 1fr;
             grid-template-rows: 76px 1fr;
-            background:
-                radial-gradient(1200px 600px at 20% 0%, rgba(196, 30, 58, 0.10), transparent 55%),
-                radial-gradient(900px 500px at 90% 10%, rgba(255, 183, 3, 0.10), transparent 60%),
-                var(--bg-light);
+            background: var(--bg-light);
         }
 
         .app-header {
@@ -67,10 +64,7 @@
             justify-content: space-between;
             position: relative;
             padding: 0.75rem 1.25rem;
-            background:
-                linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.90)),
-                radial-gradient(900px 260px at 18% 0%, rgba(196, 30, 58, 0.18), transparent 55%),
-                radial-gradient(700px 240px at 88% 0%, rgba(255, 183, 3, 0.14), transparent 60%);
+            background: var(--primary-dark);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border-color);
             border-top: 5px solid var(--primary);
@@ -82,8 +76,8 @@
             position: absolute;
             inset: 0;
             pointer-events: none;
-            background: linear-gradient(90deg, rgba(196, 30, 58, 0.12), transparent 42%, rgba(196, 30, 58, 0.08));
-            opacity: 0.85;
+            background: transparent;
+            opacity: 1;
         }
 
         .app-header > * {
@@ -120,7 +114,7 @@
             outline: none;
             width: 100%;
             background: transparent;
-            font-weight: 800;
+            font-weight: 600;
             color: var(--text-primary);
         }
 
@@ -143,10 +137,10 @@
         }
 
         .brand span {
-            font-weight: 900;
+            font-weight: 700;
             letter-spacing: 0.4px;
             text-transform: uppercase;
-            color: var(--text-primary);
+            color: #FFFFFF;
             font-size: 1.12rem;
             white-space: nowrap;
             overflow: hidden;
@@ -160,9 +154,9 @@
             width: 42px;
             height: 42px;
             border-radius: 12px;
-            border: 1px solid var(--border-color);
-            background: white;
-            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            background: rgba(255, 255, 255, 0.12);
+            color: #FFFFFF;
             box-shadow: var(--shadow-sm);
             transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
         }
@@ -170,7 +164,8 @@
         .icon-btn:hover {
             transform: translateY(-1px);
             box-shadow: var(--shadow-md);
-            border-color: rgba(196, 30, 58, 0.35);
+            border-color: rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.18);
         }
 
         .icon-btn i {
@@ -196,17 +191,17 @@
             padding: 0.55rem 0.8rem;
             border-radius: 999px;
             text-decoration: none;
-            color: var(--text-primary);
-            font-weight: 800;
+            color: rgba(255, 255, 255, 0.92);
+            font-weight: 600;
             font-size: 0.92rem;
             border: 1px solid transparent;
             transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
         }
 
         .top-link:hover {
-            background: rgba(196, 30, 58, 0.08);
-            border-color: rgba(196, 30, 58, 0.18);
-            color: var(--primary-dark);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.22);
+            color: #FFFFFF;
         }
 
         .user-profile {
@@ -215,8 +210,8 @@
             gap: 0.7rem;
             padding: 0.35rem 0.65rem 0.35rem 0.35rem;
             border-radius: 999px;
-            border: 1px solid var(--border-color);
-            background: white;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            background: rgba(255, 255, 255, 0.12);
             box-shadow: var(--shadow-sm);
             max-width: 320px;
         }
@@ -225,14 +220,14 @@
             width: 38px;
             height: 38px;
             border-radius: 999px;
-            border: 2px solid rgba(196, 30, 58, 0.25);
+            border: 2px solid rgba(139, 21, 40, 0.25);
             object-fit: cover;
         }
 
         .user-name {
-            font-weight: 900;
+            font-weight: 700;
             font-size: 0.88rem;
-            color: var(--text-primary);
+            color: rgba(255, 255, 255, 0.95);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -240,32 +235,19 @@
         }
 
         /* NAV */
-        #sidebar {
-            grid-row: 2;
-            background:
-                radial-gradient(900px 360px at 0% 0%, rgba(196, 30, 58, 0.14), transparent 62%),
-                rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(10px);
-            border-right: 1px solid var(--border-color);
-            overflow: hidden;
-            padding: 1rem;
-        }
+        
+        
 
-        .app-nav__head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.85rem 0.9rem;
-            border-radius: 14px;
-            background: linear-gradient(135deg, rgba(196, 30, 58, 0.22), rgba(196, 30, 58, 0.06));
-            border: 1px solid rgba(196, 30, 58, 0.22);
-            font-weight: 900;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            font-size: 0.78rem;
-            color: var(--primary-dark);
-            margin-bottom: 0.75rem;
-        }
+        
+        
+        
+
+        
+
+        
+
+
+        
 
         #sidebar .nav-link {
             display: flex;
@@ -273,8 +255,8 @@
             gap: 0.75rem;
             padding: 0.85rem 0.9rem;
             border-radius: 14px;
-            color: var(--text-primary) !important;
-            font-weight: 800;
+            color: rgba(255, 255, 255, 0.92) !important;
+            font-weight: 600;
             font-size: 0.95rem;
             text-decoration: none;
             border: 1px solid transparent;
@@ -282,46 +264,38 @@
         }
 
         #sidebar .nav-link i {
-            font-size: 1.1rem;
-            color: var(--primary);
+            font-size: 1rem;
+            color: var(--accent);
         }
 
         #sidebar .nav-link:hover {
-            background: rgba(196, 30, 58, 0.07);
-            border-color: rgba(196, 30, 58, 0.18);
+            background: rgba(255, 255, 255, 0.10);
+            border-color: rgba(255, 255, 255, 0.16);
             transform: translateY(-1px);
         }
 
-        .sidebar-title {
-            color: var(--text-secondary);
-            font-size: 0.75rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 0.85rem 0.4rem 0.35rem;
-            margin: 0.25rem 0 0.25rem;
-            border-bottom: 1px dashed rgba(15, 23, 42, 0.15);
-        }
+        
 
         /* MAIN */
         main {
             grid-row: 2;
             overflow: hidden;
             height: calc(100vh - 76px);
-            padding: clamp(0.75rem, 1.6vw, 1.5rem);
+            padding: clamp(0.6rem, 1.2vw, 1.15rem);
         }
 
         .dashboard-grid {
             display: grid;
             height: 100%;
             grid-template-columns: 1.35fr 1fr;
-            grid-template-rows: minmax(0, 1fr) auto;
+            /* Force fit in height: Hero takes up to 60%, Quick takes rest. */
+            grid-template-rows: minmax(0, 6fr) minmax(0, 4fr);
             grid-template-areas:
                 "hero panel"
                 "quick panel";
             column-gap: 1.25rem;
-            row-gap: 0.65rem;
-            align-items: start;
+            row-gap: 0.75rem; /* Little more breathing room */
+            align-items: stretch; /* Stretch to fill */
         }
 
         .dash-hero { grid-area: hero; }
@@ -329,80 +303,169 @@
         .dash-quick { grid-area: quick; }
         .dash-content { grid-area: content; }
 
-        /* No agrandar carrusel; mantenerlo controlado */
-        .dash-hero {
-            height: clamp(260px, 40vh, 420px);
+        /* Permitir que el bloque quick rellene el alto disponible */
+        .dash-quick {
             min-height: 0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; /* Scroll interno si los botones no caben */
+        }
+
+        .dash-hero .card,
+        .dash-hero #carouselNoticias,
+        .dash-hero .carousel-inner,
+        .dash-hero .carousel-item {
+            height: 100%;
+        }
+
+        /* Hero fills grid cell completely */
+        .dash-hero {
+            height: 100%;
+            min-height: 0;
+            overflow: hidden;
         }
 
         .dash-hero .card {
             height: 100%;
         }
+        
+        .dash-panel {
+            min-height: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; /* Scroll interno para panel derecho */
+            padding-right: 4px; /* Space for scrollbar */
+        }
 
-        /* Sidebar docs tiles (sin lista/selector) */
+        /* Common discrete scrollbar for internal containers */
+        .dash-quick::-webkit-scrollbar,
+        .dash-panel::-webkit-scrollbar {
+            width: 4px;
+        }
+        .dash-quick::-webkit-scrollbar-thumb,
+        .dash-panel::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.1);
+            border-radius: 4px;
+        }
+
+        /* Sidebar docs (sin tiles) */
         .sidebar-card {
             border: 1px solid rgba(15, 23, 42, 0.10);
             border-radius: var(--radius);
-            background: rgba(255, 255, 255, 0.94);
+            background: rgba(255, 255, 255, 0.06);
             box-shadow: var(--shadow-sm);
             padding: 1rem;
+            
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex: 1;
+            min-height: 0;
         }
 
         .sidebar-card__title {
-            font-weight: 950;
-            letter-spacing: 1px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
             font-size: 0.72rem;
-            color: var(--text-secondary);
+            color: rgba(255, 255, 255, 0.70);
             margin-bottom: 0.6rem;
+            flex-shrink: 0;
         }
 
-        .docs-tiles {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 0.55rem;
-        }
-
-        .doc-tile {
+        .docs-stack {
             display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            padding: 0.7rem 0.75rem;
+            flex-direction: column;
+            gap: 0.55rem;
+            
+            overflow-y: auto;
+            overflow-x: hidden;
+            flex: 1;
+            padding-right: 0.25rem;
+            
+            mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
+        }
+
+        /* Custom scrollbar specifically for docs-stack */
+        .docs-stack::-webkit-scrollbar {
+            width: 4px; /* Más pequeño */
+        }
+        
+        .docs-stack::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .docs-stack::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2); /* Gris/Blanco transparente */
+            border-radius: 4px;
+        }
+
+        .docs-stack::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .doc-pill {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.8rem 1rem;
             border-radius: 14px;
-            border: 1px solid rgba(196, 30, 58, 0.16);
-            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(255, 255, 255, 0.08);
             text-decoration: none;
-            color: var(--text-primary);
-            font-weight: 900;
-            font-size: 0.92rem;
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 700;
+            font-size: 1rem;
             box-shadow: var(--shadow-sm);
             transition: transform 0.15s ease, border-color 0.15s ease;
         }
 
-        .doc-tile i {
-            color: var(--primary);
-            font-size: 1.1rem;
+        .doc-pill__left {
+            display: inline-flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            min-width: 0;
         }
 
-        .doc-tile:hover {
+        .doc-pill__left span {
+            white-space: normal;
+            overflow: visible;
+            text-overflow: unset;
+            line-height: 1.15;
+        }
+
+        .doc-pill i {
+            color: var(--accent);
+            font-size: 1rem;
+            flex: 0 0 auto;
+        }
+
+        .doc-pill:hover {
             transform: translateY(-1px);
-            border-color: rgba(196, 30, 58, 0.28);
+            border-color: rgba(139, 21, 40, 0.32);
+        }
+
+        .doc-pill .bi-chevron-right {
+            color: rgba(255, 255, 255, 0.65);
         }
 
         .portal-favs {
-            border: 1px dashed rgba(196, 30, 58, 0.28);
-            background: rgba(196, 30, 58, 0.05);
+            border: 1px dashed rgba(139, 21, 40, 0.28);
+            background: rgba(139, 21, 40, 0.07);
             border-radius: 14px;
             padding: 0.75rem;
             margin-bottom: 0.85rem;
         }
 
         .portal-favs__title {
-            font-weight: 950;
-            letter-spacing: 1px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
             text-transform: uppercase;
             font-size: 0.72rem;
-            color: var(--primary-dark);
+            color: rgba(255, 255, 255, 0.88);
             margin-bottom: 0.5rem;
         }
 
@@ -418,16 +481,16 @@
             gap: 0.4rem;
             padding: 0.45rem 0.7rem;
             border-radius: 999px;
-            border: 1px solid rgba(196, 30, 58, 0.18);
+            border: 1px solid rgba(139, 21, 40, 0.18);
             background: rgba(255, 255, 255, 0.92);
             text-decoration: none;
             color: var(--primary-dark);
-            font-weight: 900;
+            font-weight: 700;
             font-size: 0.9rem;
         }
 
         .portal-fav-pill:hover {
-            background: rgba(196, 30, 58, 0.08);
+            background: rgba(139, 21, 40, 0.08);
         }
 
         .portal-fav-btn {
@@ -446,13 +509,13 @@
 
         .portal-fav-btn:hover {
             transform: translateY(-1px);
-            border-color: rgba(196, 30, 58, 0.25);
+            border-color: rgba(139, 21, 40, 0.25);
             color: var(--primary-dark);
         }
 
         .portal-fav-btn.is-fav {
             color: var(--accent);
-            border-color: rgba(255, 183, 3, 0.35);
+            border-color: rgba(218, 165, 32, 0.35);
         }
 
         /* CARDS */
@@ -478,41 +541,91 @@
         .quick-access {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 0.55rem;
+            gap: 0.5rem;
+            height: 100%;
+            align-content: stretch;
+            grid-auto-rows: 1fr;
+        }
+
+        /* En desktop: 2 columnas fijas para que 2 botones = ancho del aviso */
+        @media (min-width: 992px) {
+            .quick-access {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        .quick-access > a {
+            height: 100%;
         }
 
         .quick-card {
-            min-height: 98px;
+            min-height: 104px;
             display: flex;
             align-items: center;
             justify-content: flex-start;
             gap: 0.9rem;
-            padding: 1.05rem 1.15rem;
+            padding: 1.1rem 1.2rem;
+            height: 100%;
             cursor: pointer;
             border-radius: var(--radius);
             color: var(--text-primary) !important;
-            font-weight: 900;
+            font-weight: 700;
             transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
             text-decoration: none !important;
-            border: 1px solid rgba(196, 30, 58, 0.16);
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.92));
+            border: 1px solid rgba(139, 21, 40, 0.16);
+            background: rgba(255, 255, 255, 0.96);
             box-shadow: var(--shadow-sm);
             position: relative;
+        }
+
+        /* Menos blanco: acentos por tipo */
+        .quick-card.card-red {
+            border-color: rgba(139, 21, 40, 0.22);
+            background: rgba(139, 21, 40, 0.22);
+        }
+
+        .quick-card.card-orange {
+            border-color: rgba(218, 165, 32, 0.35);
+            background: rgba(218, 165, 32, 0.26);
+        }
+
+        .quick-card.card-teal {
+            border-color: rgba(4, 110, 85, 0.25);
+            background: rgba(4, 110, 85, 0.22);
+        }
+
+        .quick-card.quick-card--wide {
+            background: var(--primary);
+            border-color: rgba(0, 0, 0, 0.0);
+        }
+
+        .quick-card.quick-card--wide .quick-card-text,
+        .quick-card.quick-card--wide .quick-sub {
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .quick-card.quick-card--wide .quick-sub {
+            color: rgba(255, 255, 255, 0.80);
+        }
+
+        .quick-card.quick-card--wide .quick-icon {
+            background: rgba(255, 255, 255, 0.18) !important;
+            color: #FFFFFF;
         }
 
         .quick-card:hover {
             transform: translateY(-2px);
             box-shadow: var(--shadow-md);
-            border-color: rgba(196, 30, 58, 0.25);
+            border-color: rgba(139, 21, 40, 0.25);
             background: rgba(255, 255, 255, 0.98);
         }
 
         .quick-card i {
-            font-size: 1.35rem;
+            font-size: 1.45rem;
         }
 
         .quick-card-text {
-            font-size: 1.02rem;
+            font-size: 1.08rem;
             line-height: 1.25;
             display: flex;
             flex-direction: column;
@@ -520,14 +633,14 @@
         }
 
         .quick-sub {
-            font-size: 0.82rem;
+            font-size: 0.86rem;
             color: var(--text-secondary);
             font-weight: 700;
         }
 
         .quick-icon {
-            width: 48px;
-            height: 48px;
+            width: 52px;
+            height: 52px;
             border-radius: 14px;
             display: inline-flex;
             align-items: center;
@@ -537,9 +650,9 @@
             box-shadow: 0 10px 18px rgba(15, 23, 42, 0.10);
         }
 
-        .quick-icon--red { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); }
-        .quick-icon--gold { background: linear-gradient(135deg, var(--accent), #FB8500); }
-        .quick-icon--teal { background: linear-gradient(135deg, var(--success), #048763); }
+        .quick-icon--red { background: var(--primary); }
+        .quick-icon--gold { background: var(--accent); }
+        .quick-icon--teal { background: var(--success); }
 
         .card-red, .card-orange, .card-teal { background: unset; }
 
@@ -559,7 +672,9 @@
 
         .carousel-item img {
             height: 100%;
+            width: 100%;
             object-fit: cover;
+            object-position: center;
         }
 
         .carousel-control-prev, .carousel-control-next {
@@ -582,7 +697,15 @@
             height: 100%;
         }
 
-        .accordion-item {
+        
+        
+        
+        
+        
+        
+        
+        
+ .accordion-item-old {
             background: rgba(255, 255, 255, 0.94);
             border: 1px solid rgba(15, 23, 42, 0.10);
             border-radius: var(--radius);
@@ -599,17 +722,34 @@
         }
 
         .dash-panel .accordion-collapse {
-            max-height: clamp(180px, 24vh, 260px);
-            overflow: auto;
+            /* max-height: clamp(...)  REMOVED - now panel scrolls properly */
+            overflow: visible;
+        }
+
+        /* Panel derecho menos blanco */
+        .dash-panel 
+        
+        
+        
+        
+        
+        
+        
+ .accordion-item-old {
+            background: rgba(139, 21, 40, 0.10);
+        }
+
+        .dash-panel 
+
+        /* En pantallas más altas (p. ej. 24"), llenar mejor el viewport sin scroll */
+        @media (min-height: 900px) {
+            /* Logic handled by grid-rows: fr now */
         }
         /* Overlay de contenido dinámico (para mantener funciones sin scrollear la página) */
         .contenido-overlay {
             position: fixed;
             inset: 76px 0 0 0;
-            background:
-                radial-gradient(1100px 520px at 15% 0%, rgba(196, 30, 58, 0.12), transparent 55%),
-                radial-gradient(900px 520px at 90% 10%, rgba(255, 183, 3, 0.10), transparent 60%),
-                rgba(248, 249, 250, 0.96);
+            background: rgba(248, 249, 250, 0.98);
             backdrop-filter: blur(10px);
             z-index: 2000;
             display: none;
@@ -639,31 +779,18 @@
         }
 
         .contenido-overlay__title {
-            font-weight: 950;
+            font-weight: 700;
             letter-spacing: 0.4px;
             margin: 0;
             font-size: 1rem;
         }
 
-        .accordion-button {
-            background: rgba(255, 255, 255, 0.98);
-            color: var(--text-primary);
-            font-weight: 900;
-            font-size: 1.02rem;
-            border: none;
-            box-shadow: none;
-            padding: 1.05rem 1.15rem;
-            transition: background 0.15s ease;
-        }
+        
 
-        .accordion-button:not(.collapsed) {
-            background: rgba(196, 30, 58, 0.07);
-            color: var(--primary-dark);
-            box-shadow: none;
-        }
+        
 
         .accordion-button:hover {
-            background: rgba(196, 30, 58, 0.06);
+            background: rgba(139, 21, 40, 0.06);
         }
 
         .accordion-button:focus {
@@ -673,13 +800,10 @@
 
         .accordion-button i {
             margin-right: 0.6rem;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
         }
 
-        .accordion-body {
-            padding: 1.1rem;
-            background: rgba(255, 255, 255, 0.98);
-        }
+        
 
         /* LIST */
         .list-group-item {
@@ -719,7 +843,7 @@
         }
 
         .modal-header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            background: var(--primary);
             color: white;
             border: none;
             padding: 1.5rem;
@@ -736,7 +860,7 @@
 
         /* BUTTONS */
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            background: var(--primary);
             border: none;
             border-radius: 10px;
             font-weight: 700;
@@ -768,7 +892,7 @@
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(196, 30, 58, 0.4);
+            box-shadow: 0 8px 24px rgba(139, 21, 40, 0.4);
         }
 
         .btn-secondary {
@@ -815,12 +939,12 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, var(--primary), var(--primary-light));
+            background: var(--primary);
             border-radius: 5px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, var(--primary-dark), var(--primary));
+            background: var(--primary-dark);
         }
 
         /* ANIMATIONS */
@@ -841,7 +965,7 @@
 
         .toast {
             border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(196, 30, 58, 0.2);
+            box-shadow: 0 8px 24px rgba(139, 21, 40, 0.2);
             border: none;
             border-left: 4px solid var(--primary);
         }
@@ -850,21 +974,43 @@
         @media (max-width: 1024px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto auto; /* Explicit rows for mobile */
                 grid-template-areas:
                     "hero"
                     "quick"
                     "panel"
                     "panel";
+                height: auto; /* Allow growth */
+                row-gap: 1rem;
+            }
+
+            .dash-hero {
+                height: 380px; /* Fixed reasonable height on tablet/mobile */
             }
 
             main {
                 overflow: auto;
                 height: auto;
+                display: block; /* revert grid restriction */
+                padding-bottom: 2rem;
             }
 
-            #sidebar {
-                overflow: auto;
+            .dash-panel, .dash-quick {
+                overflow: visible; /* Let page scroll handle it */
+                height: auto;
             }
+
+            
+        
+
+        
+        
+        
+
+        
+
+        
+
         }
 
         /* RESPONSIVE - MOBILE (768px) */
@@ -875,14 +1021,14 @@
 
             #sidebar {
                 position: fixed;
-                left: 0;
                 top: 76px;
-                height: calc(100vh - 76px);
-                width: min(340px, 92vw);
-                transform: translateX(-110%);
-                transition: transform 0.2s ease;
+                left: 0;
+                bottom: 0;
+                width: 280px;
                 z-index: 1100;
-                border-right: 1px solid var(--border-color);
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+                box-shadow: 4px 0 24px rgba(0,0,0,0.15);
             }
 
             #sidebar.show {
@@ -941,7 +1087,217 @@
             }
 
         }
-    </style>
+    
+        
+
+        
+        
+        
+
+        
+
+        
+
+        
+        
+        
+        
+        
+        
+        
+
+
+        .quick-access {
+             /* Adjust grid to look like image - 2 cols top, 1 col bottom */
+        }
+
+        .quick-card {
+            border: none !important;
+            border-radius: 4px !important;
+            color: white !important;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 1rem 0.5rem !important;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
+            min-height: 110px;
+            text-decoration: none !important;
+        }
+
+        .card-blue-gray {
+            background: #90A4AE !important; /* Slate Blue */
+        }
+        
+        .card-red-full {
+            background: #A41F33 !important;
+        }
+
+        .quick-card-text {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .quick-icon {
+            font-size: 1.8rem;
+            background: none !important;
+            box-shadow: none !important;
+            width: auto !important;
+            height: auto !important;
+            color: rgba(255,255,255,0.9);
+            margin-top: 0.5rem;
+        }
+
+
+        /* SIDEBAR RESTORED */
+        #sidebar {
+            grid-row: 2;
+            background: var(--text-primary);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid var(--border-color);
+            overflow: hidden;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .app-nav__head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.85rem 0.9rem;
+            border-radius: 14px;
+            background: var(--primary);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 0.75rem;
+        }
+
+        .sidebar-title {
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0.85rem 0.4rem 0.35rem;
+            margin: 0.25rem 0 0.25rem;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.18);
+        }
+
+        /* ACCORDION RESTORED */
+        .accordion-item {
+            background: rgba(255, 255, 255, 0.94);
+            border: 1px solid rgba(15, 23, 42, 0.10);
+            border-radius: var(--radius) !important;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm) !important;
+            margin-bottom: 0px; 
+        }
+
+        .dash-panel .accordion-item {
+             background: rgba(139, 21, 40, 0.10);
+        }
+
+        .accordion-button {
+            background: rgba(255, 255, 255, 0.98) !important;
+            color: var(--text-primary) !important;
+            font-weight: 700;
+            font-size: 1.08rem;
+            border: none;
+            box-shadow: none;
+            padding: 1.1rem 1.2rem;
+            transition: background 0.15s ease;
+            text-transform: none; /* Revert uppercase */
+        }
+
+        .accordion-button:not(.collapsed) {
+            background: rgba(139, 21, 40, 0.07) !important;
+            color: var(--primary-dark) !important;
+            box-shadow: none;
+        }
+
+        .accordion-button:hover {
+            background: rgba(139, 21, 40, 0.06);
+        }
+        
+        .accordion-body {
+            padding: 1.1rem;
+            background: rgba(255, 255, 255, 0.98);
+            border-top: none;
+        }
+
+
+        /* SEARCH DROPDOWN */
+        .global-search {
+            position: relative;
+        }
+        
+        .search-dropdown {
+            position: absolute;
+            top: 120%;
+            left: 0;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 1px solid rgba(0,0,0,0.1);
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            z-index: 9999;
+            padding: 0.5rem 0;
+        }
+        
+        .search-dropdown.show {
+            display: block;
+        }
+        
+        .search-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.7rem 1rem;
+            text-decoration: none;
+            color: var(--text-primary);
+            border-bottom: 1px solid #f3f4f6;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .search-item:last-child {
+            border-bottom: none;
+        }
+        
+        .search-item:hover {
+            background: rgba(139, 21, 40, 0.05);
+            color: var(--primary);
+            padding-left: 1.2rem;
+        }
+        
+        .search-item i {
+            color: var(--accent);
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .search-category {
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 700;
+            text-transform: uppercase;
+            background: #f8f9fa;
+        }
+
+</style>
 </head>
 <body>
     {% if not current_user.password_changed %}
@@ -953,7 +1309,7 @@
             <form method="POST" action="{{ url_for('main.change_password') }}" style="margin-top: 1.5rem;">
                 <input type="password" name="new_password" placeholder="Nueva contraseña" required style="width: 100%; padding: 0.8rem; margin-bottom: 1rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem;">
                 <input type="password" name="confirm_password" placeholder="Confirmar contraseña" required style="width: 100%; padding: 0.8rem; margin-bottom: 1.5rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem;">
-                <button type="submit" style="width: 100%; padding: 0.8rem; background: linear-gradient(90deg, var(--primary), var(--secondary)); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Cambiar Contraseña</button>
+                <button type="submit" style="width: 100%; padding: 0.8rem; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Cambiar Contraseña</button>
             </form>
         </div>
     </div>
@@ -978,7 +1334,7 @@
     <div class="app-shell">
         <header class="app-header">
             <div class="app-header__left">
-                <button class="icon-btn" type="button" onclick="toggleSidebar()" aria-label="Abrir menú">
+                <button class="icon-btn" type="button" onclick="toggleDashboardSidebar()" aria-label="Abrir menú">
                     <i class="bi bi-list"></i>
                 </button>
                 <a class="brand" href="/dashboard">
@@ -988,6 +1344,7 @@
                 <div class="global-search" role="search" aria-label="Buscar">
                     <i class="bi bi-search"></i>
                     <input id="globalSearch" type="search" placeholder="Buscar avisos, portales, documentos, eventos…">
+                    <div id="searchResults" class="search-dropdown"></div>
                 </div>
             </div>
             <div class="app-header__right">
@@ -1005,19 +1362,43 @@
             </div>
         </header>
 
-        <aside id="sidebar" class="app-nav">
+                        <aside id="sidebar" class="app-nav">
             <div class="app-nav__head">Normatividad</div>
             <div class="sidebar-card">
                 <div class="sidebar-card__title">Documentos</div>
-                <div class="docs-tiles" aria-label="Documentos">
-                    <a class="doc-tile" href="{{ url_for('static', filename='docs/REGLAMENTO DEL HEROICO CUERPO DE BOMBEROS DE LEÓN, GUANAJUATO.pdf') }}" target="_blank" rel="noopener"><i class="bi bi-file-pdf"></i> Reglamento</a>
-                    <a class="doc-tile" href="{{ url_for('static', filename='docs/CODIGO DE ETICA.pdf') }}" target="_blank" rel="noopener"><i class="bi bi-file-pdf"></i> Ética</a>
-                    <a class="doc-tile" href="{{ url_for('static', filename='docs/CODIGO-DE-CONDUCTA.pdf') }}" target="_blank" rel="noopener"><i class="bi bi-file-pdf"></i> Conducta</a>
-                    <a class="doc-tile" href="{{ url_for('static', filename='docs/REGLAMENTO INTERIOR DE LA ADMINISTRACIÓN PÚBLICA MUNICIPAL DE LEÓN, GUANAJUATO.pdf') }}" target="_blank" rel="noopener"><i class="bi bi-file-pdf"></i> Interior</a>
-                    <a class="doc-tile" href="{{ url_for('static', filename='docs/LEY DE RESPONSABILIDADES ADMINISTRATIVAS PARA EL ESTADO DE GUANAJUATO.pdf') }}" target="_blank" rel="noopener"><i class="bi bi-file-pdf"></i> Respons.</a>
-                    <a class="doc-tile" href="{{ url_for('static', filename='docs/CONSTITUCIÓN POLITICA DEL ESTADO DE GUANAJUATO.pdf') }}" target="_blank" rel="noopener"><i class="bi bi-file-pdf"></i> Const. Gto</a>
-                    <a class="doc-tile" href="{{ url_for('static', filename='docs/CONSTITUCION POLITICA DE LOS ESTADOS UNIDOS MEXICANOS.pdf') }}" target="_blank" rel="noopener"><i class="bi bi-file-pdf"></i> Const. MX</a>
-                    <a class="doc-tile" href="{{ url_for('static', filename='docs/REGLAMENTO DE CONTROL INTERNO PARA LA ADMINISTRACIÓN PÚBLICA MUNICIPAL DE LEÓN, GUANAJUATO.pdf') }}" target="_blank" rel="noopener"><i class="bi bi-file-pdf"></i> Control</a>
+                <div class="docs-stack" aria-label="Documentos">
+                    <a class="doc-pill" href="{{ url_for('static', filename='docs/REGLAMENTO DEL HEROICO CUERPO DE BOMBEROS DE LEÓN, GUANAJUATO.pdf') }}" target="_blank" rel="noopener">
+                        <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Reglamento</span></span>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                    <a class="doc-pill" href="{{ url_for('static', filename='docs/CODIGO DE ETICA.pdf') }}" target="_blank" rel="noopener">
+                        <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Código de Ética</span></span>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                    <a class="doc-pill" href="{{ url_for('static', filename='docs/CODIGO-DE-CONDUCTA.pdf') }}" target="_blank" rel="noopener">
+                        <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Código de Conducta</span></span>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                    <a class="doc-pill" href="{{ url_for('static', filename='docs/REGLAMENTO INTERIOR DE LA ADMINISTRACIÓN PÚBLICA MUNICIPAL DE LEÓN, GUANAJUATO.pdf') }}" target="_blank" rel="noopener">
+                        <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Reglamento Interior</span></span>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                    <a class="doc-pill" href="{{ url_for('static', filename='docs/LEY DE RESPONSABILIDADES ADMINISTRATIVAS PARA EL ESTADO DE GUANAJUATO.pdf') }}" target="_blank" rel="noopener">
+                        <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Responsabilidades</span></span>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                    <a class="doc-pill" href="{{ url_for('static', filename='docs/CONSTITUCIÓN POLITICA DEL ESTADO DE GUANAJUATO.pdf') }}" target="_blank" rel="noopener">
+                        <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Constitución Guanajuato</span></span>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                    <a class="doc-pill" href="{{ url_for('static', filename='docs/CONSTITUCION POLITICA DE LOS ESTADOS UNIDOS MEXICANOS.pdf') }}" target="_blank" rel="noopener">
+                        <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Constitución México</span></span>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                    <a class="doc-pill" href="{{ url_for('static', filename='docs/REGLAMENTO DE <i class="bi bi-shield-check"></i> Control Interno PARA LA ADMINISTRACIÓN PÚBLICA MUNICIPAL DE LEÓN, GUANAJUATO.pdf') }}" target="_blank" rel="noopener">
+                        <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Control Interno</span></span>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
                 </div>
             </div>
         </aside>
@@ -1042,17 +1423,17 @@
 
                 <section class="dash-panel">
                     <div class="accordion" id="mainAccordion">
-                        <!-- AVISOS -->
+                        <!-- <i class="bi bi-bell"></i> AVISOS -->
                         <div class="accordion-item">
                             <h2 class="accordion-header">
-                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAvisos">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAvisos">
                                     <i class="bi bi-bell"></i> AVISOS
                                     {% if current_user.id == 2 %}
                                     <button class="btn btn-light btn-sm ms-auto me-2" data-bs-toggle="modal" data-bs-target="#avisoModal" onclick="event.stopPropagation()">➕</button>
                                     {% endif %}
                                 </button>
                             </h2>
-                            <div id="collapseAvisos" class="accordion-collapse collapse show" data-bs-parent="#mainAccordion">
+                            <div id="collapseAvisos" class="accordion-collapse collapse" data-bs-parent="#mainAccordion">
                                 <div class="accordion-body">
                                     <div id="avisosContainer">
                                         {% if avisos %}
@@ -1106,7 +1487,7 @@
                             </div>
                         </div>
 
-                        <!-- CONVOCATORIAS -->
+                        <!-- <i class="bi bi-file-earmark"></i> CONVOCATORIAS -->
                         <div class="accordion-item">
                             <h2 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDocumentos">
@@ -1131,7 +1512,7 @@
                             </div>
                         </div>
 
-                        <!-- EVENTOS -->
+                        <!-- <i class="bi bi-calendar2-event"></i> EVENTOS -->
                         <div class="accordion-item">
                             <h2 class="accordion-header">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEventos">
@@ -1164,19 +1545,18 @@
                     </div>
                 </section>
 
-                <section class="dash-quick">
+                                <section class="dash-quick">
                     <div class="quick-access">
-                        <a href="https://denuncia.leon.gob.mx/" target="_blank" class="quick-card card-red">
-                            <span class="quick-icon quick-icon--red"><i class="bi bi-journal-text"></i></span>
-                            <span class="quick-card-text">Denuncia León<span class="quick-sub">Acceso directo</span></span>
+                        <a href="https://denuncia.leon.gob.mx/" target="_blank" class="quick-card card-blue-gray">
+                            <span class="quick-card-text">Denuncia León</span>
+                            <i class="bi bi-file-text quick-icon"></i>
                         </a>
-                        <a href="#" class="quick-card card-orange" onclick="alert('Próximamente'); return false;">
-                            <span class="quick-icon quick-icon--gold"><i class="bi bi-calendar-event-fill"></i></span>
-                            <span class="quick-card-text">Calendario 2025<span class="quick-sub">Próximamente</span></span>
+                        <a href="#" class="quick-card card-blue-gray" onclick="alert('Próximamente'); return false;">
+                            <span class="quick-card-text">Calendario De Nómina 2025</span>
+                            <i class="bi bi-calendar-event quick-icon"></i>
                         </a>
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#avisoPrivacidadModal" class="quick-card card-teal" style="grid-column: 1/-1;">
-                            <span class="quick-icon quick-icon--teal"><i class="bi bi-shield-lock"></i></span>
-                            <span class="quick-card-text">Aviso de Privacidad<span class="quick-sub">Consulta la información</span></span>
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#avisoPrivacidadModal" class="quick-card card-red-full" style="grid-column: 1/-1;">
+                            <span class="quick-card-text">Aviso de Privacidad Integral</span>
                         </a>
                     </div>
                 </section>
@@ -1329,16 +1709,153 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/shepherd.js@8.0.0/dist/js/shepherd.min.js"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
-    <script>
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('show');
+        <script>
+        function toggleDashboardSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('show');
+            
+            // Simple backdrop handling for mobile
+            if (window.innerWidth <= 768) {
+                let backdrop = document.getElementById('sidebarBackdrop');
+                if (sidebar.classList.contains('show')) {
+                    if (!backdrop) {
+                        backdrop = document.createElement('div');
+                        backdrop.id = 'sidebarBackdrop';
+                        backdrop.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1050;'; // below sidebar (1100)
+                        backdrop.onclick = toggleDashboardSidebar;
+                        document.body.appendChild(backdrop);
+                    }
+                } else {
+                    if (backdrop) backdrop.remove();
+                }
+            }
         }
         function toggleNavbar() {
             document.getElementById('navbarNav').classList.toggle('show');
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            // Si alguna función del JS escribe en #contenido, lo mostramos en overlay.
+            // --- SEARCH LOGIC (Dropdown Style) ---
+            const searchInput = document.getElementById('globalSearch');
+            const searchResults = document.getElementById('searchResults');
+            
+            if (searchInput && searchResults) {
+                
+                function getSearchableItems() {
+                    const items = [];
+                    
+                    // 1. Normatividad (Sidebar docs)
+                    // Selector adjusted for new sidebar structure (.doc-pill)
+                    document.querySelectorAll('#sidebar .doc-pill').forEach(link => {
+                        // Title is typically inside .doc-pill__left -> span -> span, or just text
+                        // Let's grab the full text content clean
+                        const title = link.querySelector('span span') ? link.querySelector('span span').textContent : link.textContent;
+                        items.push({
+                            title: title.trim(),
+                            url: link.href,
+                            category: 'Normatividad',
+                            icon: 'bi-file-text'
+                        });
+                    });
+
+                    // 2. Portales
+                    document.querySelectorAll('[data-portal-row]').forEach(row => {
+                        const link = row.querySelector('a');
+                        if (link) {
+                            items.push({
+                                title: link.textContent.trim(),
+                                url: link.href,
+                                category: 'Portales',
+                                icon: 'bi-globe'
+                            });
+                        }
+                    });
+
+                    // 3. Convocatorias (Files)
+                    document.querySelectorAll('#file-list .list-group-item').forEach(item => {
+                        const link = item.querySelector('a[href*="serve_uploaded_file"]'); 
+                        const name = item.getAttribute('data-filename') || item.textContent.trim();
+                        if (link) {
+                            items.push({
+                                title: name.replace(/\s+/g, ' ').trim(),
+                                url: link.href,
+                                category: 'Convocatorias',
+                                icon: 'bi-file-pdf'
+                            });
+                        }
+                    });
+
+                    // 4. Quick Access
+                    document.querySelectorAll('.quick-card').forEach(card => {
+                        const textEl = card.querySelector('.quick-card-text');
+                        if (textEl) {
+                            items.push({
+                                title: textEl.textContent.trim(),
+                                url: card.href,
+                                category: 'Accesos Rápidos',
+                                icon: 'bi-lightning'
+                            });
+                        }
+                    });
+                    
+                    return items;
+                }
+
+                // Cache items once on load
+                const searchableItems = getSearchableItems();
+
+                searchInput.addEventListener('input', function(e) {
+                    const term = e.target.value.trim().toLowerCase();
+                    searchResults.innerHTML = '';
+                    
+                    if (term.length < 2) {
+                        searchResults.classList.remove('show');
+                        return;
+                    }
+
+                    const matches = searchableItems.filter(item => 
+                        item.title.toLowerCase().includes(term)
+                    );
+
+                    if (matches.length > 0) {
+                        searchResults.classList.add('show');
+                        
+                        // Group by category
+                        const categories = [...new Set(matches.map(m => m.category))];
+                        
+                        categories.forEach(cat => {
+                            const catHeader = document.createElement('div');
+                            catHeader.className = 'search-category';
+                            catHeader.textContent = cat;
+                            searchResults.appendChild(catHeader);
+
+                            const catItems = matches.filter(m => m.category === cat);
+                            catItems.forEach(item => {
+                                const a = document.createElement('a');
+                                a.className = 'search-item';
+                                a.href = item.url;
+                                // External links get _blank
+                                if (item.url.startsWith('http') && !item.url.includes(window.location.host)) {
+                                    a.target = '_blank';
+                                }
+                                a.innerHTML = `<i class="bi ${item.icon}"></i> <span>${item.title}</span>`;
+                                searchResults.appendChild(a);
+                            });
+                        });
+                    } else {
+                        searchResults.classList.remove('show');
+                    }
+                });
+
+                // Hide when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                        searchResults.classList.remove('show');
+                    }
+                });
+            }
+
+            // --- OVERLAY LOGIC ---
             const overlay = document.getElementById('contenidoOverlay');
             const contenido = document.getElementById('contenido');
             const closeBtn = document.getElementById('closeContenido');

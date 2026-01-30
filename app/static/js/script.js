@@ -852,12 +852,14 @@ document.addEventListener("DOMContentLoaded", function () {
         rebuildFavList();
     });
 
-    // Buscador global
+    // Buscador global - DESACTIVADO (Manejado en dashboard.html con dropdown)
+    /*
     if (searchInput) {
         searchInput.addEventListener("input", function () {
             applyGlobalSearch(searchInput.value);
         });
     }
+    */
 
     updateFavButtons();
     rebuildFavList();
