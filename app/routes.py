@@ -1139,16 +1139,32 @@ def agregar_portal():
             return jsonify({"success": True})
     return jsonify({"success": False}), 403
 
+
 @main.route('/eliminar_portal', methods=['POST'])
 @login_required
 def eliminar_portal():
-    if current_user.id == 2:
-        portal_id = request.json.get('id')
-        portal = PortalWeb.query.get(portal_id)
-        if portal:
-            db.session.delete(portal)
-            db.session.commit()
-            return jsonify({"success": True})
-    return jsonify({"success": False}), 403
+    import sys
+    try:
+        print(f"DEBUG eliminar_portal: user_id={current_user.id}", file=sys.stderr)
+        print(f"DEBUG eliminar_portal: request.json={request.json}", file=sys.stderr)
+        if current_user.id == 2:
+            portal_id = request.json.get('id')
+            print(f"DEBUG eliminar_portal: portal_id={portal_id}", file=sys.stderr)
+            portal = PortalWeb.query.get(portal_id)
+            if portal:
+                db.session.delete(portal)
+                db.session.commit()
+                print(f"DEBUG eliminar_portal: eliminado portal_id={portal_id}", file=sys.stderr)
+                return jsonify({"success": True})
+            else:
+                print(f"DEBUG eliminar_portal: portal no encontrado id={portal_id}", file=sys.stderr)
+        else:
+            print(f"DEBUG eliminar_portal: usuario no autorizado id={current_user.id}", file=sys.stderr)
+        return jsonify({"success": False}), 403
+    except Exception as e:
+        import traceback
+        print(f"ERROR eliminar_portal: {e}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
