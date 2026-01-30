@@ -970,29 +970,48 @@
             border-left: 4px solid var(--primary);
         }
 
-        /* RESPONSIVE - TABLET (768px) */
+        /* RESPONSIVE - TABLET & MOBILE (<= 1024px) */
         @media (max-width: 1024px) {
+            html, body {
+                height: auto;
+                overflow-y: auto !important; /* Force scroll on body */
+            }
+
+            .app-shell {
+                height: auto;
+                min-height: 100vh;
+                display: flex; /* Flex column is better for flow than grid here */
+                flex-direction: column;
+            }
+
+            .app-header {
+                position: sticky;
+                top: 0;
+            }
+
             .dashboard-grid {
                 grid-template-columns: 1fr;
                 grid-template-rows: auto auto auto auto; /* Explicit rows for mobile */
                 grid-template-areas:
                     "hero"
-                    "quick"
                     "panel"
-                    "panel";
+                    "quick"
+                    "quick";
                 height: auto; /* Allow growth */
-                row-gap: 1rem;
+                row-gap: 1.5rem;
             }
 
             .dash-hero {
-                height: 380px; /* Fixed reasonable height on tablet/mobile */
+                height: auto;
+                aspect-ratio: 16/9; /* Maintain aspect ratio */
+                min-height: 250px;
             }
 
             main {
-                overflow: auto;
-                height: auto;
+                overflow: visible !important; /* No internal scroll */
+                height: auto !important;
                 display: block; /* revert grid restriction */
-                padding-bottom: 2rem;
+                padding-bottom: 4rem; /* Extra space at bottom */
             }
 
             .dash-panel, .dash-quick {
@@ -1000,17 +1019,10 @@
                 height: auto;
             }
 
-            
-        
-
-        
-        
-        
-
-        
-
-        
-
+            /* Adjust quick access cards for mobile */
+            .quick-access {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Smaller min-width */
+            }
         }
 
         /* RESPONSIVE - MOBILE (768px) */
