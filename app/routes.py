@@ -1041,6 +1041,7 @@ def delete_evento(evento_id):
     return jsonify({ "success": True })
 
 @main.route('/admin/noticias', methods=['GET', 'POST'])
+@login_required
 def admin_noticias():
     if request.method == 'POST':
         titulo = request.form['titulo']
