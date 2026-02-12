@@ -374,27 +374,6 @@ def login():
             flash('Usuario incorrecto.', 'danger')
 
     return render_template('login.html', form=form)
-from flask import session
-
-@main.route('/change_password', methods=['POST'])
-@login_required
-def change_password():
-    new_password = request.form['new_password']
-    confirm_password = request.form['confirm_password']
-    if new_password != confirm_password:
-        flash('Las contraseñas no coinciden.', 'danger')
-        return redirect(url_for('main.dashboard'))
-
-    current_user.set_password(new_password)
-    current_user.password_changed = True
-    db.session.commit()
-
-    with open('cambio_contraseñas.txt', 'a', encoding='utf-8') as f:
-        f.write(f"Usuario: {current_user.username} - Nueva contraseña: {new_password}\n")
-
-    session['show_password_changed_message'] = True
-
-    return redirect(url_for('main.dashboard'))
 
 @main.route('/logout')
 @login_required
