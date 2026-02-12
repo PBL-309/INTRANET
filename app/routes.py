@@ -6,8 +6,9 @@ from flask_login import current_user, login_user, logout_user, login_required
 import qrcode
 from werkzeug.utils import secure_filename
 from app import db
-from io import BytesIO # Necesario para manejar el archivo en memoria
+from io import BytesIO 
 import os
+import requests # Necesario para verificar reCAPTCHA v3
 from app.models import Aviso, Evento, File, Folder, FormularioRespuesta, PortalWeb, Respuesta, User, VacationRequest, Noticia, RegistroCompetencia, EvaluacionDesempeno, AsistenciaFinAnio
 from app.forms import LoginForm
 from datetime import datetime, timedelta
@@ -358,13 +359,19 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
-        if user and user.check_password(form.password.data):
+        
+        if user:
+            # Verificación específica para administrador
+            if user.username == 'admin':
+                if not form.password.data or not user.check_password(form.password.data):
+                    flash('Contraseña incorrecta.', 'danger')
+                    return render_template('login.html', form=form)
+            
             login_user(user)
-
             flash('Inicio de sesión exitoso.', 'success')
             return redirect(url_for('main.dashboard'))
         else:
-            flash('Usuario o contraseña incorrectos.', 'danger')
+            flash('Usuario incorrecto.', 'danger')
 
     return render_template('login.html', form=form)
 from flask import session

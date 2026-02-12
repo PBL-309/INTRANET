@@ -135,16 +135,57 @@
     .hidden {
       display: none;
     }
+
+    /* Flash Messages Styles */
+    .alert {
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .alert-success {
+      color: #3c763d;
+      background-color: #dff0d8;
+      border-color: #d6e9c6;
+    }
+    .alert-danger, .alert-error {
+      color: #a94442;
+      background-color: #f2dede;
+      border-color: #ebccd1;
+    }
+    .alert-info {
+      color: #31708f;
+      background-color: #d9edf7;
+      border-color: #bce8f1;
+    }
+    .alert-warning {
+      color: #8a6d3b;
+      background-color: #fcf8e3;
+      border-color: #faebcc;
+    }
   </style>
 </head>
 <body>
   <div class="page" id="page">
-    <h2>EVALUACIÓN DEL DESEMPEÑO</h2>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'error' else 'danger' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <h2>EVALUACIñ“N DEL DESEMPEñ‘O</h2>
     <form action="{{ url_for('main.submit_evaluacion') }}" method="POST">    	
     <div class="header">
       <label>Nombre:<br><input type="text"  name="nombre" required /></label>
       <label>Fecha:<br><input type="date" name="fecha" placeholder="dd/mm/aaaa" required /></label>
-      <label>Área:<br><input type="text" name="area" required /></label>
+      <label>ñrea:<br><input type="text" name="area" required /></label>
       <label>Estación:<br><input type="text" name="estacion" required /></label>
       <label>No. de Nómina:<br><input type="text" name="nomina" required /></label>
       <label>Puesto:<br><input type="text" name="puesto" required /></label>
@@ -405,7 +446,7 @@
 </div>
 
 <div class="page hidden" id="page2">
-  <h2>CONTINUACIÓN DE LA EVALUACIÓN</h2>
+  <h2>CONTINUACIñ“N DE LA EVALUACIñ“N</h2>
 
   <p class="instruction">
     Instrucción: En cada una de las oraciones deberá marcar el círculo que represente lo que usted piense sobre su desempeño dentro de la institución de acuerdo a la siguiente clasificación:
@@ -643,6 +684,36 @@
   }
 </script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                     alert.style.transition = 'opacity 0.5s ease-out';
+                     alert.style.opacity = '0';
+                     setTimeout(function() {
+                        alert.remove();
+                     }, 500);
+                });
+            }, 4000);
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                     alert.style.transition = 'opacity 0.5s ease-out';
+                     alert.style.opacity = '0';
+                     setTimeout(function() {
+                        alert.remove();
+                     }, 500);
+                });
+            }, 4000);
+        });
+    </script>
 </body>
 </html>
+
+
 

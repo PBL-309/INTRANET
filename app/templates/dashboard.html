@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -28,7 +28,6 @@
             --shadow-md: 0 10px 24px rgba(15, 23, 42, 0.08);
             --radius: 16px;
         }
-
         * {
             margin: 0;
             padding: 0;
@@ -48,8 +47,6 @@
             flex-direction: column;
             overflow: hidden;
         }
-
-        /* APP SHELL (layout completamente distinto) */
         .app-shell {
             height: 100vh;
             display: grid;
@@ -234,22 +231,6 @@
             text-overflow: ellipsis;
             max-width: 240px;
         }
-
-        /* NAV */
-        
-        
-
-        
-        
-        
-
-        
-
-        
-
-
-        
-
         #sidebar .nav-link {
             display: flex;
             align-items: center;
@@ -274,10 +255,6 @@
             border-color: rgba(255, 255, 255, 0.16);
             transform: translateY(-1px);
         }
-
-        
-
-        /* MAIN */
         main {
             grid-row: 2;
             overflow: hidden;
@@ -289,27 +266,24 @@
             display: grid;
             height: 100%;
             grid-template-columns: 1.35fr 1fr;
-            /* Force fit in height: Hero takes up to 60%, Quick takes rest. */
             grid-template-rows: minmax(0, 6fr) minmax(0, 4fr);
             grid-template-areas:
                 "hero panel"
                 "quick panel";
             column-gap: 1.25rem;
-            row-gap: 0.75rem; /* Little more breathing room */
-            align-items: stretch; /* Stretch to fill */
+            row-gap: 0.75rem;
+            align-items: stretch;
         }
 
         .dash-hero { grid-area: hero; }
         .dash-panel { grid-area: panel; }
         .dash-quick { grid-area: quick; }
         .dash-content { grid-area: content; }
-
-        /* Permitir que el bloque quick rellene el alto disponible */
         .dash-quick {
             min-height: 0;
             display: flex;
             flex-direction: column;
-            overflow-y: auto; /* Scroll interno si los botones no caben */
+            overflow-y: auto;
         }
 
         .dash-hero .card,
@@ -318,8 +292,6 @@
         .dash-hero .carousel-item {
             height: 100%;
         }
-
-        /* Hero fills grid cell completely */
         .dash-hero {
             height: 100%;
             min-height: 0;
@@ -335,11 +307,9 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            overflow-y: auto; /* Scroll interno para panel derecho */
-            padding-right: 4px; /* Space for scrollbar */
+            overflow-y: auto;
+            padding-right: 4px;
         }
-
-        /* Common discrete scrollbar for internal containers */
         .dash-quick::-webkit-scrollbar,
         .dash-panel::-webkit-scrollbar {
             width: 4px;
@@ -349,8 +319,6 @@
             background: rgba(0,0,0,0.1);
             border-radius: 4px;
         }
-
-        /* Sidebar docs (sin tiles) */
         .sidebar-card {
             border: 1px solid rgba(15, 23, 42, 0.10);
             border-radius: var(--radius);
@@ -388,10 +356,8 @@
             mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
             -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
         }
-
-        /* Custom scrollbar specifically for docs-stack */
         .docs-stack::-webkit-scrollbar {
-            width: 4px; /* Más pequeño */
+            width: 4px;
         }
         
         .docs-stack::-webkit-scrollbar-track {
@@ -399,7 +365,7 @@
         }
 
         .docs-stack::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2); /* Gris/Blanco transparente */
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 4px;
         }
 
@@ -451,6 +417,85 @@
 
         .doc-pill .bi-chevron-right {
             color: rgba(255, 255, 255, 0.65);
+        }
+
+        /* ── Sidebar Collapsible Groups ── */
+        .sidebar-group {
+            margin-bottom: 0.4rem;
+        }
+
+        .sidebar-group__toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 0.7rem 0.85rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.92);
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: background 0.18s ease, border-color 0.18s ease;
+            text-align: left;
+            letter-spacing: 0.3px;
+        }
+
+        .sidebar-group__toggle:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.22);
+        }
+
+        .sidebar-group__toggle[aria-expanded="true"] {
+            background: rgba(139, 21, 40, 0.25);
+            border-color: rgba(139, 21, 40, 0.40);
+            color: #fff;
+        }
+
+        .sidebar-group__toggle .toggle-left {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .sidebar-group__toggle .toggle-left i {
+            font-size: 1rem;
+            color: var(--accent);
+        }
+
+        .sidebar-group__toggle .bi-chevron-down {
+            font-size: 0.7rem;
+            transition: transform 0.25s ease;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .sidebar-group__toggle[aria-expanded="true"] .bi-chevron-down {
+            transform: rotate(180deg);
+            color: var(--accent);
+        }
+
+        .sidebar-group__body {
+            padding: 0.35rem 0 0 1.2rem;
+            border-left: 2px solid rgba(139, 21, 40, 0.25);
+            margin-left: 1rem;
+            margin-top: 0.3rem;
+        }
+
+        .sidebar-group__body .doc-pill {
+            padding: 0.55rem 0.8rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 10px;
+            margin-bottom: 0.3rem;
+        }
+
+        .sidebar-group__body .doc-pill__left i {
+            font-size: 0.85rem;
+        }
+
+        .sidebar-group__body .doc-pill .bi-chevron-right {
+            font-size: 0.7rem;
         }
 
         .portal-favs {
@@ -518,8 +563,6 @@
             color: var(--accent);
             border-color: rgba(218, 165, 32, 0.35);
         }
-
-        /* CARDS */
         .card {
             border: 1px solid rgba(15, 23, 42, 0.10);
             border-radius: var(--radius);
@@ -537,8 +580,6 @@
         .card-body {
             padding: 1.25rem;
         }
-
-        /* QUICK ACCESS CARDS */
         .quick-access {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -547,8 +588,6 @@
             align-content: stretch;
             grid-auto-rows: 1fr;
         }
-
-        /* En desktop: 2 columnas fijas para que 2 botones = ancho del aviso */
         @media (min-width: 992px) {
             .quick-access {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -578,8 +617,6 @@
             box-shadow: var(--shadow-sm);
             position: relative;
         }
-
-        /* Menos blanco: acentos por tipo */
         .quick-card.card-red {
             border-color: rgba(139, 21, 40, 0.22);
             background: rgba(139, 21, 40, 0.22);
@@ -656,8 +693,6 @@
         .quick-icon--teal { background: var(--success); }
 
         .card-red, .card-orange, .card-teal { background: unset; }
-
-        /* CAROUSEL */
         .carousel {
             border-radius: var(--radius);
             overflow: hidden;
@@ -687,25 +722,13 @@
             transform: translateY(-50%);
             box-shadow: var(--shadow-md);
         }
-
         .carousel-control-prev-icon, .carousel-control-next-icon {
             filter: invert(1) grayscale(1);
         }
-
-        /* ACCORDION */
         .accordion {
             gap: 1rem;
             height: 100%;
         }
-
-        
-        
-        
-        
-        
-        
-        
-        
  .accordion-item-old {
             background: rgba(255, 255, 255, 0.94);
             border: 1px solid rgba(15, 23, 42, 0.10);
@@ -713,21 +736,15 @@
             overflow: hidden;
             box-shadow: var(--shadow-sm);
         }
-
         .dash-panel {
             min-height: 0;
         }
-
         .dash-panel .accordion {
             overflow: hidden;
         }
-
         .dash-panel .accordion-collapse {
-            /* max-height: clamp(...)  REMOVED - now panel scrolls properly */
             overflow: visible;
         }
-
-        /* Panel derecho menos blanco */
         .dash-panel 
         
         
@@ -740,13 +757,9 @@
             background: rgba(139, 21, 40, 0.10);
         }
 
-        .dash-panel 
-
-        /* En pantallas más altas (p. ej. 24"), llenar mejor el viewport sin scroll */
+        .dash-panel
         @media (min-height: 900px) {
-            /* Logic handled by grid-rows: fr now */
         }
-        /* Overlay de contenido dinámico (para mantener funciones sin scrollear la página) */
         .contenido-overlay {
             position: fixed;
             inset: 76px 0 0 0;
@@ -785,11 +798,6 @@
             margin: 0;
             font-size: 1rem;
         }
-
-        
-
-        
-
         .accordion-button:hover {
             background: rgba(139, 21, 40, 0.06);
         }
@@ -804,9 +812,6 @@
             font-size: 1.2rem;
         }
 
-        
-
-        /* LIST */
         .list-group-item {
             border: none;
             border-bottom: 1px solid var(--border-color);
@@ -834,8 +839,6 @@
             gap: 1rem;
             padding-left: 0.4rem;
         }
-
-        /* MODAL */
         .modal-content {
             border: none;
             border-radius: 14px;
@@ -858,8 +861,6 @@
         .btn-close {
             filter: brightness(0) invert(1);
         }
-
-        /* BUTTONS */
         .btn-primary {
             background: var(--primary);
             border: none;
@@ -928,8 +929,6 @@
         .btn-link:hover {
             color: var(--primary-dark) !important;
         }
-
-        /* SCROLLBAR */
         ::-webkit-scrollbar {
             width: 10px;
             height: 10px;
@@ -947,8 +946,6 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--primary-dark);
         }
-
-        /* ANIMATIONS */
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -970,63 +967,51 @@
             border: none;
             border-left: 4px solid var(--primary);
         }
-
-        /* RESPONSIVE - TABLET & MOBILE (<= 1024px) */
         @media (max-width: 1024px) {
             html, body {
                 height: auto;
-                overflow-y: auto !important; /* Force scroll on body */
+                overflow-y: auto !important;
             }
-
             .app-shell {
                 height: auto;
                 min-height: 100vh;
-                display: flex; /* Flex column is better for flow than grid here */
+                display: flex;
                 flex-direction: column;
             }
-
             .app-header {
                 position: sticky;
                 top: 0;
             }
-
             .dashboard-grid {
                 grid-template-columns: 1fr;
-                grid-template-rows: auto auto auto auto; /* Explicit rows for mobile */
+                grid-template-rows: auto auto auto auto;
                 grid-template-areas:
                     "hero"
                     "panel"
                     "quick"
                     "quick";
-                height: auto; /* Allow growth */
+                height: auto;
                 row-gap: 1.5rem;
             }
-
             .dash-hero {
                 height: auto;
-                aspect-ratio: 16/9; /* Maintain aspect ratio */
+                aspect-ratio: 16/9;
                 min-height: 250px;
             }
-
             main {
-                overflow: visible !important; /* No internal scroll */
+                overflow: visible !important;
                 height: auto !important;
-                display: block; /* revert grid restriction */
-                padding-bottom: 4rem; /* Extra space at bottom */
+                display: block;
+                padding-bottom: 4rem;
             }
-
             .dash-panel, .dash-quick {
-                overflow: visible; /* Let page scroll handle it */
+                overflow: visible;
                 height: auto;
             }
-
-            /* Adjust quick access cards for mobile */
             .quick-access {
                 grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Smaller min-width */
             }
         }
-
-        /* RESPONSIVE - MOBILE (768px) */
         @media (max-width: 768px) {
             .app-shell {
                 grid-template-columns: 1fr;
@@ -1095,8 +1080,6 @@
                 height: auto;
             }
         }
-
-        /* RESPONSIVE - SMALL MOBILE (480px) */
         @media (max-width: 480px) {
             .user-profile {
                 max-width: 150px;
@@ -1110,29 +1093,6 @@
                 grid-template-columns: 1fr;
             }
 
-        }
-    
-        
-
-        
-        
-        
-
-        
-
-        
-
-        
-        
-        
-        
-        
-        
-        
-
-
-        .quick-access {
-             /* Adjust grid to look like image - 2 cols top, 1 col bottom */
         }
 
         .quick-card {
@@ -1151,7 +1111,7 @@
         }
 
         .card-blue-gray {
-            background: #90A4AE !important; /* Slate Blue */
+            background: #90A4AE !important;
         }
         
         .card-red-full {
@@ -1173,9 +1133,6 @@
             color: rgba(255,255,255,0.9);
             margin-top: 0.5rem;
         }
-
-
-        /* SIDEBAR RESTORED */
         #sidebar {
             grid-row: 2;
             background: var(--text-primary);
@@ -1213,8 +1170,6 @@
             margin: 0.25rem 0 0.25rem;
             border-bottom: 1px dashed rgba(255, 255, 255, 0.18);
         }
-
-        /* ACCORDION RESTORED */
         .accordion-item {
             background: rgba(255, 255, 255, 0.94);
             border: 1px solid rgba(15, 23, 42, 0.10);
@@ -1237,7 +1192,7 @@
             box-shadow: none;
             padding: 1.1rem 1.2rem;
             transition: background 0.15s ease;
-            text-transform: none; /* Revert uppercase */
+            text-transform: none;
         }
 
         .accordion-button:not(.collapsed) {
@@ -1255,9 +1210,6 @@
             background: rgba(255, 255, 255, 0.98);
             border-top: none;
         }
-
-
-        /* SEARCH DROPDOWN */
         .global-search {
             position: relative;
         }
@@ -1320,6 +1272,30 @@
             text-transform: uppercase;
             background: #f8f9fa;
         }
+        .accordion-item .accordion-body img {
+            max-width: 100%;
+            max-height: 90vh;
+            width: auto;
+            height: auto;
+        }
+
+        @media (max-width: 1024px) {
+            .accordion-item .accordion-body img {
+                max-height: 85vh;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .accordion-item .accordion-body img {
+                max-height: 80vh;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .accordion-item .accordion-body img {
+                max-height: 70vh;
+            }
+        }
 
 </style>
 </head>
@@ -1327,7 +1303,7 @@
     {% if not current_user.password_changed %}
     <div id="overlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(5px);">
         <div style="background: white; padding: 2.5rem; border-radius: 16px; max-width: 450px; width: 95%; text-align: center; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);">
-            <div style="font-size: 2rem; margin-bottom: 1rem;">🔐</div>
+            <div style="font-size: 2rem; margin-bottom: 1rem;">ðŸ”</div>
             <h2 style="color: var(--primary); margin-bottom: 1rem; font-weight: 700;">Cambio Obligatorio de Contraseña</h2>
             <p style="margin-bottom: 1.5rem; color: var(--text-secondary); line-height: 1.6;">Por seguridad, debes cambiar tu contraseña. Esta acción solo se pedirá una vez.</p>
             <form method="POST" action="{{ url_for('main.change_password') }}" style="margin-top: 1.5rem;">
@@ -1358,7 +1334,7 @@
     <div class="app-shell">
         <header class="app-header">
             <div class="app-header__left">
-                <button class="icon-btn" type="button" onclick="toggleDashboardSidebar()" aria-label="Abrir menú">
+                <button class="icon-btn d-md-none" type="button" onclick="toggleDashboardSidebar()" aria-label="Abrir menú">
                     <i class="bi bi-list"></i>
                 </button>
                 <a class="brand" href="/dashboard">
@@ -1367,14 +1343,14 @@
                 </a>
                 <div class="global-search" role="search" aria-label="Buscar">
                     <i class="bi bi-search"></i>
-                    <input id="globalSearch" type="search" placeholder="Buscar avisos, portales, documentos, eventos…">
+                    <input id="globalSearch" type="search" placeholder="Buscar avisos, portales, documentos, eventos">
                     <div id="searchResults" class="search-dropdown"></div>
                 </div>
             </div>
             <div class="app-header__right">
                 <div class="top-links" id="navbarNav">
                     <a class="top-link" href="/dashboard"><i class="bi bi-house"></i> Inicio</a>
-                    <a class="top-link" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal"><i class="bi bi-door-left"></i> Cerrar</a>
+                    <a class="top-link" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal" style="background-color: #b74455;"><i class="bi bi-door-left"></i> Cerrar Sesión</a>
                 </div>
                 <div class="user-profile" title="{{ current_user.nombre }}">
                     <img src="{{ url_for('static', filename=user_image) }}" alt="Foto" class="user-img">
@@ -1391,43 +1367,158 @@
             <div class="sidebar-card">
                 <div class="sidebar-card__title">Documentos</div>
                 <div class="docs-stack" aria-label="Documentos">
-                    <a class="doc-pill" href="{{ url_for('static', filename='docs/REGLAMENTO DEL HEROICO CUERPO DE BOMBEROS DE LEÓN, GUANAJUATO.pdf') }}" target="_blank" rel="noopener">
-                        <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Reglamento</span></span>
-                        <i class="bi bi-chevron-right"></i>
-                    </a>
-                    <a class="doc-pill" href="{{ url_for('static', filename='docs/CODIGO DE ETICA.pdf') }}" target="_blank" rel="noopener">
-                        <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Código de Ética</span></span>
-                        <i class="bi bi-chevron-right"></i>
-                    </a>
-                    <a class="doc-pill" href="{{ url_for('static', filename='docs/CODIGO-DE-CONDUCTA.pdf') }}" target="_blank" rel="noopener">
-                        <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Código de Conducta</span></span>
-                        <i class="bi bi-chevron-right"></i>
-                    </a>
-                    <a class="doc-pill" href="{{ url_for('static', filename='docs/REGLAMENTO INTERIOR DE LA ADMINISTRACIÓN PÚBLICA MUNICIPAL DE LEÓN, GUANAJUATO.pdf') }}" target="_blank" rel="noopener">
-                        <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Reglamento Interior</span></span>
-                        <i class="bi bi-chevron-right"></i>
-                    </a>
-                    <a class="doc-pill" href="{{ url_for('static', filename='docs/LEY DE RESPONSABILIDADES ADMINISTRATIVAS PARA EL ESTADO DE GUANAJUATO.pdf') }}" target="_blank" rel="noopener">
-                        <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Responsabilidades</span></span>
-                        <i class="bi bi-chevron-right"></i>
-                    </a>
-                    <a class="doc-pill" href="{{ url_for('static', filename='docs/CONSTITUCIÓN POLITICA DEL ESTADO DE GUANAJUATO.pdf') }}" target="_blank" rel="noopener">
-                        <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Constitución Guanajuato</span></span>
-                        <i class="bi bi-chevron-right"></i>
-                    </a>
-                    <a class="doc-pill" href="{{ url_for('static', filename='docs/CONSTITUCION POLITICA DE LOS ESTADOS UNIDOS MEXICANOS.pdf') }}" target="_blank" rel="noopener">
-                        <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Constitución México</span></span>
-                        <i class="bi bi-chevron-right"></i>
-                    </a>
-                    <a class="doc-pill" href="{{ url_for('static', filename='docs/MANUAL DE CONTROL INTERNO.pdf') }}" target="_blank" rel="noopener">
-                        <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Manual de Control Interno</span></span>
-                        <i class="bi bi-chevron-right"></i>
-                    </a>
+
+                    <!-- ── Reglamentos ── -->
+                    <div class="sidebar-group">
+                        <button class="sidebar-group__toggle" data-bs-toggle="collapse" data-bs-target="#grpReglamentos" aria-expanded="false" aria-controls="grpReglamentos">
+                            <span class="toggle-left"><i class="bi bi-journal-bookmark-fill"></i> Reglamentos</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div class="collapse" id="grpReglamentos">
+                            <div class="sidebar-group__body">
+                                <a class="doc-pill" href="{{ url_for('static', filename='docs/REGLAMENTO DEL HEROICO CUERPO DE BOMBEROS DE LEÓN, GUANAJUATO.pdf') }}" target="_blank" rel="noopener">
+                                    <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Reglamento del H. Cuerpo de Bomberos</span></span>
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                                <a class="doc-pill" href="{{ url_for('static', filename='docs/REGLAMENTO INTERIOR DE LA ADMINISTRACIÓN PÚBLICA MUNICIPAL DE LEÓN, GUANAJUATO.pdf') }}" target="_blank" rel="noopener">
+                                    <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Reglamento Interior Adm. Pública</span></span>
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                                <a class="doc-pill" href="{{ url_for('static', filename='docs/REGLAMENTO DE ADQUISICIONES, ENAJENACIONES, ARRENDAMIENTOS, COMODATOS Y CONTRATACIÓN DE SERVICIOS PARA EL MUNICIPIO DE LEÓN, GUANAJUATO.pdf') }}" target="_blank" rel="noopener">
+                                    <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Reglamento de Adquisiciones</span></span>
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                                <a class="doc-pill" href="{{ url_for('static', filename='docs/REGLAMENTO DE CONTROL INTERNO PARA LA ADMINISTRACIÓN PÚBLICA MUNICIPAL DE LEÓN, GUANAJUATO.pdf') }}" target="_blank" rel="noopener">
+                                    <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Reglamento de Control Interno</span></span>
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Códigos ── -->
+                    <div class="sidebar-group">
+                        <button class="sidebar-group__toggle" data-bs-toggle="collapse" data-bs-target="#grpCodigos" aria-expanded="false" aria-controls="grpCodigos">
+                            <span class="toggle-left"><i class="bi bi-shield-check"></i> Códigos</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div class="collapse" id="grpCodigos">
+                            <div class="sidebar-group__body">
+                                <a class="doc-pill" href="{{ url_for('static', filename='docs/CODIGO DE ETICA.pdf') }}" target="_blank" rel="noopener">
+                                    <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Código de Ética</span></span>
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                                <a class="doc-pill" href="{{ url_for('static', filename='docs/CODIGO-DE-CONDUCTA.pdf') }}" target="_blank" rel="noopener">
+                                    <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Código de Conducta</span></span>
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Leyes ── -->
+                    <div class="sidebar-group">
+                        <button class="sidebar-group__toggle" data-bs-toggle="collapse" data-bs-target="#grpLeyes" aria-expanded="false" aria-controls="grpLeyes">
+                            <span class="toggle-left"><i class="bi bi-bank"></i> Leyes</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div class="collapse" id="grpLeyes">
+                            <div class="sidebar-group__body">
+                                <a class="doc-pill" href="{{ url_for('static', filename='docs/LEY DE RESPONSABILIDADES ADMINISTRATIVAS PARA EL ESTADO DE GUANAJUATO.pdf') }}" target="_blank" rel="noopener">
+                                    <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Ley de Responsabilidades Adm.</span></span>
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                                <a class="doc-pill" href="{{ url_for('static', filename='docs/LEY PARA EL GOBIERNO Y ADMINISTRACIÓN DE LOS MUNICIPIOS DEL ESTADO DE GUANAJUATO.pdf') }}" target="_blank" rel="noopener">
+                                    <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Ley de Gobierno Municipal</span></span>
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Constituciones ── -->
+                    <div class="sidebar-group">
+                        <button class="sidebar-group__toggle" data-bs-toggle="collapse" data-bs-target="#grpConstituciones" aria-expanded="false" aria-controls="grpConstituciones">
+                            <span class="toggle-left"><i class="bi bi-book-half"></i> Constituciones</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div class="collapse" id="grpConstituciones">
+                            <div class="sidebar-group__body">
+                                <a class="doc-pill" href="{{ url_for('static', filename='docs/CONSTITUCIÓN POLITICA DEL ESTADO DE GUANAJUATO.pdf') }}" target="_blank" rel="noopener">
+                                    <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Constitución de Guanajuato</span></span>
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                                <a class="doc-pill" href="{{ url_for('static', filename='docs/CONSTITUCION POLITICA DE LOS ESTADOS UNIDOS MEXICANOS.pdf') }}" target="_blank" rel="noopener">
+                                    <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Constitución de México</span></span>
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Manuales ── -->
+                    <div class="sidebar-group">
+                        <button class="sidebar-group__toggle" data-bs-toggle="collapse" data-bs-target="#grpManuales" aria-expanded="false" aria-controls="grpManuales">
+                            <span class="toggle-left"><i class="bi bi-clipboard2-data"></i> Manuales</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div class="collapse" id="grpManuales">
+                            <div class="sidebar-group__body">
+                                <a class="doc-pill" href="{{ url_for('static', filename='docs/MANUAL DE CONTROL INTERNO.pdf') }}" target="_blank" rel="noopener">
+                                    <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Manual de Control Interno</span></span>
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Otros ── -->
+                    <div class="sidebar-group">
+                        <button class="sidebar-group__toggle" data-bs-toggle="collapse" data-bs-target="#grpOtros" aria-expanded="false" aria-controls="grpOtros">
+                            <span class="toggle-left"><i class="bi bi-folder2-open"></i> Otros</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div class="collapse" id="grpOtros">
+                            <div class="sidebar-group__body">
+                                <a class="doc-pill" href="{{ url_for('static', filename='docs/aviso-denuncia-leon-contraloria.pdf') }}" target="_blank" rel="noopener">
+                                    <span class="doc-pill__left"><i class="bi bi-file-pdf"></i><span>Aviso de Denuncia - Contraloría</span></span>
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </aside>
 
         <main>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div style="padding: 1rem 1.5rem 0 1.5rem;">
+                    {% for category, message in messages %}
+                        <!-- Map 'error' to 'danger' for Bootstrap -->
+                        {% set bootstrap_category = 'danger' if category == 'error' else category %}
+                        <div class="alert alert-{{ bootstrap_category }} alert-dismissible fade show d-flex align-items-center" role="alert">
+                            {% if bootstrap_category == 'danger' %}
+                                <i class="bi bi-exclamation-octagon-fill flex-shrink-0 me-2"></i>
+                            {% elif bootstrap_category == 'success' %}
+                                <i class="bi bi-check-circle-fill flex-shrink-0 me-2"></i>
+                            {% elif bootstrap_category == 'warning' %}
+                                <i class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2"></i>
+                            {% else %}
+                                <i class="bi bi-info-circle-fill flex-shrink-0 me-2"></i>
+                            {% endif %}
+                            <div>
+                                {{ message }}
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
             <div class="dashboard-grid">
                 <section class="dash-hero">
                     <div class="card position-relative">
@@ -1452,8 +1543,7 @@
 
 
                 <section class="dash-panel">
-                    <div class="accordion" id="mainAccordion">
-                        <!-- <i class="bi bi-bell"></i> AVISOS -->
+                    <div class="accordion" id="mainAccordion" style="height: 100%; display: flex; flex-direction: column;">
                         <div class="accordion-item">
                             <h2 class="accordion-header position-relative">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAvisos">
@@ -1475,7 +1565,7 @@
                                                         <p class="mb-1 fw-bold" style="font-size: 0.95rem;">{{ aviso.descripcion }}</p>
                                                         <small class="text-muted">{{ aviso.fecha_creacion.strftime('%d/%m/%Y %H:%M') }}</small>
                                                     </div>
-                                                    {% if current_user.id == 2 %}<button class="btn btn-sm btn-link delete-aviso-btn" data-aviso-id="{{ aviso.id }}">✖</button>{% endif %}
+                                                    {% if current_user.id == 2 %}<button class="btn btn-sm btn-link delete-aviso-btn" data-aviso-id="{{ aviso.id }}">❌</button>{% endif %}
                                                 </div>
                                             </div>
                                         </div>
@@ -1485,8 +1575,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- PORTALES -->
                         <div class="accordion-item">
                             <h2 class="accordion-header position-relative">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePortales">
@@ -1509,15 +1597,13 @@
                                             <button type="button" class="portal-fav-btn" data-portal-id="{{ portal.id }}" data-portal-name="{{ portal.nombre }}" data-portal-url="{{ portal.url }}" aria-label="Marcar como favorito">
                                                 <i class="bi bi-star"></i>
                                             </button>
-                                            {% if current_user.id == 2 %}<button class="btn btn-sm btn-link text-danger delete-portal-btn" data-portal-id="{{ portal.id }}">✖</button>{% endif %}
+                                            {% if current_user.id == 2 %}<button class="btn btn-sm btn-link text-danger delete-portal-btn" data-portal-id="{{ portal.id }}">❌</button>{% endif %}
                                         </div>
                                     </div>
                                     {% endfor %}
                                 </div>
                             </div>
                         </div>
-
-                        <!-- <i class="bi bi-file-earmark"></i> CONVOCATORIAS -->
                         <div class="accordion-item">
                             <h2 class="accordion-header position-relative">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDocumentos">
@@ -1532,8 +1618,8 @@
                                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                                 <span><i class="bi bi-file-pdf"></i> {{ file.filename }}</span>
                                                 <div>
-                                                    <a href="{{ url_for('main.serve_uploaded_file', filename=file.filename) }}" class="btn btn-sm btn-link text-primary">⬇️</a>
-                                                    {% if current_user.id == 2 %}<a href="#" class="btn btn-sm btn-link text-danger delete-file-btn" data-filename="{{ file.filename }}">❌</a>{% endif %}
+                                                    <a href="{{ url_for('main.serve_uploaded_file', filename=file.filename) }}" class="btn btn-sm btn-link text-primary">â¬‡ï¸</a>
+                                                    {% if current_user.id == 2 %}<a href="#" class="btn btn-sm btn-link text-danger delete-file-btn" data-filename="{{ file.filename }}">âŒ</a>{% endif %}
                                                 </div>
                                             </div>
                                         </li>{% endfor %}
@@ -1541,8 +1627,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- <i class="bi bi-calendar2-event"></i> EVENTOS -->
                         <div class="accordion-item">
                             <h2 class="accordion-header position-relative">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEventos">
@@ -1562,7 +1646,7 @@
                                                         <p class="mb-1 fw-bold" style="font-size: 0.95rem;">{{ evento.descripcion }}</p>
                                                         <small class="text-muted"><i class="bi bi-calendar"></i> {{ evento.fecha }}</small>
                                                     </div>
-                                                    {% if current_user.id == 2 %}<button class="btn btn-sm btn-link delete-evento-btn" data-evento-id="{{ evento.id }}">✖</button>{% endif %}
+                                                    {% if current_user.id == 2 %}<button class="btn btn-sm btn-link delete-evento-btn" data-evento-id="{{ evento.id }}">❌</button>{% endif %}
                                                 </div>
                                             </div>
                                         </div>
@@ -1572,11 +1656,36 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- IMAGEN SIEMPRE VISIBLE -->
-                        <div class="accordion-item">
-                            <div class="accordion-body" style="padding: 1rem; text-align: center;">
-                                <img src="{{ url_for('static', filename='images/reglas.jpg') }}" alt="Reglas" style="max-width: 100%; max-height: 600px; width: 100%; height: auto; object-fit: contain; border-radius: 8px;">
+                        <div class="accordion-item" style="flex: 1; min-height: 0; display: flex; flex-direction: column;">
+                            <div class="accordion-body" style="padding: clamp(0.2rem, 1vw, 1.5rem); overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column;">
+                                <h5 class="text-center fw-bold" style="color: var(--primary); text-transform: uppercase; letter-spacing: 0.1px; font-size: clamp(0.6rem, 1.5vw, 1.25rem); margin-bottom: clamp(0.2rem, 1vw, 1rem); flex-shrink: 0;">Filosofía Institucional</h5>
+                                <div style="display: flex; flex-direction: column; flex-grow: 1; justify-content: space-evenly; gap: clamp(0.1rem, 0.5vw, 1rem);">
+                                    <div>
+                                        <strong style="color: var(--primary); font-size: clamp(0.55rem, 1.2vw, 1.1rem); display: block; margin-bottom: 0.2rem;"><i class="bi bi-bullseye me-1"></i>MISIÓN</strong>
+                                        <p style="text-align: justify; line-height: 1.25; font-size: clamp(0.5rem, 1.1vw, 0.95rem); color: var(--text-primary); margin: 0;">
+                                            Servir y atender la seguridad de los ciudadanos leoneses, comprometidos en salvaguardar vidas y proteger bienes, con acciones efectivas y oportunas en prevención, atención a emergencias, socorro, protección y extinción de incendios con bomberos altamente calificados y competentes.
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <strong style="color: var(--primary); font-size: clamp(0.55rem, 1.2vw, 1.1rem); display: block; margin-bottom: 0.2rem;"><i class="bi bi-eye me-1"></i>VISIÓN</strong>
+                                        <p style="text-align: justify; line-height: 1.25; font-size: clamp(0.5rem, 1.1vw, 0.95rem); color: var(--text-primary); margin: 0;">
+                                            Ser un referente a nivel nacional en prevención, atención de emergencias, extinción de incendios, formación y profesionalización del personal bomberil, capacitando y desarrollando al personal a través de centro de capacitación modernizado de bomberos, a través de la inclusión de herramientas de tecnología de punta y equipamiento moderno para el bienestar de los ciudadanos leoneses.
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <strong style="color: var(--primary); font-size: clamp(0.55rem, 1.2vw, 1.1rem); display: block; margin-bottom: 0.2rem;"><i class="bi bi-award me-1"></i>VALORES</strong>
+                                        <ol start="1" style="margin: 0; padding-left: 1.2rem; font-size: clamp(0.5rem, 1.1vw, 0.95rem); color: var(--text-primary); line-height: 1.25; display: grid; grid-template-columns: 1fr 1fr; gap: 0.2rem 1rem;">
+                                            <li>Respeto hacia los demás</li>
+                                            <li>Compromiso "Con los ideales y la sociedad"</li>
+                                            <li>Cortesía "Saber demostrar el respeto hacia los demás"</li>
+                                            <li>Sacrificios "Esfuerzo para buscar el bien de los demás"</li>
+                                            <li>Lealtad "Hacia las instituciones y uno mismo"</li>
+                                            <li>Confianza "Ser firme en las decisiones"</li>
+                                            <li>Humildad "Aceptar los triunfos de los demás y reconocer nuestras limitaciones"</li>
+                                            <li>Coraje "Ser fuerte en tus metas e ideales"</li>
+                                        </ol>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1603,7 +1712,7 @@
         <div class="contenido-overlay__panel">
             <div class="contenido-overlay__bar">
                 <h3 class="contenido-overlay__title">Contenido</h3>
-                <button type="button" class="icon-btn" id="closeContenido" aria-label="Cerrar">
+                <button type="button" class="icon-btn" id="closeContenido" aria-label="Cerrar Sesión">
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>
@@ -1619,8 +1728,6 @@
             </div>
         </main>
     </div>
-
-    <!-- MODALS -->
     <div class="modal fade" id="avisoPrivacidadModal" tabindex="-1" aria-labelledby="avisoPrivacidadLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
@@ -1750,15 +1857,13 @@
         function toggleDashboardSidebar() {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('show');
-            
-            // Simple backdrop handling for mobile
             if (window.innerWidth <= 768) {
                 let backdrop = document.getElementById('sidebarBackdrop');
                 if (sidebar.classList.contains('show')) {
                     if (!backdrop) {
                         backdrop = document.createElement('div');
                         backdrop.id = 'sidebarBackdrop';
-                        backdrop.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1050;'; // below sidebar (1100)
+                        backdrop.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1050;';
                         backdrop.onclick = toggleDashboardSidebar;
                         document.body.appendChild(backdrop);
                     }
@@ -1772,7 +1877,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            // --- SEARCH LOGIC (Dropdown Style) ---
             const searchInput = document.getElementById('globalSearch');
             const searchResults = document.getElementById('searchResults');
             
@@ -1780,12 +1884,7 @@
                 
                 function getSearchableItems() {
                     const items = [];
-                    
-                    // 1. Normatividad (Sidebar docs)
-                    // Selector adjusted for new sidebar structure (.doc-pill)
                     document.querySelectorAll('#sidebar .doc-pill').forEach(link => {
-                        // Title is typically inside .doc-pill__left -> span -> span, or just text
-                        // Let's grab the full text content clean
                         const title = link.querySelector('span span') ? link.querySelector('span span').textContent : link.textContent;
                         items.push({
                             title: title.trim(),
@@ -1794,8 +1893,6 @@
                             icon: 'bi-file-text'
                         });
                     });
-
-                    // 2. Portales
                     document.querySelectorAll('[data-portal-row]').forEach(row => {
                         const link = row.querySelector('a');
                         if (link) {
@@ -1807,8 +1904,6 @@
                             });
                         }
                     });
-
-                    // 3. Convocatorias (Files)
                     document.querySelectorAll('#file-list .list-group-item').forEach(item => {
                         const link = item.querySelector('a[href*="serve_uploaded_file"]'); 
                         const name = item.getAttribute('data-filename') || item.textContent.trim();
@@ -1821,8 +1916,6 @@
                             });
                         }
                     });
-
-                    // 4. Quick Access
                     document.querySelectorAll('.quick-card').forEach(card => {
                         const textEl = card.querySelector('.quick-card-text');
                         if (textEl) {
@@ -1837,8 +1930,6 @@
                     
                     return items;
                 }
-
-                // Cache items once on load
                 const searchableItems = getSearchableItems();
 
                 searchInput.addEventListener('input', function(e) {
@@ -1856,22 +1947,17 @@
 
                     if (matches.length > 0) {
                         searchResults.classList.add('show');
-                        
-                        // Group by category
                         const categories = [...new Set(matches.map(m => m.category))];
-                        
                         categories.forEach(cat => {
                             const catHeader = document.createElement('div');
                             catHeader.className = 'search-category';
                             catHeader.textContent = cat;
                             searchResults.appendChild(catHeader);
-
                             const catItems = matches.filter(m => m.category === cat);
                             catItems.forEach(item => {
                                 const a = document.createElement('a');
                                 a.className = 'search-item';
                                 a.href = item.url;
-                                // External links get _blank
                                 if (item.url.startsWith('http') && !item.url.includes(window.location.host)) {
                                     a.target = '_blank';
                                 }
@@ -1883,16 +1969,12 @@
                         searchResults.classList.remove('show');
                     }
                 });
-
-                // Hide when clicking outside
                 document.addEventListener('click', function(e) {
                     if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
                         searchResults.classList.remove('show');
                     }
                 });
             }
-
-            // --- OVERLAY LOGIC ---
             const overlay = document.getElementById('contenidoOverlay');
             const contenido = document.getElementById('contenido');
             const closeBtn = document.getElementById('closeContenido');
@@ -1924,5 +2006,29 @@
             }
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    var bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 4000);
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    var bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 4000);
+        });
+    </script>
 </body>
 </html>
+
+

@@ -27,6 +27,11 @@ def create_app():
     app.config['MAIL_PASSWORD'] = 'xayh sphs fbbd agbt'  # contraseña de aplicación
     app.config['MAIL_DEFAULT_SENDER'] = 'sgcpbl@gmail.com'
 
+    # Configuración de Google reCAPTCHA v2
+    # Claves de producción proporcionadas por el usuario
+    app.config['RECAPTCHA_PUBLIC_KEY'] = '6Lf1UmgsAAAAADkKsBHsHZht0D45KBQgo18JOBox'
+    app.config['RECAPTCHA_PRIVATE_KEY'] = '6Lf1UmgsAAAAAGkckMYzC2hj_SPzMrDNEBOhguH4'
+
     db.init_app(app)
     login_manager.init_app(app)
     mail.init_app(app)  

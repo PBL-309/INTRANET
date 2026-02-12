@@ -102,9 +102,30 @@
 <body>
 
 <div class="container">
-    <a href="{{ url_for('main.dashboard') }}" class="back-btn">⬅️ Regresar</a>
+    <a href="{{ url_for('main.dashboard') }}" class="back-btn">â¬…ï¸ Regresar</a>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                {% set bootstrap_category = 'danger' if category == 'error' else category %}
+                <div class="alert alert-{{ bootstrap_category }} alert-dismissible fade show d-flex align-items-center mb-3" role="alert">
+                    {% if bootstrap_category == 'danger' %}
+                        <i class="bi bi-exclamation-octagon-fill flex-shrink-0 me-2"></i>
+                    {% elif bootstrap_category == 'success' %}
+                        <i class="bi bi-check-circle-fill flex-shrink-0 me-2"></i>
+                    {% elif bootstrap_category == 'warning' %}
+                        <i class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2"></i>
+                    {% else %}
+                        <i class="bi bi-info-circle-fill flex-shrink-0 me-2"></i>
+                    {% endif %}
+                    <div>{{ message }}</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
     
-    <h2>📢 Administrar Noticias</h2>
+    <h2>ðŸ“¢ Administrar Noticias</h2>
 
     <form method="POST" enctype="multipart/form-data" class="mb-3">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -124,10 +145,10 @@
             <label class="form-label">Enlace (Opcional)</label>
             <input type="text" name="link" class="input-custom" placeholder="Enlace a la noticia">
         </div>
-        <button type="submit" class="btn-custom">📩 Agregar Noticia</button>
+        <button type="submit" class="btn-custom">ðŸ“© Agregar Noticia</button>
     </form>
 
-    <h3>📰 Noticias Actuales</h3>
+    <h3>ðŸ“° Noticias Actuales</h3>
 
     <table class="table table-bordered table-hover">
         <thead>
@@ -145,11 +166,11 @@
                     </td>
                     <td>{{ noticia.titulo }}</td>
                     <td>
-                        <button class="btn btn-danger delete-noticia-btn" data-id="{{ noticia.id }}">🗑️ Eliminar</button>
+                        <button class="btn btn-danger delete-noticia-btn" data-id="{{ noticia.id }}">ðŸ—‘ï¸ Eliminar</button>
                         <a href="{{ url_for('main.move_noticia', id=noticia.id, direction='up') }}" 
-                           class="btn btn-secondary move-btn" data-id="{{ noticia.id }}" data-direction="up">🔼</a>
+                           class="btn btn-secondary move-btn" data-id="{{ noticia.id }}" data-direction="up">ðŸ”¼</a>
                         <a href="{{ url_for('main.move_noticia', id=noticia.id, direction='down') }}" 
-                           class="btn btn-secondary move-btn" data-id="{{ noticia.id }}" data-direction="down">🔽</a>
+                           class="btn btn-secondary move-btn" data-id="{{ noticia.id }}" data-direction="down">ðŸ”½</a>
                     </td>
                 </tr>
             {% endfor %}
@@ -235,5 +256,29 @@ document.querySelectorAll('.move-btn').forEach(button => {
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    var bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 4000);
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                var alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    var bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 4000);
+        });
+    </script>
 </body>
 </html>
+
+
