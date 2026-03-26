@@ -180,34 +180,245 @@
         {% endif %}
     {% endwith %}
 
-    <h2>EVALUACIñ“N DEL DESEMPEñ‘O</h2>
+    <h2>EVALUACIÓN DEL DESEMPEÑO</h2>
     <form action="{{ url_for('main.submit_evaluacion') }}" method="POST">    	
     <div class="header">
       <label>Nombre:<br><input type="text"  name="nombre" required /></label>
       <label>Fecha:<br><input type="date" name="fecha" placeholder="dd/mm/aaaa" required /></label>
-      <label>ñrea:<br><input type="text" name="area" required /></label>
+      <label>Área:<br><input type="text" name="area" required /></label>
       <label>Estación:<br><input type="text" name="estacion" required /></label>
       <label>No. de Nómina:<br><input type="text" name="nomina" required /></label>
       <label>Puesto:<br><input type="text" name="puesto" required /></label>
     </div>
 
     <p class="instruction">
-      Instrucción: En cada una de las oraciones deberá marcar el círculo que represente lo que usted piense sobre su desempeño dentro de la institución de acuerdo a la siguiente clasificación:
+      Instrucción: Califique cada criterio del 1 al 5 de acuerdo a la siguiente escala:
+      <br><strong>1 = Deficiente | 2 = Regular | 3 = Aceptable | 4 = Bueno | 5 = Excelente</strong>
     </p>
 
+    <!-- ═══════ COMUNICACIÓN ═══════ -->
     <table>
       <tr>
-       <td></td>
-        <td class="radio-label">1<br><span>Totalmente en desacuerdo</span></td>
-        <td class="radio-label">2<br><span>En desacuerdo</span></td>
-        <td class="radio-label">3<br><span>Indiferente</span></td>
-        <td class="radio-label">4<br><span>De acuerdo</span></td>
-        <td class="radio-label">5<br><span>Totalmente de acuerdo</span></td>
+        <td colspan="6" class="section-title">1. COMUNICACIÓN</td>
       </tr>
-
       <tr>
-        <td colspan="6" class="section-title">Mi desempeño</td>
+        <td></td>
+        <td class="radio-label">1<br><span>Deficiente</span></td>
+        <td class="radio-label">2<br><span>Regular</span></td>
+        <td class="radio-label">3<br><span>Aceptable</span></td>
+        <td class="radio-label">4<br><span>Bueno</span></td>
+        <td class="radio-label">5<br><span>Excelente</span></td>
       </tr>
+      <tr>
+        <td class="question"><strong>Claridad verbal</strong><br>Se expresa con precisión y coherencia en situaciones operativas y cotidianas</td>
+        <td><input type="radio" name="comunicacion_claridad" value="1" required /></td>
+        <td><input type="radio" name="comunicacion_claridad" value="2" /></td>
+        <td><input type="radio" name="comunicacion_claridad" value="3" /></td>
+        <td><input type="radio" name="comunicacion_claridad" value="4" /></td>
+        <td><input type="radio" name="comunicacion_claridad" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Escucha activa</strong><br>Atiende instrucciones, sugerencias y retroalimentación sin interrupciones</td>
+        <td><input type="radio" name="comunicacion_escucha" value="1" required /></td>
+        <td><input type="radio" name="comunicacion_escucha" value="2" /></td>
+        <td><input type="radio" name="comunicacion_escucha" value="3" /></td>
+        <td><input type="radio" name="comunicacion_escucha" value="4" /></td>
+        <td><input type="radio" name="comunicacion_escucha" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Comunicación en equipo</strong><br>Comparte información relevante con sus compañeros de forma oportuna</td>
+        <td><input type="radio" name="comunicacion_equipo" value="1" required /></td>
+        <td><input type="radio" name="comunicacion_equipo" value="2" /></td>
+        <td><input type="radio" name="comunicacion_equipo" value="3" /></td>
+        <td><input type="radio" name="comunicacion_equipo" value="4" /></td>
+        <td><input type="radio" name="comunicacion_equipo" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Manejo de conflictos</strong><br>Resuelve desacuerdos con respeto y profesionalismo</td>
+        <td><input type="radio" name="comunicacion_conflictos" value="1" required /></td>
+        <td><input type="radio" name="comunicacion_conflictos" value="2" /></td>
+        <td><input type="radio" name="comunicacion_conflictos" value="3" /></td>
+        <td><input type="radio" name="comunicacion_conflictos" value="4" /></td>
+        <td><input type="radio" name="comunicacion_conflictos" value="5" /></td>
+      </tr>
+    </table>
+
+    <!-- ═══════ HABILIDADES BLANDAS ═══════ -->
+    <table>
+      <tr>
+        <td colspan="6" class="section-title">2. HABILIDADES BLANDAS</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td class="radio-label">1<br><span>Deficiente</span></td>
+        <td class="radio-label">2<br><span>Regular</span></td>
+        <td class="radio-label">3<br><span>Aceptable</span></td>
+        <td class="radio-label">4<br><span>Bueno</span></td>
+        <td class="radio-label">5<br><span>Excelente</span></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Trabajo en equipo</strong><br>Colabora eficazmente en tareas grupales y operaciones</td>
+        <td><input type="radio" name="blandas_trabajo_equipo" value="1" required /></td>
+        <td><input type="radio" name="blandas_trabajo_equipo" value="2" /></td>
+        <td><input type="radio" name="blandas_trabajo_equipo" value="3" /></td>
+        <td><input type="radio" name="blandas_trabajo_equipo" value="4" /></td>
+        <td><input type="radio" name="blandas_trabajo_equipo" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Empatía</strong><br>Muestra sensibilidad ante las necesidades de compañeros y ciudadanos</td>
+        <td><input type="radio" name="blandas_empatia" value="1" required /></td>
+        <td><input type="radio" name="blandas_empatia" value="2" /></td>
+        <td><input type="radio" name="blandas_empatia" value="3" /></td>
+        <td><input type="radio" name="blandas_empatia" value="4" /></td>
+        <td><input type="radio" name="blandas_empatia" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Adaptabilidad</strong><br>Se ajusta con rapidez a cambios operativos o administrativos</td>
+        <td><input type="radio" name="blandas_adaptabilidad" value="1" required /></td>
+        <td><input type="radio" name="blandas_adaptabilidad" value="2" /></td>
+        <td><input type="radio" name="blandas_adaptabilidad" value="3" /></td>
+        <td><input type="radio" name="blandas_adaptabilidad" value="4" /></td>
+        <td><input type="radio" name="blandas_adaptabilidad" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Responsabilidad</strong><br>Cumple con sus funciones sin necesidad de supervisión constante</td>
+        <td><input type="radio" name="blandas_responsabilidad" value="1" required /></td>
+        <td><input type="radio" name="blandas_responsabilidad" value="2" /></td>
+        <td><input type="radio" name="blandas_responsabilidad" value="3" /></td>
+        <td><input type="radio" name="blandas_responsabilidad" value="4" /></td>
+        <td><input type="radio" name="blandas_responsabilidad" value="5" /></td>
+      </tr>
+    </table>
+
+    <!-- ═══════ DISCIPLINA ═══════ -->
+    <table>
+      <tr>
+        <td colspan="6" class="section-title">3. DISCIPLINA</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td class="radio-label">1<br><span>Deficiente</span></td>
+        <td class="radio-label">2<br><span>Regular</span></td>
+        <td class="radio-label">3<br><span>Aceptable</span></td>
+        <td class="radio-label">4<br><span>Bueno</span></td>
+        <td class="radio-label">5<br><span>Excelente</span></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Puntualidad</strong><br>Respeta horarios de entrada, salida y actividades</td>
+        <td><input type="radio" name="disciplina_puntualidad" value="1" required /></td>
+        <td><input type="radio" name="disciplina_puntualidad" value="2" /></td>
+        <td><input type="radio" name="disciplina_puntualidad" value="3" /></td>
+        <td><input type="radio" name="disciplina_puntualidad" value="4" /></td>
+        <td><input type="radio" name="disciplina_puntualidad" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Respeto a normas</strong><br>Acata reglamentos internos y protocolos operativos</td>
+        <td><input type="radio" name="disciplina_normas" value="1" required /></td>
+        <td><input type="radio" name="disciplina_normas" value="2" /></td>
+        <td><input type="radio" name="disciplina_normas" value="3" /></td>
+        <td><input type="radio" name="disciplina_normas" value="4" /></td>
+        <td><input type="radio" name="disciplina_normas" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Presentación personal</strong><br>Mantiene uniforme y equipo en condiciones adecuadas</td>
+        <td><input type="radio" name="disciplina_presentacion" value="1" required /></td>
+        <td><input type="radio" name="disciplina_presentacion" value="2" /></td>
+        <td><input type="radio" name="disciplina_presentacion" value="3" /></td>
+        <td><input type="radio" name="disciplina_presentacion" value="4" /></td>
+        <td><input type="radio" name="disciplina_presentacion" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Uso adecuado de recursos</strong><br>Cuida instalaciones, vehículos y herramientas asignadas</td>
+        <td><input type="radio" name="disciplina_recursos" value="1" required /></td>
+        <td><input type="radio" name="disciplina_recursos" value="2" /></td>
+        <td><input type="radio" name="disciplina_recursos" value="3" /></td>
+        <td><input type="radio" name="disciplina_recursos" value="4" /></td>
+        <td><input type="radio" name="disciplina_recursos" value="5" /></td>
+      </tr>
+    </table>
+
+    <!-- ═══════ ORDEN CERRADO ═══════ -->
+    <table>
+      <tr>
+        <td colspan="6" class="section-title">4. ORDEN CERRADO</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td class="radio-label">1<br><span>Deficiente</span></td>
+        <td class="radio-label">2<br><span>Regular</span></td>
+        <td class="radio-label">3<br><span>Aceptable</span></td>
+        <td class="radio-label">4<br><span>Bueno</span></td>
+        <td class="radio-label">5<br><span>Excelente</span></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Dominio de formaciones</strong><br>Ejecuta correctamente alineaciones, marchas y desplazamientos</td>
+        <td><input type="radio" name="orden_cerrado_dominio" value="1" required /></td>
+        <td><input type="radio" name="orden_cerrado_dominio" value="2" /></td>
+        <td><input type="radio" name="orden_cerrado_dominio" value="3" /></td>
+        <td><input type="radio" name="orden_cerrado_dominio" value="4" /></td>
+        <td><input type="radio" name="orden_cerrado_dominio" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Coordinación grupal</strong><br>Se sincroniza con el grupo en movimientos y comandos</td>
+        <td><input type="radio" name="orden_cerrado_coordinacion" value="1" required /></td>
+        <td><input type="radio" name="orden_cerrado_coordinacion" value="2" /></td>
+        <td><input type="radio" name="orden_cerrado_coordinacion" value="3" /></td>
+        <td><input type="radio" name="orden_cerrado_coordinacion" value="4" /></td>
+        <td><input type="radio" name="orden_cerrado_coordinacion" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Atención a comandos</strong><br>Responde con precisión y rapidez a indicaciones del mando</td>
+        <td><input type="radio" name="orden_cerrado_atencion" value="1" required /></td>
+        <td><input type="radio" name="orden_cerrado_atencion" value="2" /></td>
+        <td><input type="radio" name="orden_cerrado_atencion" value="3" /></td>
+        <td><input type="radio" name="orden_cerrado_atencion" value="4" /></td>
+        <td><input type="radio" name="orden_cerrado_atencion" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Postura y presencia</strong><br>Mantiene porte firme y actitud profesional durante actos oficiales</td>
+        <td><input type="radio" name="orden_cerrado_postura" value="1" required /></td>
+        <td><input type="radio" name="orden_cerrado_postura" value="2" /></td>
+        <td><input type="radio" name="orden_cerrado_postura" value="3" /></td>
+        <td><input type="radio" name="orden_cerrado_postura" value="4" /></td>
+        <td><input type="radio" name="orden_cerrado_postura" value="5" /></td>
+      </tr>
+    </table>
+
+    <!-- ═══════ OBSERVACIONES GENERALES ═══════ -->
+    <table>
+      <tr>
+        <td colspan="6" class="section-title">5. OBSERVACIONES GENERALES</td>
+      </tr>
+      <tr>
+        <td colspan="6" class="question">
+          <strong>Comentarios del Subteniente sobre el desempeño, fortalezas y áreas de mejora:</strong><br><br>
+          <textarea style="width: 100%; height: 100px; font-size: 16px;" name="observaciones" required></textarea>
+        </td>
+      </tr>
+    </table>
+
+    <div class="button-container">
+      <button class="next-btn" type="submit">Enviar Evaluación</button>
+    </div>
+    </form>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(function() {
+        var alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+          alert.style.transition = 'opacity 0.5s ease-out';
+          alert.style.opacity = '0';
+          setTimeout(function() {
+            alert.remove();
+          }, 500);
+        });
+      }, 4000);
+    });
+  </script>
+</body>
+</html>
 
       <tr>
         <td class="question">1. Conozco mis funciones y mis responsabilidades</td>

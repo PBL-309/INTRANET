@@ -385,7 +385,7 @@ def logout():
 @main.route('/submit_evaluacion', methods=['POST'])
 @login_required
 def submit_evaluacion():
-    # Recibimos las respuestas del formulario
+    # Recibimos los datos del formulario
     nombre = request.form.get('nombre')
     fecha_str = request.form.get('fecha')
     fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
@@ -396,64 +396,33 @@ def submit_evaluacion():
     
     # Almacenamos las respuestas del formulario en un diccionario
     respuestas = {
-        'desempeno': {
-            'q1': request.form.get('q1'),
-            'q2': request.form.get('q2'),
-            'q3': request.form.get('q3'),
-            'q4': request.form.get('q4'),
-            'q5': request.form.get('q5'),
-            'q6': request.form.get('q6')
+        'comunicacion': {
+            'claridad': request.form.get('comunicacion_claridad'),
+            'escucha': request.form.get('comunicacion_escucha'),
+            'equipo': request.form.get('comunicacion_equipo'),
+            'conflictos': request.form.get('comunicacion_conflictos')
         },
-        'jefe_inmediato': {
-            'q7': request.form.get('q7'),
-            'q8': request.form.get('q8'),
-            'q9': request.form.get('q9'),
-            'q10': request.form.get('q10'),
-            'q11': request.form.get('q11'),
-            'q12': request.form.get('q12')
+        'habilidades_blandas': {
+            'trabajo_equipo': request.form.get('blandas_trabajo_equipo'),
+            'empatia': request.form.get('blandas_empatia'),
+            'adaptabilidad': request.form.get('blandas_adaptabilidad'),
+            'responsabilidad': request.form.get('blandas_responsabilidad')
         },
-        'apoyo_convivencia': {
-            'q13': request.form.get('q13'),
-            'q14': request.form.get('q14'),
-            'q15': request.form.get('q15'),
-            'q16': request.form.get('q16'),
-            'q17': request.form.get('q17'),
-            'q18': request.form.get('q18')
+        'disciplina': {
+            'puntualidad': request.form.get('disciplina_puntualidad'),
+            'normas': request.form.get('disciplina_normas'),
+            'presentacion': request.form.get('disciplina_presentacion'),
+            'recursos': request.form.get('disciplina_recursos')
         },
-        'pertenencia': {
-            'q19': request.form.get('q19'),
-            'q20': request.form.get('q20'),
-            'q21': request.form.get('q21'),
-            'q22': request.form.get('q22'),
-            'q23': request.form.get('q23'),
-            'q24': request.form.get('q24')
-        },
-        'clasificacion': {
-            'q25': request.form.get('q25'),
-            'q26': request.form.get('q26'),
-            'q27': request.form.get('q27'),
-            'q28': request.form.get('q28'),
-            'q29': request.form.get('q29'),
-            'q30': request.form.get('q30'),
-            'q31': request.form.get('q31'),
-            'q32': request.form.get('q32'),
-            'q33': request.form.get('q33'),
-            'q34': request.form.get('q34'),
-            'q35': request.form.get('q35'),
-            'q36': request.form.get('q36'),
-            'q37': request.form.get('q37'),
-            'q38': request.form.get('q38'),
-            'q39': request.form.get('q39'),
-            'q40': request.form.get('q40'),
-            'q41': request.form.get('q41'),
-            'q42': request.form.get('q42'),
-            'q43': request.form.get('q43'),
-            'q44': request.form.get('q44')
+        'orden_cerrado': {
+            'dominio': request.form.get('orden_cerrado_dominio'),
+            'coordinacion': request.form.get('orden_cerrado_coordinacion'),
+            'atencion': request.form.get('orden_cerrado_atencion'),
+            'postura': request.form.get('orden_cerrado_postura')
         }
     }
 
-    evaluacion_general = request.form.get('evaluacion_general')
-    comentario = request.form.get('comentario')
+    observaciones = request.form.get('observaciones')
 
     # Crear un objeto de la evaluación
     evaluacion = EvaluacionDesempeno(
@@ -465,15 +434,15 @@ def submit_evaluacion():
         nomina=nomina,
         puesto=puesto,
         respuestas=respuestas,
-        evaluacion_general=evaluacion_general,
-        comentario=comentario
+        evaluacion_general=observaciones,
+        comentario=observaciones
     )
 
     # Guardar la evaluación en la base de datos
     db.session.add(evaluacion)
     db.session.commit()
 
-    flash("Formulario enviado con éxito", "success")  # Mostrar un mensaje de éxito
+    flash("Evaluación enviada exitosamente", "success")  # Mostrar un mensaje de éxito
 
     # Redirigir al dashboard
     return redirect(url_for('main.dashboard'))
