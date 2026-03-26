@@ -59,29 +59,23 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
-      margin-bottom: 20px;
-      font-size: 16px;
+      margin-top: 10px;
+      font-size: 18px;
     }
-
     td, th {
       border: 1px solid black;
       text-align: center;
-      padding: 12px 6px;
+      padding: 10px 6px;
     }
 
     .section-title {
       background-color: #c2c2c2;
       font-weight: bold;
       text-align: left;
-      padding: 15px;
-      font-size: 18px;
     }
 
     .question {
       text-align: left;
-      background-color: #f9f9f9;
-      padding: 12px;
     }
 
     input[type="radio"] {
@@ -91,16 +85,7 @@
     .radio-label {
       font-size: 14px;
       font-weight: bold;
-      background-color: #f0f0f0;
     }
-
-    textarea {
-      font-family: Arial, sans-serif;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      padding: 10px;
-    }
-
     .next-btn, .prev-btn {
       margin-top: 30px;
       background-color: #6a5acd;
@@ -121,6 +106,7 @@
       display: flex;
       justify-content: center;
       gap: 20px;
+      flex-wrap: wrap;
     }
 
     @media (max-width: 600px) {
@@ -130,10 +116,6 @@
 
       table {
         font-size: 15px;
-      }
-
-      td, th {
-        padding: 8px 4px;
       }
 
       input[type="radio"] {
@@ -147,12 +129,22 @@
       .next-btn, .prev-btn {
         width: 100%;
       }
-
-      .button-container {
-        flex-direction: column;
-      }
     }
-    
+
+    /* Textareas */
+    .textarea-field {
+      width: 100%;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    .textarea-observaciones {
+      height: 100px;
+    }
+
+    .textarea-comentario {
+      height: 80px;
+    }
     .hidden {
       display: none;
     }
@@ -413,7 +405,7 @@
       <tr>
         <td colspan="6" class="question">
           <strong>Comentarios del Subteniente sobre el desempeño, fortalezas y áreas de mejora:</strong><br><br>
-          <textarea style="width: 100%; height: 100px; font-size: 16px;" name="observaciones" required></textarea>
+          <textarea class="textarea-field textarea-observaciones" name="observaciones" required></textarea>
         </td>
       </tr>
     </table>
@@ -889,11 +881,11 @@
     <tr>
       <td colspan="6" class="question">
         <strong>¿Deseas agregar algún comentario?</strong><br><br>
-        <textarea style="width: 100%; height: 80px; font-size: 16px;" name="comentario"></textarea>
+        <textarea class="textarea-field textarea-comentario" name="comentario"></textarea>
       </td>
     </tr>
   </table>
-  <div class="button-container" style="gap: 20px;">
+  <div class="button-container">
     <button class="prev-btn" type="button" onclick="showPrev()">Anterior</button>
     <button class="next-btn" type="submit">Enviar</button>
   </div>
