@@ -5,137 +5,163 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Formulario de Evaluación</title>
   <style>
+    :root {
+      --bg: #e9e3f5;
+      --card: #ffffff;
+      --primary: #6a5acd;
+      --primary-hover: #574ac9;
+      --border: #000000;
+      --muted: #c2c2c2;
+      --font: Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
+      font-family: var(--font);
       margin: 0;
-      background-color: #e9e3f5; /* Fondo lila */
+      background-color: var(--bg);
       display: flex;
       justify-content: center;
       padding: 30px 10px;
+      color: #111;
     }
 
     .page {
-      background-color: white;
+      background-color: var(--card);
       max-width: 1200px;
       width: 100%;
       padding: 40px 30px;
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-      border-radius: 6px;
+      border-radius: 8px;
     }
 
     h2 {
       text-align: center;
-      margin-bottom: 20px;
+      margin: 0 0 20px 0;
       font-size: 24px;
+      letter-spacing: 0.2px;
     }
 
     .header {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 20px;
+      gap: 16px 20px;
       margin-bottom: 20px;
     }
 
     .header label {
       display: block;
-      margin-bottom: 10px;
-      font-size: 18px;
+      margin-bottom: 8px;
+      font-size: 16px;
+      font-weight: 600;
     }
 
     .header input {
       width: 100%;
       border: none;
-      border-bottom: 2px solid #000;
-      font-size: 18px;
-      padding: 6px;
+      border-bottom: 2px solid var(--border);
+      font-size: 16px;
+      padding: 6px 4px;
       background: none;
+      outline: none;
     }
 
     .instruction {
-      font-size: 18px;
-      margin: 20px 0 10px 0;
+      font-size: 16px;
+      margin: 18px 0 12px 0;
+      line-height: 1.35;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
-      font-size: 18px;
+      font-size: 15px;
+      table-layout: fixed; /* evita que celdas largas rompan el layout */
     }
-    td, th {
-      border: 1px solid black;
+
+    td,
+    th {
+      border: 1px solid var(--border);
       text-align: center;
-      padding: 10px 6px;
+      padding: 8px 6px;
+      vertical-align: top;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      line-height: 1.25;
     }
 
     .section-title {
-      background-color: #c2c2c2;
-      font-weight: bold;
+      background-color: var(--muted);
+      font-weight: 700;
       text-align: left;
+      padding: 10px 10px;
     }
 
     .question {
       text-align: left;
+      font-weight: 400;
+      padding-left: 10px;
     }
 
     input[type="radio"] {
-      transform: scale(1.5);
+      transform: scale(1.35);
+      transform-origin: top left;
+      margin-top: 4px;
     }
 
     .radio-label {
-      font-size: 14px;
-      font-weight: bold;
-    }
-    .next-btn, .prev-btn {
-      margin-top: 30px;
-      background-color: #6a5acd;
-      color: white;
-      border: none;
-      padding: 12px 30px;
-      font-size: 18px;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
+      font-size: 12.5px;
+      font-weight: 700;
+      line-height: 1.15;
     }
 
-    .next-btn:hover, .prev-btn:hover {
-      background-color: #574ac9;
+    .radio-label span {
+      display: block;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .next-btn,
+    .prev-btn {
+      margin-top: 30px;
+      background-color: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 12px 26px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .next-btn:hover,
+    .prev-btn:hover {
+      background-color: var(--primary-hover);
     }
 
     .button-container {
       display: flex;
       justify-content: center;
-      gap: 20px;
+      gap: 18px;
       flex-wrap: wrap;
-    }
-
-    @media (max-width: 600px) {
-      .header {
-        grid-template-columns: 1fr;
-      }
-
-      table {
-        font-size: 15px;
-      }
-
-      input[type="radio"] {
-        transform: scale(1.2);
-      }
-
-      .page {
-        padding: 20px 15px;
-      }
-
-      .next-btn, .prev-btn {
-        width: 100%;
-      }
     }
 
     /* Textareas */
     .textarea-field {
       width: 100%;
-      font-size: 16px;
+      font-size: 15px;
       box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 10px;
+      font-family: var(--font);
+      outline: none;
+      resize: vertical;
     }
 
     .textarea-observaciones {
@@ -145,38 +171,89 @@
     .textarea-comentario {
       height: 80px;
     }
+
     .hidden {
       display: none;
     }
 
     /* Flash Messages Styles */
     .alert {
-      padding: 15px;
+      padding: 14px;
       margin-bottom: 20px;
       border: 1px solid transparent;
-      border-radius: 4px;
+      border-radius: 6px;
       text-align: center;
-      font-weight: bold;
+      font-weight: 700;
     }
+
     .alert-success {
       color: #3c763d;
       background-color: #dff0d8;
       border-color: #d6e9c6;
     }
-    .alert-danger, .alert-error {
+
+    .alert-danger,
+    .alert-error {
       color: #a94442;
       background-color: #f2dede;
       border-color: #ebccd1;
     }
+
     .alert-info {
       color: #31708f;
       background-color: #d9edf7;
       border-color: #bce8f1;
     }
+
     .alert-warning {
       color: #8a6d3b;
       background-color: #fcf8e3;
       border-color: #faebcc;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 20px 8px;
+      }
+
+      .page {
+        padding: 20px 15px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      .header {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .header label {
+        font-size: 15px;
+      }
+
+      .instruction {
+        font-size: 14.5px;
+      }
+
+      table {
+        font-size: 13.5px;
+      }
+
+      input[type="radio"] {
+        transform: scale(1.1);
+      }
+
+      td,
+      th {
+        padding: 7px 4px;
+      }
+
+      .next-btn,
+      .prev-btn {
+        width: 100%;
+      }
     }
   </style>
 </head>
