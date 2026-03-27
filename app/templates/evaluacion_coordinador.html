@@ -511,6 +511,7 @@
 
     <h2>EVALUACIÓN DEL DESEMPEÑO</h2>
     <form action="{{ url_for('main.submit_evaluacion') }}" method="POST">    	
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
     <div class="header">
       <div class="header-info">
         <div>
