@@ -918,19 +918,14 @@
               turnoEvaluado.value = data.turno || '';
               nominaEvaluadoHidden.value = data.nomina || '';
               
-              // Cargar foto de perfil
+              // Cargar foto de perfil desde static/uploads/{username}.jpg
               profileNameText.textContent = data.nombre || 'Seleccionar usuario';
               profileRoleText.textContent = data.puesto || '---';
               
-              if (data.image_file) {
-                fotoEvaluado.src = `/static/images/${data.image_file}`;
-                // Si hay error cargando la imagen, usar default
-                fotoEvaluado.onerror = function() {
-                  this.src = '/static/images/default.jpg';
-                };
-              } else {
-                fotoEvaluado.src = '/static/images/default.jpg';
-              }
+              fotoEvaluado.src = `/static/uploads/${username}.jpg`;
+              fotoEvaluado.onerror = function() {
+                this.src = '/static/images/default.jpg';
+              };
             }
           } catch (error) {
             console.error('Error al buscar usuario:', error);
