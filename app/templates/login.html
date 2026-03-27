@@ -96,7 +96,13 @@
                         <i class="bi bi-x-lg"></i>
                     </button>
                     <h3>Reconocimiento Facial</h3>
-                    <p>Mire a la camara. El acceso es automatico al detectar coincidencia.</p>
+                    <p>Valide el captcha de este modal y despues inicie la camara.</p>
+                    <div id="facialCaptchaWrap" style="margin-bottom: 14px;">
+                        <div id="facialRecaptcha"></div>
+                        <button type="button" id="startFacialAfterCaptchaBtn" class="btn-capture" style="margin-top: 10px;">
+                            Validar captcha e iniciar camara
+                        </button>
+                    </div>
                     <div class="camera-container">
                         <video id="cameraVideo" autoplay playsinline muted></video>
                         <div id="loadingSpinner" class="spinner">
@@ -126,6 +132,7 @@
             const cameraVideo = document.getElementById('cameraVideo');
             const statusMessage = document.getElementById('statusMessage');
             const loadingSpinner = document.getElementById('loadingSpinner');
+            const startFacialAfterCaptchaBtn = document.getElementById('startFacialAfterCaptchaBtn');
 
             let cameraStream = null;
             let matcher = null;
@@ -138,6 +145,7 @@
             let candidateLabel = null;
             let candidateCount = 0;
             let facialCaptchaToken = '';
+            let facialRecaptchaWidgetId = null;
 
             setTimeout(function() {
                 const alerts = document.querySelectorAll('.alert');
@@ -172,11 +180,18 @@
 
             facialRecognitionBtn.addEventListener('click', async function(e) {
                 e.preventDefault();
-                const token = getCaptchaToken();
+                abrirModalFacial();
+                setStatus('Resuelva el captcha del modal para iniciar la camara.', false);
+                await ensureFacialRecaptchaWidget();
+            });
+
+            startFacialAfterCaptchaBtn.addEventListener('click', async function() {
+                const token = getFacialCaptchaToken();
                 if (!token) {
-                    showCaptchaRequiredMessage();
+                    setStatus('Primero resuelva el captcha del modal.', false);
                     return;
                 }
+
                 facialCaptchaToken = token;
                 await iniciarFlujoFacial();
             });
@@ -194,7 +209,6 @@
             async function iniciarFlujoFacial() {
                 try {
                     stopped = false;
-                    abrirModalFacial();
                     setStatus('Cargando modelos de reconocimiento...', true);
 
                     await ensureModelsLoaded();
@@ -208,39 +222,37 @@
                 }
             }
 
-            function getCaptchaToken() {
-                try {
-                    if (window.grecaptcha && typeof window.grecaptcha.getResponse === 'function') {
-                        const resp = window.grecaptcha.getResponse();
-                        if (resp) {
-                            return resp;
-                        }
-                    }
-                } catch (e) {
-                    // fallback al textarea
+            async function ensureFacialRecaptchaWidget() {
+                if (facialRecaptchaWidgetId !== null) {
+                    return;
                 }
 
-                const hidden = document.querySelector('textarea[name="g-recaptcha-response"]');
-                return hidden && hidden.value ? hidden.value : '';
+                let attempts = 0;
+                while ((!window.grecaptcha || typeof window.grecaptcha.render !== 'function') && attempts < 30) {
+                    await new Promise((r) => setTimeout(r, 200));
+                    attempts += 1;
+                }
+
+                if (!window.grecaptcha || typeof window.grecaptcha.render !== 'function') {
+                    setStatus('No se pudo cargar reCAPTCHA del modal.', false);
+                    return;
+                }
+
+                facialRecaptchaWidgetId = window.grecaptcha.render('facialRecaptcha', {
+                    sitekey: '{{ config.RECAPTCHA_PUBLIC_KEY }}',
+                    theme: 'light'
+                });
             }
 
-            function showCaptchaRequiredMessage() {
-                const recaptchaContainer = document.getElementById('recaptcha-container');
-                if (recaptchaContainer) {
-                    recaptchaContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            function getFacialCaptchaToken() {
+                try {
+                    if (facialRecaptchaWidgetId !== null && window.grecaptcha && typeof window.grecaptcha.getResponse === 'function') {
+                        return window.grecaptcha.getResponse(facialRecaptchaWidgetId) || '';
+                    }
+                } catch (e) {
+                    return '';
                 }
-
-                const existing = document.getElementById('facial-captcha-alert');
-                if (existing) {
-                    existing.remove();
-                }
-
-                const alert = document.createElement('div');
-                alert.id = 'facial-captcha-alert';
-                alert.className = 'alert warning';
-                alert.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Primero marque el captcha y despues presione reconocimiento facial.';
-                const form = document.getElementById('loginForm');
-                form.parentNode.insertBefore(alert, form);
+                return '';
             }
 
             function abrirModalFacial() {
@@ -250,6 +262,10 @@
             function cerrarModalFacial() {
                 facialModal.style.display = 'none';
                 detenerReconocimiento();
+                facialCaptchaToken = '';
+                if (facialRecaptchaWidgetId !== null && window.grecaptcha && typeof window.grecaptcha.reset === 'function') {
+                    window.grecaptcha.reset(facialRecaptchaWidgetId);
+                }
             }
 
             function setStatus(message, loading) {
@@ -431,11 +447,13 @@
 
             async function loginFacial(username) {
                 try {
-                    const tokenActual = getCaptchaToken();
+                    const tokenActual = getFacialCaptchaToken();
                     if (!tokenActual) {
                         stopped = false;
-                        cerrarModalFacial();
-                        showCaptchaRequiredMessage();
+                        setStatus('Captcha del modal expirado. Resuelvalo de nuevo.', false);
+                        if (facialRecaptchaWidgetId !== null && window.grecaptcha && typeof window.grecaptcha.reset === 'function') {
+                            window.grecaptcha.reset(facialRecaptchaWidgetId);
+                        }
                         return;
                     }
 
