@@ -732,12 +732,12 @@ def listar_usuarios():
         usuarios = [u for u in usuarios if u.puesto == "BOMBERO ESPECIALIZADO"]
     
     # Si el usuario es TENIENTE, filtrar solo SUBTENIENTE
-    elif current_user.puesto.startswith("TENIENTE"):
+    elif current_user.puesto == "TENIENTE":
         usuarios = [u for u in usuarios if u.puesto == "SUBTENIENTE"]
     
     # Si el usuario es COORDINADOR OPERATIVO, filtrar solo TENIENTE
     elif current_user.puesto == "COORDINADOR OPERATIVO":
-        usuarios = [u for u in usuarios if u.puesto.startswith("TENIENTE")]
+        usuarios = [u for u in usuarios if u.puesto == "TENIENTE"]
     
     lista = [{"username": u.username, "nombre": u.nombre, "turno": u.turno or ""} for u in usuarios]
     return jsonify({"success": True, "usuarios": lista})
@@ -749,7 +749,7 @@ def evaluacion():
     if current_user.puesto == "SUBTENIENTE":
         return render_template('evaluacion_subteniente.html', usuario_actual=current_user)
 
-    elif current_user.puesto.startswith("TENIENTE"):
+    elif current_user.puesto == "TENIENTE":
         return render_template('evaluacion_teniente.html', usuario_actual=current_user)
 
     elif current_user.puesto == "COORDINADOR OPERATIVO":
