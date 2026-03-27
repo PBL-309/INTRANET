@@ -5,6 +5,7 @@ from flask_mail import Mail
 from flask_wtf.csrf import CSRFProtect
 import os
 from datetime import timedelta
+import logging
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -45,6 +46,39 @@ def create_app():
     with app.app_context():
         from app.models import User
         db.create_all()
+        
+        # Inicializar servicio de reconocimiento facial
+        try:
+            from app.facial_service import init_facial_service
+            if init_facial_service(app):
+                logging.info("[Facial] Servicio de reconocimiento facial inicializado")
+                
+                # Precalcular descriptores de fotos de usuarios
+                try:
+                    usuarios = User.query.filter(
+                        User.foto_url != None,
+                        User.foto_url != ''
+                    ).all()
+                    
+                    if usuarios:
+                        usuarios_fotos = [
+                            {
+                                'username': u.username,
+                                'nombre': u.nombre,
+                                'foto_url': u.foto_url
+                            }
+                            for u in usuarios
+                        ]
+                        
+                        from app.facial_service import facial_service
+                        facial_service.precompute_descriptors(usuarios_fotos)
+                except Exception as e:
+                    logging.error(f"[Facial] Error en precálculo de descriptores: {e}")
+        except ImportError:
+            logging.warning("[Facial] Servicio facial no disponible (librerías no instaladas)")
+        except Exception as e:
+            logging.error(f"[Facial] Error inicializando servicio facial: {e}")
+    
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))

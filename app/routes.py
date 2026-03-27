@@ -10,6 +10,7 @@ from app import db
 from io import BytesIO 
 import os
 import requests # Necesario para verificar reCAPTCHA v3
+import logging
 from app.models import Aviso, Evento, File, Folder, FormularioRespuesta, PortalWeb, Respuesta, User, VacationRequest, Noticia, RegistroCompetencia, EvaluacionDesempeno, AsistenciaFinAnio
 from app.forms import LoginForm
 from datetime import datetime, timedelta
@@ -821,6 +822,89 @@ def face_cache():
         pyjson.dump(payload, f)
 
     return jsonify({"success": True})
+
+
+@main.route('/api/recognize_face', methods=['POST'])
+def recognize_face():
+    """
+    Reconoce un rostro en una imagen enviada como base64.
+    Usa el servicio facial precargado en servidor.
+    """
+    try:
+        from app.facial_service import facial_service
+        
+        if not facial_service.initialized or not facial_service.face_descriptors:
+            return jsonify({
+                "success": False,
+                "error": "Servicio facial no disponible"
+            }), 503
+        
+        body = request.get_json(silent=True) or {}
+        image_base64 = body.get('image', '').strip()
+        
+        if not image_base64:
+            return jsonify({
+                "success": False,
+                "error": "Imagen requerida"
+            }), 400
+        
+        # Decodificar imagen base64
+        try:
+            import base64
+            import cv2
+            import numpy as np
+            
+            # Remover prefijo data:image si existe
+            if ',' in image_base64:
+                image_base64 = image_base64.split(',')[1]
+            
+            image_data = base64.b64decode(image_base64)
+            nparr = np.frombuffer(image_data, np.uint8)
+            image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            
+            if image is None:
+                return jsonify({
+                    "success": False,
+                    "error": "Imagen inválida"
+                }), 400
+            
+            # Reconocer rostro
+            username, nombre, confidence = facial_service.recognize_face(image, threshold=0.5)
+            
+            if username:
+                return jsonify({
+                    "success": True,
+                    "username": username,
+                    "nombre": nombre,
+                    "confidence": float(confidence)
+                })
+            else:
+                return jsonify({
+                    "success": False,
+                    "error": "No se pudo identificar el rostro"
+                }), 401
+        
+        except Exception as e:
+            logger = logging.getLogger(__name__)
+            logger.error(f"[Facial] Error decodificando imagen: {e}")
+            return jsonify({
+                "success": False,
+                "error": "Error procesando imagen"
+            }), 400
+    
+    except ImportError:
+        return jsonify({
+            "success": False,
+            "error": "Servicio facial no disponible"
+        }), 503
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"[Facial] Error en recognize_face: {e}")
+        return jsonify({
+            "success": False,
+            "error": "Error interno del servidor"
+        }), 500
 
 
 @main.route('/api/login_facial', methods=['POST'])
