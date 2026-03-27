@@ -819,9 +819,34 @@ def face_cache():
 def login_facial():
     body = request.get_json(silent=True) or {}
     username = (body.get('username') or '').strip()
+    recaptcha_token = (body.get('recaptcha_token') or '').strip()
 
     if not username:
         return jsonify({"success": False, "error": "Usuario requerido"}), 400
+
+    if not recaptcha_token:
+        return jsonify({"success": False, "error": "Captcha requerido"}), 400
+
+    secret_key = current_app.config.get('RECAPTCHA_PRIVATE_KEY')
+    if not secret_key:
+        return jsonify({"success": False, "error": "Configuracion de captcha no disponible"}), 500
+
+    try:
+        verify_resp = requests.post(
+            'https://www.google.com/recaptcha/api/siteverify',
+            data={
+                'secret': secret_key,
+                'response': recaptcha_token,
+                'remoteip': request.remote_addr
+            },
+            timeout=8
+        )
+        verify_data = verify_resp.json()
+    except Exception:
+        return jsonify({"success": False, "error": "No se pudo validar captcha"}), 502
+
+    if not verify_data.get('success'):
+        return jsonify({"success": False, "error": "Captcha invalido o expirado"}), 403
 
     user = User.query.filter_by(username=username).first()
     if not user:

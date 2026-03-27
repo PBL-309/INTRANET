@@ -75,7 +75,7 @@
                 </div>
 
                 <!-- Google reCAPTCHA v2 -->
-                <div style="margin: 20px 0; display: flex; justify-content: start;">
+                <div id="recaptcha-container" style="margin: 20px 0; display: flex; justify-content: start;">
                     {{ form.recaptcha }}
                 </div>
 
@@ -137,6 +137,7 @@
             let stopped = false;
             let candidateLabel = null;
             let candidateCount = 0;
+            let facialCaptchaToken = '';
 
             setTimeout(function() {
                 const alerts = document.querySelectorAll('.alert');
@@ -169,9 +170,15 @@
             usernameInput.addEventListener('input', checkUser);
             usernameInput.addEventListener('blur', checkUser);
 
-            facialRecognitionBtn.addEventListener('click', function(e) {
+            facialRecognitionBtn.addEventListener('click', async function(e) {
                 e.preventDefault();
-                iniciarFlujoFacial();
+                const token = getCaptchaToken();
+                if (!token) {
+                    showCaptchaRequiredMessage();
+                    return;
+                }
+                facialCaptchaToken = token;
+                await iniciarFlujoFacial();
             });
 
             closeFacialModal.addEventListener('click', function() {
@@ -199,6 +206,41 @@
                     setStatus('No fue posible iniciar el reconocimiento facial.', false);
                     detenerReconocimiento();
                 }
+            }
+
+            function getCaptchaToken() {
+                try {
+                    if (window.grecaptcha && typeof window.grecaptcha.getResponse === 'function') {
+                        const resp = window.grecaptcha.getResponse();
+                        if (resp) {
+                            return resp;
+                        }
+                    }
+                } catch (e) {
+                    // fallback al textarea
+                }
+
+                const hidden = document.querySelector('textarea[name="g-recaptcha-response"]');
+                return hidden && hidden.value ? hidden.value : '';
+            }
+
+            function showCaptchaRequiredMessage() {
+                const recaptchaContainer = document.getElementById('recaptcha-container');
+                if (recaptchaContainer) {
+                    recaptchaContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+
+                const existing = document.getElementById('facial-captcha-alert');
+                if (existing) {
+                    existing.remove();
+                }
+
+                const alert = document.createElement('div');
+                alert.id = 'facial-captcha-alert';
+                alert.className = 'alert warning';
+                alert.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> Primero marque el captcha y despues presione reconocimiento facial.';
+                const form = document.getElementById('loginForm');
+                form.parentNode.insertBefore(alert, form);
             }
 
             function abrirModalFacial() {
@@ -389,10 +431,18 @@
 
             async function loginFacial(username) {
                 try {
+                    const tokenActual = getCaptchaToken();
+                    if (!tokenActual) {
+                        stopped = false;
+                        cerrarModalFacial();
+                        showCaptchaRequiredMessage();
+                        return;
+                    }
+
                     const resp = await fetch('/api/login_facial', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username: username })
+                        body: JSON.stringify({ username: username, recaptcha_token: tokenActual || facialCaptchaToken })
                     });
                     const data = await resp.json();
 
