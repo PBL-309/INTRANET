@@ -31,7 +31,7 @@ class FacialRecognitionService:
         )
         
     def initialize(self, app=None):
-        """Precarga modelos y calcula descriptores de todas las fotos."""
+        """Precarga modelos y descriptores de todas las fotos."""
         if self.initialized:
             return True
             
@@ -52,6 +52,11 @@ class FacialRecognitionService:
             )
             
             logger.info("[Facial] Modelos cargados correctamente")
+            
+            # Cargar descriptores desde caché si existen
+            if self._load_descriptors_cache():
+                logger.info(f"[Facial] {len(self.face_descriptors)} descriptores cargados desde caché")
+            
             self.initialized = True
             return True
             
@@ -140,6 +145,11 @@ class FacialRecognitionService:
         Precalcula descriptores para todas las fotos de usuarios.
         usuarios_fotos: list of {username, nombre, foto_url}
         """
+        # Verificar si el caché es válido
+        if self._is_cache_valid(usuarios_fotos):
+            logger.info("[Facial] Caché válido - descriptores ya cargados en memoria")
+            return len(self.face_descriptors)
+        
         logger.info("[Facial] Precalculando descriptores de fotos...")
         self.face_descriptors = {}
         success_count = 0
@@ -171,6 +181,65 @@ class FacialRecognitionService:
         logger.info(f"[Facial] Precálculo completado: {success_count}/{len(usuarios_fotos)} descriptores")
         self._save_descriptors_cache()
         return success_count
+    
+    def _is_cache_valid(self, usuarios_fotos):
+        """
+        Verifica si el caché es válido comparando firmas de fotos.
+        Retorna True si el caché está actualizado, False si hay cambios.
+        """
+        if not os.path.exists(self.descriptor_cache_path):
+            return False
+        
+        try:
+            with open(self.descriptor_cache_path, 'r') as f:
+                cache_data = pyjson.load(f)
+            
+            cached_descriptors = cache_data.get('descriptors', {})
+            cached_usernames = set(cached_descriptors.keys())
+            current_usernames = set(u['username'] for u in usuarios_fotos)
+            
+            # Si cambiaron los usuarios, caché es inválido
+            if cached_usernames != current_usernames:
+                logger.info("[Facial] Caché desactualizado: usuarios cambió")
+                return False
+            
+            # Cargar descriptores en memoria si caché es válido
+            self.face_descriptors = {}
+            for username, data in cached_descriptors.items():
+                self.face_descriptors[username] = {
+                    'descriptor': data['descriptor'],  # Ya está en lista JSON
+                    'nombre': data.get('nombre', username)
+                }
+            
+            return len(self.face_descriptors) > 0
+            
+        except Exception as e:
+            logger.warning(f"[Facial] Error validando caché: {e}")
+            return False
+    
+    def _load_descriptors_cache(self):
+        """
+        Carga descriptores desde el archivo de caché.
+        Retorna True si cargó correctamente, False si no hay caché.
+        """
+        if not os.path.exists(self.descriptor_cache_path):
+            return False
+        
+        try:
+            with open(self.descriptor_cache_path, 'r') as f:
+                cache_data = pyjson.load(f)
+            
+            self.face_descriptors = {}
+            for username, data in cache_data.get('descriptors', {}).items():
+                self.face_descriptors[username] = {
+                    'descriptor': data['descriptor'],
+                    'nombre': data.get('nombre', username)
+                }
+            
+            return len(self.face_descriptors) > 0
+        except Exception as e:
+            logger.error(f"[Facial] Error cargando caché de descriptores: {e}")
+            return False
     
     def _save_descriptors_cache(self):
         """Guarda descriptores en caché JSON."""

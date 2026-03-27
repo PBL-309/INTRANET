@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -130,6 +130,7 @@
             let recognitionTimer = null;
             let processingFrame = false;
             let stopped = false;
+            let facialServiceReady = false;
 
             // Ocultar alertas después de 4 segundos
             setTimeout(function() {
@@ -142,6 +143,29 @@
                     }, 500);
                 });
             }, 4000);
+
+            // Verificar estado del servicio facial en background
+            async function checkFacialService() {
+                try {
+                    const resp = await fetch('/api/facial_status');
+                    const data = await resp.json();
+                    facialServiceReady = data.ready;
+                    
+                    if (facialServiceReady) {
+                        console.log('[Facial] Servicio listo:', data.count, 'descriptores');
+                    } else {
+                        console.log('[Facial] Cargando descriptores...');
+                        // Reintentar en 2 segundos
+                        setTimeout(checkFacialService, 2000);
+                    }
+                } catch (e) {
+                    console.warn('[Facial] Error verificando servicio:', e);
+                    setTimeout(checkFacialService, 2000);
+                }
+            }
+            
+            // Iniciar verificación sin bloquear
+            checkFacialService();
 
             // Lógica para mostrar/ocultar campo de contraseña
             const usernameInput = document.getElementById('usernameInput');
@@ -168,6 +192,17 @@
             facialRecognitionBtn.addEventListener('click', async function(e) {
                 e.preventDefault();
                 abrirModalFacial();
+                
+                // Si el servicio no está listo, esperar
+                if (!facialServiceReady) {
+                    setStatus('Esperando servicio de reconocimiento...', true);
+                    let attempts = 0;
+                    while (!facialServiceReady && attempts < 30) {
+                        await new Promise(r => setTimeout(r, 500));
+                        attempts += 1;
+                    }
+                }
+                
                 setStatus('Iniciando cámara...', true);
                 
                 try {

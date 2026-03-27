@@ -824,6 +824,33 @@ def face_cache():
     return jsonify({"success": True})
 
 
+@main.route('/api/facial_status')
+def facial_status():
+    """
+    Retorna el estado del servicio de reconocimiento facial.
+    """
+    try:
+        from app.facial_service import facial_service
+        
+        is_ready = (
+            facial_service.initialized and 
+            facial_service.embeddings_model is not None and
+            len(facial_service.face_descriptors) > 0
+        )
+        
+        return jsonify({
+            "success": True,
+            "ready": is_ready,
+            "count": len(facial_service.face_descriptors)
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "ready": False,
+            "error": str(e)
+        }), 500
+
+
 @main.route('/api/recognize_face', methods=['POST'])
 def recognize_face():
     """
