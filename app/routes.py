@@ -708,18 +708,38 @@ def add_aviso():
 def formulario():
     return render_template('formulario.html')
 
+@main.route('/api/buscar_usuario/<username>')
+@login_required
+def buscar_usuario(username):
+    usuario = User.query.filter_by(username=username).first()
+    if usuario:
+        return jsonify({
+            "success": True,
+            "nombre": usuario.nombre,
+            "puesto": usuario.puesto,
+            "nomina": usuario.username
+        })
+    return jsonify({"success": False, "error": "Usuario no encontrado"}), 404
+
+@main.route('/api/listar_usuarios')
+@login_required
+def listar_usuarios():
+    usuarios = User.query.filter(User.id != current_user.id).all()
+    lista = [{"username": u.username, "nombre": u.nombre} for u in usuarios]
+    return jsonify({"success": True, "usuarios": lista})
+
 @main.route('/evaluacion_del_desempeño')
 @login_required
 def evaluacion():
 
     if current_user.puesto == "SUBTENIENTE":
-        return render_template('evaluacion_subteniente.html')
+        return render_template('evaluacion_subteniente.html', usuario_actual=current_user)
 
     elif current_user.puesto.startswith("TENIENTE"):
-        return render_template('evaluacion_teniente.html')
+        return render_template('evaluacion_teniente.html', usuario_actual=current_user)
 
     elif current_user.puesto == "COORDINADOR OPERATIVO":
-        return render_template('evaluacion_coordinador.html')
+        return render_template('evaluacion_coordinador.html', usuario_actual=current_user)
 
     else:
         return render_template('evaluacion.html')  # bomberos u otros
@@ -895,8 +915,6 @@ def submit_competencia():
     ninos = int(request.form.get('ninos', 0))
     adultos = int(request.form.get('adultos', 0))
     correo = request.form.get('correo')
-
-    # Verificar si ya hay un registro para este usuario
     registro = RegistroCompetencia.query.filter_by(user_id=current_user.id).first()
 
     if not registro:
@@ -921,7 +939,6 @@ def submit_competencia():
 
     from flask_mail import Message
 
-    # Cuerpo simple de texto y HTML sin QR
     texto = f"Hola {nombre},\n\nGracias por registrarte al Bombero Challenge.\nTu número de competidor es: #{nuevo_num}.\n\n¡Te esperamos!"
 
     html = f"""

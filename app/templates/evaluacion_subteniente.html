@@ -8,259 +8,65 @@
     .hidden {
       display: none;
     }
-  </style>
-  <!--
-    :root {
-      --bg: #e9e3f5;
-      --card: #ffffff;
-      --primary: #6a5acd;
-      --primary-hover: #574ac9;
-      --border: #000000;
-      --muted: #c2c2c2;
-      --font: Arial, sans-serif;
+
+    .search-container {
+      position: relative;
+      margin-bottom: 12px;
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: var(--font);
-      margin: 0;
-      background-color: var(--bg);
-      display: flex;
-      justify-content: center;
-      padding: 30px 10px;
-      color: #111;
-    }
-
-    .page {
-      background-color: var(--card);
-      max-width: 1200px;
+    .search-input {
       width: 100%;
-      padding: 40px 30px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-      border-radius: 8px;
-    }
-
-    h2 {
-      text-align: center;
-      margin: 0 0 20px 0;
-      font-size: 24px;
-      letter-spacing: 0.2px;
-    }
-
-    .header {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px 20px;
-      margin-bottom: 20px;
-    }
-
-    .header label {
-      display: block;
-      margin-bottom: 8px;
-      font-size: 16px;
-      font-weight: 600;
-    }
-
-    .header input {
-      width: 100%;
-      border: none;
-      border-bottom: 2px solid var(--border);
-      font-size: 16px;
-      padding: 6px 4px;
-      background: none;
+      padding: 8px 12px;
+      font-size: 14px;
+      border: 1px solid rgba(17, 24, 39, 0.22);
+      border-radius: 6px;
       outline: none;
     }
 
-    .instruction {
-      font-size: 16px;
-      margin: 18px 0 12px 0;
-      line-height: 1.35;
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(91, 91, 214, 0.1);
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      font-size: 15px;
-      table-layout: fixed; /* evita que celdas largas rompan el layout */
-    }
-
-    td,
-    th {
-      border: 1px solid var(--border);
-      text-align: center;
-      padding: 8px 6px;
-      vertical-align: top;
-      word-break: break-word;
-      overflow-wrap: anywhere;
-      line-height: 1.25;
-    }
-
-    .section-title {
-      background-color: var(--muted);
-      font-weight: 700;
-      text-align: left;
-      padding: 10px 10px;
-    }
-
-    .question {
-      text-align: left;
-      font-weight: 400;
-      padding-left: 10px;
-    }
-
-    input[type="radio"] {
-      transform: scale(1.35);
-      transform-origin: top left;
-      margin-top: 4px;
-    }
-
-    .radio-label {
-      font-size: 12.5px;
-      font-weight: 700;
-      line-height: 1.15;
-    }
-
-    .radio-label span {
-      display: block;
-      font-weight: 700;
-      margin-top: 2px;
-    }
-
-    .next-btn,
-    .prev-btn {
-      margin-top: 30px;
-      background-color: var(--primary);
-      color: #fff;
-      border: none;
-      padding: 12px 26px;
-      font-size: 16px;
-      font-weight: 700;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-    }
-
-    .next-btn:hover,
-    .prev-btn:hover {
-      background-color: var(--primary-hover);
-    }
-
-    .button-container {
-      display: flex;
-      justify-content: center;
-      gap: 18px;
-      flex-wrap: wrap;
-    }
-
-    /* Textareas */
-    .textarea-field {
-      width: 100%;
-      font-size: 15px;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      padding: 10px;
-      font-family: var(--font);
-      outline: none;
-      resize: vertical;
-    }
-
-    .textarea-observaciones {
-      height: 100px;
-    }
-
-    .textarea-comentario {
-      height: 80px;
-    }
-
-    .hidden {
+    .dropdown-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid rgba(17, 24, 39, 0.22);
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
       display: none;
     }
 
-    /* Flash Messages Styles */
-    .alert {
-      padding: 14px;
-      margin-bottom: 20px;
-      border: 1px solid transparent;
-      border-radius: 6px;
-      text-align: center;
-      font-weight: 700;
+    .dropdown-list.show {
+      display: block;
     }
 
-    .alert-success {
-      color: #3c763d;
-      background-color: #dff0d8;
-      border-color: #d6e9c6;
+    .dropdown-item {
+      padding: 10px 12px;
+      cursor: pointer;
+      hover-background: var(--section);
+      border-bottom: 1px solid rgba(17, 24, 39, 0.08);
     }
 
-    .alert-danger,
-    .alert-error {
-      color: #a94442;
-      background-color: #f2dede;
-      border-color: #ebccd1;
+    .dropdown-item:hover {
+      background-color: var(--section);
     }
 
-    .alert-info {
-      color: #31708f;
-      background-color: #d9edf7;
-      border-color: #bce8f1;
+    .dropdown-item small {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
     }
-
-    .alert-warning {
-      color: #8a6d3b;
-      background-color: #fcf8e3;
-      border-color: #faebcc;
-    }
-
-    @media (max-width: 600px) {
-      body {
-        padding: 20px 8px;
-      }
-
-      .page {
-        padding: 20px 15px;
-      }
-
-      h2 {
-        font-size: 20px;
-      }
-
-      .header {
-        grid-template-columns: 1fr;
-        gap: 12px;
-      }
-
-      .header label {
-        font-size: 15px;
-      }
-
-      .instruction {
-        font-size: 14.5px;
-      }
-
-      table {
-        font-size: 13.5px;
-      }
-
-      input[type="radio"] {
-        transform: scale(1.1);
-      }
-
-      td,
-      th {
-        padding: 7px 4px;
-      }
-
-      .next-btn,
-      .prev-btn {
-        width: 100%;
-      }
-    }
-  -->
+  
+  </style>
+  
   <style>
     :root {
       --bg: #f2f3ff;
@@ -518,12 +324,22 @@
     <h2>EVALUACIÓN DEL DESEMPEÑO</h2>
     <form action="{{ url_for('main.submit_evaluacion') }}" method="POST">    	
     <div class="header">
-      <label>Nombre:<br><input type="text"  name="nombre" required /></label>
+      <div>
+        <label>Seleccionar Usuario a Evaluar:<br></label>
+        <div class="search-container">
+          <input type="text" id="buscar_usuario" class="search-input" placeholder="Escribe el username..." autocomplete="off" />
+          <div id="dropdown_usuarios" class="dropdown-list"></div>
+        </div>
+        <input type="hidden" id="username_seleccionado" name="nombre" required />
+      </div>
+      <label>Nombre del Evaluado:<br><input type="text" id="nombre_evaluado" readonly /></label>
+      <label>Puesto del Evaluado:<br><input type="text" id="puesto_evaluado" readonly /></label>
+      <label>Nómina del Evaluado:<br><input type="text" id="nomina_evaluado" name="nomina" readonly /></label>
       <label>Fecha:<br><input type="date" name="fecha" placeholder="dd/mm/aaaa" required /></label>
       <label>Área:<br><input type="text" name="area" required /></label>
       <label>Estación:<br><input type="text" name="estacion" required /></label>
-      <label>No. de Nómina:<br><input type="text" name="nomina" required /></label>
-      <label>Puesto:<br><input type="text" name="puesto" required /></label>
+      <label>Nombre del Subteniente:<br><input type="text" id="nombre_subteniente" readonly /></label>
+      <input type="hidden" id="puesto_subteniente" name="puesto" />
     </div>
 
     <p class="instruction">
@@ -740,6 +556,94 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      // Auto-llenar nombre del subteniente
+      document.getElementById('nombre_subteniente').value = '{{ usuario_actual.nombre }}';
+      document.getElementById('puesto_subteniente').value = '{{ usuario_actual.puesto }}';
+
+      // Funcionalidad de búsqueda de usuarios
+      const buscarInput = document.getElementById('buscar_usuario');
+      const dropdownUsuarios = document.getElementById('dropdown_usuarios');
+      const usernameSeleccionado = document.getElementById('username_seleccionado');
+      const nombreEvaluado = document.getElementById('nombre_evaluado');
+      const puestoEvaluado = document.getElementById('puesto_evaluado');
+      const nominaEvaluado = document.getElementById('nomina_evaluado');
+
+      let usuariosDisponibles = [];
+
+      // Cargar lista de usuarios
+      async function cargarUsuarios() {
+        try {
+          const response = await fetch('/api/listar_usuarios');
+          const data = await response.json();
+          if (data.success) {
+            usuariosDisponibles = data.usuarios;
+          }
+        } catch (error) {
+          console.error('Error al cargar usuarios:', error);
+        }
+      }
+
+      // Mostrar dropdown cuando el usuario escribe
+      buscarInput.addEventListener('input', function() {
+        const valor = this.value.toLowerCase().trim();
+        
+        if (valor.length === 0) {
+          dropdownUsuarios.classList.remove('show');
+          return;
+        }
+
+        const filtrados = usuariosDisponibles.filter(u => 
+          u.username.toLowerCase().includes(valor)
+        );
+
+        if (filtrados.length > 0) {
+          dropdownUsuarios.innerHTML = filtrados.map(u => `
+            <div class="dropdown-item" data-username="${u.username}">
+              <strong>${u.username}</strong>
+              <small>${u.nombre}</small>
+            </div>
+          `).join('');
+          dropdownUsuarios.classList.add('show');
+        } else {
+          dropdownUsuarios.classList.remove('show');
+        }
+      });
+
+      // Seleccionar usuario del dropdown
+      dropdownUsuarios.addEventListener('click', async function(e) {
+        const item = e.target.closest('.dropdown-item');
+        if (item) {
+          const username = item.dataset.username;
+          buscarInput.value = username;
+          usernameSeleccionado.value = username;
+          dropdownUsuarios.classList.remove('show');
+
+          // Cargar datos del usuario seleccionado
+          try {
+            const response = await fetch(`/api/buscar_usuario/${username}`);
+            const data = await response.json();
+            if (data.success) {
+              nombreEvaluado.value = data.nombre;
+              puestoEvaluado.value = data.puesto;
+              nominaEvaluado.value = data.nomina || '';
+            }
+          } catch (error) {
+            console.error('Error al buscar usuario:', error);
+          }
+        }
+      });
+
+      // Cerrar dropdown al hacer clic fuera
+      document.addEventListener('click', function(e) {
+        if (e.target !== buscarInput && !dropdownUsuarios.contains(e.target)) {
+          dropdownUsuarios.classList.remove('show');
+        }
+      });
+
+      // Cargar usuarios al inicio
+      cargarUsuarios();
+
+      // Auto-ocultar mensajes de alerta
       setTimeout(function() {
         var alerts = document.querySelectorAll('.alert');
         alerts.forEach(function(alert) {
