@@ -532,9 +532,15 @@ def submit_evaluacion():
 def resultados_evaluaciones():
     try:
         rol_seleccionado = request.args.get('rol', 'BOMBERO ESPECIALIZADO')
+        turno_seleccionado = request.args.get('turno', 'GENERAL')
         
         # Obtener todos los usuarios del rol seleccionado
         usuarios = User.query.filter_by(puesto=rol_seleccionado).all()
+        
+        # Filtrar por turno si no es GENERAL
+        if turno_seleccionado != 'GENERAL':
+            usuarios = [u for u in usuarios if u.turno == turno_seleccionado]
+        
         usuario_ids = [u.id for u in usuarios]
         
         # Obtener todas las evaluaciones de estos usuarios
@@ -624,8 +630,10 @@ def resultados_evaluaciones():
             'resultados_evaluaciones.html',
             datos_grafica=datos_grafica,
             rol_seleccionado=rol_seleccionado,
+            turno_seleccionado=turno_seleccionado,
             total_evaluaciones=len(evaluaciones),
-            roles_disponibles=['BOMBERO ESPECIALIZADO', 'SUBTENIENTE', 'TENIENTE']
+            roles_disponibles=['BOMBERO ESPECIALIZADO', 'SUBTENIENTE', 'TENIENTE'],
+            turnos_disponibles=['GENERAL', 'A', 'B', 'C']
         )
     except Exception as e:
         logging.error(f"Error en resultados_evaluaciones: {str(e)}")

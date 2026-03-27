@@ -233,13 +233,27 @@
             <h1>📊 Resultados de Evaluaciones del Desempeño</h1>
             
             <div class="header-controls">
-                <div class="rol-selector">
-                    {% for rol in roles_disponibles %}
-                        <a href="{{ url_for('main.resultados_evaluaciones', rol=rol) }}" 
-                           class="rol-btn {% if rol == rol_seleccionado %}active{% endif %}">
-                            {{ rol }}
-                        </a>
-                    {% endfor %}
+                <div>
+                    <strong style="display: block; margin-bottom: 10px; color: var(--text);">Rol:</strong>
+                    <div class="rol-selector">
+                        {% for rol in roles_disponibles %}
+                            <a href="{{ url_for('main.resultados_evaluaciones', rol=rol, turno=turno_seleccionado) }}" 
+                               class="rol-btn {% if rol == rol_seleccionado %}active{% endif %}">
+                                {{ rol }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div>
+                    <strong style="display: block; margin-bottom: 10px; color: var(--text);">Turno:</strong>
+                    <div class="rol-selector">
+                        {% for turno in turnos_disponibles %}
+                            <a href="{{ url_for('main.resultados_evaluaciones', rol=rol_seleccionado, turno=turno) }}" 
+                               class="rol-btn {% if turno == turno_seleccionado %}active{% endif %}">
+                                {{ turno }}
+                            </a>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
 
@@ -251,6 +265,10 @@
                 <div class="stat-card">
                     <p>Rol Seleccionado</p>
                     <div class="value" style="font-size: 14px; font-weight: 600;">{{ rol_seleccionado }}</div>
+                </div>
+                <div class="stat-card">
+                    <p>Turno Seleccionado</p>
+                    <div class="value" style="font-size: 14px; font-weight: 600;">{{ turno_seleccionado }}</div>
                 </div>
             </div>
         </div>
