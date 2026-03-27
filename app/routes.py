@@ -545,17 +545,38 @@ def resultados_evaluaciones():
         else:
             evaluaciones = []
         
-        # Calcular promedios por categoría
-        categorias = {
-            'comunicacion': {'titulo': 'Comunicación', 'valores': []},
-            'conocimientos': {'titulo': 'Conocimientos Bomberiles', 'valores': []},
-            'direccion': {'titulo': 'Dirección de Guardias y Turnos', 'valores': []},
-            'gestion': {'titulo': 'Gestión de Estaciones', 'valores': []},
-            'habilidades_blandas': {'titulo': 'Habilidades Blandas', 'valores': []},
-            'comunicacion_subordinados': {'titulo': 'Comunicación con Subordinados', 'valores': []},
-            'disciplina': {'titulo': 'Disciplina', 'valores': []},
-            'orden_cerrado': {'titulo': 'Orden Cerrado', 'valores': []}
+        # Definir categorías por rol
+        categorias_por_rol = {
+            'BOMBERO ESPECIALIZADO': {
+                'comunicacion': {'titulo': 'Comunicación', 'valores': []},
+                'habilidades_blandas': {'titulo': 'Habilidades Blandas', 'valores': []},
+                'disciplina': {'titulo': 'Disciplina', 'valores': []},
+                'orden_cerrado': {'titulo': 'Orden Cerrado', 'valores': []}
+            },
+            'SUBTENIENTE': {
+                'comunicacion': {'titulo': 'Comunicación', 'valores': []},
+                'habilidades_blandas': {'titulo': 'Habilidades Blandas', 'valores': []},
+                'disciplina': {'titulo': 'Disciplina', 'valores': []},
+                'orden_cerrado': {'titulo': 'Orden Cerrado', 'valores': []}
+            },
+            'TENIENTE': {
+                'conocimientos': {'titulo': 'Conocimientos Bomberiles', 'valores': []},
+                'habilidades_blandas': {'titulo': 'Habilidades Blandas', 'valores': []},
+                'comunicacion_subordinados': {'titulo': 'Comunicación con Subordinados', 'valores': []},
+                'disciplina': {'titulo': 'Disciplina', 'valores': []},
+                'orden_cerrado': {'titulo': 'Orden Cerrado', 'valores': []}
+            },
+            'COORDINADOR': {
+                'direccion': {'titulo': 'Dirección de Guardias y Turnos', 'valores': []},
+                'gestion': {'titulo': 'Gestión de Estaciones', 'valores': []},
+                'comunicacion_subordinados': {'titulo': 'Comunicación con Subordinados', 'valores': []},
+                'disciplina': {'titulo': 'Disciplina', 'valores': []},
+                'orden_cerrado': {'titulo': 'Orden Cerrado', 'valores': []}
+            }
         }
+        
+        # Obtener categorías para el rol seleccionado
+        categorias = categorias_por_rol.get(rol_seleccionado, categorias_por_rol['BOMBERO ESPECIALIZADO'])
         
         for evaluacion in evaluaciones:
             if not evaluacion or not evaluacion.respuestas:
@@ -610,7 +631,7 @@ def resultados_evaluaciones():
             datos_grafica=datos_grafica,
             rol_seleccionado=rol_seleccionado,
             total_evaluaciones=len(evaluaciones),
-            roles_disponibles=['BOMBERO ESPECIALIZADO', 'SUBTENIENTE', 'TENIENTE']
+            roles_disponibles=['BOMBERO ESPECIALIZADO', 'SUBTENIENTE', 'TENIENTE', 'COORDINADOR']
         )
     except Exception as e:
         logging.error(f"Error en resultados_evaluaciones: {str(e)}")
