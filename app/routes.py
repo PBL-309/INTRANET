@@ -487,54 +487,88 @@ def submit_evaluacion():
 @main.route('/resultados_evaluaciones')
 @login_required
 def resultados_evaluaciones():
-    rol_seleccionado = request.args.get('rol', 'BOMBERO ESPECIALIZADO')
-    
-    # Obtener todos los usuarios del rol seleccionado
-    usuarios = User.query.filter_by(puesto=rol_seleccionado).all()
-    
-    # Obtener todas las evaluaciones de estos usuarios
-    evaluaciones = EvaluacionDesempeno.query.filter(
-        EvaluacionDesempeno.user_id.in_([u.id for u in usuarios])
-    ).all()
-    
-    # Calcular promedios por categoría
-    categorias = {
-        'comunicacion': {'titulo': 'Comunicación', 'valores': []},
-        'habilidades_blandas': {'titulo': 'Habilidades Blandas', 'valores': []},
-        'disciplina': {'titulo': 'Disciplina', 'valores': []},
-        'orden_cerrado': {'titulo': 'Orden Cerrado', 'valores': []}
-    }
-    
-    for evaluacion in evaluaciones:
-        respuestas = evaluacion.respuestas
-        for categoria, datos in categorias.items():
-            if categoria in respuestas:
-                valores = [int(v) for v in respuestas[categoria].values() if v]
-                if valores:
-                    promedio = sum(valores) / len(valores)
-                    datos['valores'].append(promedio)
-    
-    # Calcular promedios finales y contar evaluaciones
-    datos_grafica = []
-    for categoria, datos in categorias.items():
-        if datos['valores']:
-            promedio_final = sum(datos['valores']) / len(datos['valores'])
-        else:
-            promedio_final = 0
+    try:
+        rol_seleccionado = request.args.get('rol', 'BOMBERO ESPECIALIZADO')
         
-        datos_grafica.append({
-            'nombre': datos['titulo'],
-            'promedio': round(promedio_final, 2),
-            'cantidad_evaluaciones': len(datos['valores'])
-        })
-    
-    return render_template(
-        'resultados_evaluaciones.html',
-        datos_grafica=datos_grafica,
-        rol_seleccionado=rol_seleccionado,
-        total_evaluaciones=len(evaluaciones),
-        roles_disponibles=['BOMBERO ESPECIALIZADO', 'SUBTENIENTE', 'TENIENTE']
-    )
+        # Obtener todos los usuarios del rol seleccionado
+        usuarios = User.query.filter_by(puesto=rol_seleccionado).all()
+        usuario_ids = [u.id for u in usuarios]
+        
+        # Obtener todas las evaluaciones de estos usuarios
+        if usuario_ids:
+            evaluaciones = EvaluacionDesempeno.query.filter(
+                EvaluacionDesempeno.user_id.in_(usuario_ids)
+            ).all()
+        else:
+            evaluaciones = []
+        
+        # Calcular promedios por categoría
+        categorias = {
+            'comunicacion': {'titulo': 'Comunicación', 'valores': []},
+            'habilidades_blandas': {'titulo': 'Habilidades Blandas', 'valores': []},
+            'disciplina': {'titulo': 'Disciplina', 'valores': []},
+            'orden_cerrado': {'titulo': 'Orden Cerrado', 'valores': []}
+        }
+        
+        for evaluacion in evaluaciones:
+            if not evaluacion or not evaluacion.respuestas:
+                continue
+            
+            respuestas = evaluacion.respuestas
+            if not isinstance(respuestas, dict):
+                continue
+            
+            for categoria, datos in categorias.items():
+                if categoria not in respuestas:
+                    continue
+                
+                categoria_data = respuestas[categoria]
+                if not isinstance(categoria_data, dict):
+                    continue
+                
+                try:
+                    # Convertir valores a int y filtrar los que no sean válidos
+                    valores = []
+                    for v in categoria_data.values():
+                        if v:  # Skip None y empty strings
+                            try:
+                                valores.append(int(v))
+                            except (ValueError, TypeError):
+                                # Skip values that can't be converted to int
+                                pass
+                    
+                    if valores:
+                        promedio = sum(valores) / len(valores)
+                        datos['valores'].append(promedio)
+                except Exception as e:
+                    logging.error(f"Error processing categoria {categoria}: {str(e)}")
+                    continue
+        
+        # Calcular promedios finales y contar evaluaciones
+        datos_grafica = []
+        for categoria, datos in categorias.items():
+            if datos['valores']:
+                promedio_final = sum(datos['valores']) / len(datos['valores'])
+            else:
+                promedio_final = 0
+            
+            datos_grafica.append({
+                'nombre': datos['titulo'],
+                'promedio': round(promedio_final, 2),
+                'cantidad_evaluaciones': len(datos['valores'])
+            })
+        
+        return render_template(
+            'resultados_evaluaciones.html',
+            datos_grafica=datos_grafica,
+            rol_seleccionado=rol_seleccionado,
+            total_evaluaciones=len(evaluaciones),
+            roles_disponibles=['BOMBERO ESPECIALIZADO', 'SUBTENIENTE', 'TENIENTE']
+        )
+    except Exception as e:
+        logging.error(f"Error en resultados_evaluaciones: {str(e)}")
+        flash(f"Error al cargar los resultados: {str(e)}", "danger")
+        return redirect(url_for('main.dashboard'))
 
 
 @main.route('/submit_form', methods=['POST'])
