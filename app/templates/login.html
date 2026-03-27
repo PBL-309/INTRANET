@@ -296,7 +296,31 @@
                         if (!facialCaptchaToken) {
                             return;
                         }
-                        await iniciarFlujoFacial();
+                        
+                        // Validar captcha con el servidor ANTES de iniciar flujo facial
+                        setStatus('Validando captcha...', true);
+                        try {
+                            const resp = await fetch('/api/verify_facial_captcha', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ recaptcha_token: facialCaptchaToken })
+                            });
+                            const data = await resp.json();
+                            
+                            if (!data.success) {
+                                facialCaptchaToken = '';
+                                window.grecaptcha.reset(facialRecaptchaWidgetId);
+                                setStatus(data.error || 'Captcha no validado. Reintente.', false);
+                                return;
+                            }
+                            
+                            // Captcha validado, iniciar flujo facial
+                            await iniciarFlujoFacial();
+                        } catch (e) {
+                            facialCaptchaToken = '';
+                            window.grecaptcha.reset(facialRecaptchaWidgetId);
+                            setStatus('Error al validar captcha. Reintente.', false);
+                        }
                     },
                     'expired-callback': function() {
                         facialCaptchaToken = '';
@@ -537,7 +561,7 @@
                     const resp = await fetch('/api/login_facial', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username: username, recaptcha_token: facialCaptchaToken })
+                        body: JSON.stringify({ username: username })
                     });
                     const data = await resp.json();
 
@@ -546,23 +570,36 @@
                         return;
                     }
 
+                    // Error in login
                     stopped = false;
-                    setStatus(data.error || 'No se pudo iniciar sesion facial.', false);
-                    const captchaError = (data.error || '').toLowerCase().includes('captcha');
-                    if (captchaError && facialRecaptchaWidgetId !== null && window.grecaptcha && typeof window.grecaptcha.reset === 'function') {
-                        facialCaptchaToken = '';
-                        window.grecaptcha.reset(facialRecaptchaWidgetId);
-                        detenerReconocimiento();
-                        setStatus('Resuelva de nuevo el captcha para continuar.', false);
+                    const errorMsg = data.error || 'No se pudo iniciar sesion facial.';
+                    console.error('Login error:', errorMsg);
+                    setStatus(errorMsg, false);
+                    
+                    // Si fue error de captcha, mostrar mensaje y permitir reintentar
+                    if (errorMsg.toLowerCase().includes('captcha')) {
+                        await new Promise((r) => setTimeout(r, 2000));
+                        cerrarModalFacial();
+                        abrirModalFacial();
+                        setStatus('Resuelva el captcha nuevamente para reintentar.', false);
                         return;
                     }
+                    
+                    // Para otros errores, permitir reintentar facial con nueva cámara
+                    await new Promise((r) => setTimeout(r, 1000));
                     await iniciarCamara();
                     iniciarReconocimiento();
                 } catch (e) {
+                    console.error('Facial login exception:', e);
                     stopped = false;
-                    setStatus('Error al iniciar sesion facial.', false);
-                    await iniciarCamara();
-                    iniciarReconocimiento();
+                    setStatus('Error de conexion. Reintentando...', false);
+                    await new Promise((r) => setTimeout(r, 1000));
+                    try {
+                        await iniciarCamara();
+                        iniciarReconocimiento();
+                    } catch (camErr) {
+                        setStatus('No se pudo reiniciar la camara.', false);
+                    }
                 }
             }
 
