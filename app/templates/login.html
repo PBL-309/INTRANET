@@ -140,6 +140,7 @@
             let stopped = false;
             let candidateLabel = null;
             let candidateCount = 0;
+            let facialCaptchaToken = '';
             let facialRecaptchaWidgetId = null;
             let facialFlowStarting = false;
             let modelsPromise = null;
@@ -250,20 +251,14 @@
                     sitekey: '{{ config.RECAPTCHA_PUBLIC_KEY }}',
                     theme: 'light',
                     callback: async function(token) {
-                        if (!token) {
-                            return;
-                        }
-                        const ok = await verifyFacialCaptchaToken(token);
-                        if (!ok) {
-                            setStatus('Captcha invalido o expirado. Intente de nuevo.', false);
-                            if (facialRecaptchaWidgetId !== null && window.grecaptcha && typeof window.grecaptcha.reset === 'function') {
-                                window.grecaptcha.reset(facialRecaptchaWidgetId);
-                            }
+                        facialCaptchaToken = token || '';
+                        if (!facialCaptchaToken) {
                             return;
                         }
                         await iniciarFlujoFacial();
                     },
                     'expired-callback': function() {
+                        facialCaptchaToken = '';
                         setStatus('Captcha expirado. Resuelvalo nuevamente.', false);
                     }
                 });
@@ -287,6 +282,7 @@
             function cerrarModalFacial() {
                 facialModal.style.display = 'none';
                 detenerReconocimiento();
+                facialCaptchaToken = '';
                 if (facialRecaptchaWidgetId !== null && window.grecaptcha && typeof window.grecaptcha.reset === 'function') {
                     window.grecaptcha.reset(facialRecaptchaWidgetId);
                 }
@@ -500,7 +496,7 @@
                     const resp = await fetch('/api/login_facial', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username: username })
+                        body: JSON.stringify({ username: username, recaptcha_token: facialCaptchaToken })
                     });
                     const data = await resp.json();
 
@@ -511,6 +507,14 @@
 
                     stopped = false;
                     setStatus(data.error || 'No se pudo iniciar sesion facial.', false);
+                    const captchaError = (data.error || '').toLowerCase().includes('captcha');
+                    if (captchaError && facialRecaptchaWidgetId !== null && window.grecaptcha && typeof window.grecaptcha.reset === 'function') {
+                        facialCaptchaToken = '';
+                        window.grecaptcha.reset(facialRecaptchaWidgetId);
+                        detenerReconocimiento();
+                        setStatus('Resuelva de nuevo el captcha para continuar.', false);
+                        return;
+                    }
                     await iniciarCamara();
                     iniciarReconocimiento();
                 } catch (e) {
@@ -518,20 +522,6 @@
                     setStatus('Error al iniciar sesion facial.', false);
                     await iniciarCamara();
                     iniciarReconocimiento();
-                }
-            }
-
-            async function verifyFacialCaptchaToken(token) {
-                try {
-                    const resp = await fetch('/api/verify_facial_captcha', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ recaptcha_token: token })
-                    });
-                    const data = await resp.json();
-                    return !!data.success;
-                } catch (e) {
-                    return false;
                 }
             }
 

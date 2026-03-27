@@ -819,18 +819,44 @@ def face_cache():
 def login_facial():
     body = request.get_json(silent=True) or {}
     username = (body.get('username') or '').strip()
+    recaptcha_token = (body.get('recaptcha_token') or '').strip()
 
     if not username:
         return jsonify({"success": False, "error": "Usuario requerido"}), 400
 
     verified_at = session.get('facial_captcha_verified_at')
-    if not verified_at:
-        return jsonify({"success": False, "error": "Captcha facial no verificado"}), 403
+    captcha_ok = False
 
+    if verified_at:
+        if datetime.utcnow().timestamp() - float(verified_at) <= 300:
+            captcha_ok = True
+        else:
+            session.pop('facial_captcha_verified_at', None)
 
-    if datetime.utcnow().timestamp() - float(verified_at) > 300:
-        session.pop('facial_captcha_verified_at', None)
-        return jsonify({"success": False, "error": "Captcha facial expirado"}), 403
+    if not captcha_ok:
+        if not recaptcha_token:
+            return jsonify({"success": False, "error": "Captcha facial no verificado"}), 403
+
+        secret_key = current_app.config.get('RECAPTCHA_PRIVATE_KEY')
+        if not secret_key:
+            return jsonify({"success": False, "error": "Configuracion de captcha no disponible"}), 500
+
+        try:
+            verify_resp = requests.post(
+                'https://www.google.com/recaptcha/api/siteverify',
+                data={
+                    'secret': secret_key,
+                    'response': recaptcha_token,
+                    'remoteip': request.remote_addr
+                },
+                timeout=8
+            )
+            verify_data = verify_resp.json()
+        except Exception:
+            return jsonify({"success": False, "error": "No se pudo validar captcha"}), 502
+
+        if not verify_data.get('success'):
+            return jsonify({"success": False, "error": "Captcha invalido o expirado"}), 403
 
     session.pop('facial_captcha_verified_at', None)
 
