@@ -425,30 +425,59 @@ def submit_evaluacion():
         puesto = request.form.get('puesto')
         
         # Almacenamos las respuestas del formulario en un diccionario
+        # Estructura genérica que soporta ambas evaluaciones (subteniente y teniente)
         respuestas = {
+            # Para evaluación de Subteniente
             'comunicacion': {
-                'claridad': request.form.get('comunicacion_claridad'),
-                'escucha': request.form.get('comunicacion_escucha'),
-                'equipo': request.form.get('comunicacion_equipo'),
-                'conflictos': request.form.get('comunicacion_conflictos')
+                'claridad': request.form.get('comunicacion_claridad') or None,
+                'escucha': request.form.get('comunicacion_escucha') or None,
+                'equipo': request.form.get('comunicacion_equipo') or None,
+                'conflictos': request.form.get('comunicacion_conflictos') or None
             },
+            # Para evaluación de Teniente - Conocimientos Bomberiles
+            'conocimientos': {
+                'dominio_tecnico': request.form.get('conocimientos_dominio_tecnico') or None,
+                'uso_equipo': request.form.get('conocimientos_uso_equipo') or None,
+                'normatividad': request.form.get('conocimientos_normatividad') or None,
+                'toma_decisiones': request.form.get('conocimientos_toma_decisiones') or None
+            },
+            # Habilidades Blandas
             'habilidades_blandas': {
-                'trabajo_equipo': request.form.get('blandas_trabajo_equipo'),
-                'empatia': request.form.get('blandas_empatia'),
-                'adaptabilidad': request.form.get('blandas_adaptabilidad'),
-                'responsabilidad': request.form.get('blandas_responsabilidad')
+                'trabajo_equipo': request.form.get('blandas_trabajo_equipo') or None,
+                'empatia': request.form.get('blandas_empatia') or None,
+                'adaptabilidad': request.form.get('blandas_adaptabilidad') or None,
+                'responsabilidad': request.form.get('blandas_responsabilidad') or None,
+                'liderazgo': request.form.get('blandas_liderazgo') or None,
+                'resolucion_conflictos': request.form.get('blandas_resolucion_conflictos') or None
             },
+            # Comunicación con Subordinados (para Teniente)
+            'comunicacion_subordinados': {
+                'claridad_instrucciones': request.form.get('comunicacion_claridad_instrucciones') or None,
+                'retroalimentacion': request.form.get('comunicacion_retroalimentacion') or None,
+                'escucha_activa': request.form.get('comunicacion_escucha_activa') or None,
+                'situaciones_criticas': request.form.get('comunicacion_situaciones_criticas') or None
+            },
+            # Disciplina
             'disciplina': {
-                'puntualidad': request.form.get('disciplina_puntualidad'),
-                'normas': request.form.get('disciplina_normas'),
-                'presentacion': request.form.get('disciplina_presentacion'),
-                'recursos': request.form.get('disciplina_recursos')
+                'puntualidad': request.form.get('disciplina_puntualidad') or None,
+                'normas': request.form.get('disciplina_normas') or None,
+                'presentacion': request.form.get('disciplina_presentacion') or None,
+                'recursos': request.form.get('disciplina_recursos') or None,
+                'imparcialidad': request.form.get('disciplina_imparcialidad') or None,
+                'prevencion': request.form.get('disciplina_prevencion') or None,
+                'documentacion': request.form.get('disciplina_documentacion') or None,
+                'autoridad_moral': request.form.get('disciplina_autoridad_moral') or None
             },
+            # Orden Cerrado
             'orden_cerrado': {
-                'dominio': request.form.get('orden_cerrado_dominio'),
-                'coordinacion': request.form.get('orden_cerrado_coordinacion'),
-                'atencion': request.form.get('orden_cerrado_atencion'),
-                'postura': request.form.get('orden_cerrado_postura')
+                'dominio': request.form.get('orden_cerrado_dominio') or None,
+                'coordinacion': request.form.get('orden_cerrado_coordinacion') or None,
+                'atencion': request.form.get('orden_cerrado_atencion') or None,
+                'postura': request.form.get('orden_cerrado_postura') or None,
+                'dominio_tecnicas': request.form.get('orden_cerrado_dominio_tecnicas') or None,
+                'coordinacion_grupal': request.form.get('orden_cerrado_coordinacion_grupal') or None,
+                'correccion_errores': request.form.get('orden_cerrado_correccion_errores') or None,
+                'presencia_porte': request.form.get('orden_cerrado_presencia_porte') or None
             }
         }
 
@@ -505,7 +534,9 @@ def resultados_evaluaciones():
         # Calcular promedios por categoría
         categorias = {
             'comunicacion': {'titulo': 'Comunicación', 'valores': []},
+            'conocimientos': {'titulo': 'Conocimientos Bomberiles', 'valores': []},
             'habilidades_blandas': {'titulo': 'Habilidades Blandas', 'valores': []},
+            'comunicacion_subordinados': {'titulo': 'Comunicación con Subordinados', 'valores': []},
             'disciplina': {'titulo': 'Disciplina', 'valores': []},
             'orden_cerrado': {'titulo': 'Orden Cerrado', 'valores': []}
         }
