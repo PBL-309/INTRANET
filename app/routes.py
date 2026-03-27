@@ -484,6 +484,58 @@ def submit_evaluacion():
         flash(f"Error al guardar la evaluación: {str(e)}", "danger")
         return redirect(request.referrer)
 
+@main.route('/resultados_evaluaciones')
+@login_required
+def resultados_evaluaciones():
+    rol_seleccionado = request.args.get('rol', 'BOMBERO ESPECIALIZADO')
+    
+    # Obtener todos los usuarios del rol seleccionado
+    usuarios = User.query.filter_by(puesto=rol_seleccionado).all()
+    
+    # Obtener todas las evaluaciones de estos usuarios
+    evaluaciones = EvaluacionDesempeno.query.filter(
+        EvaluacionDesempeno.user_id.in_([u.id for u in usuarios])
+    ).all()
+    
+    # Calcular promedios por categoría
+    categorias = {
+        'comunicacion': {'titulo': 'Comunicación', 'valores': []},
+        'habilidades_blandas': {'titulo': 'Habilidades Blandas', 'valores': []},
+        'disciplina': {'titulo': 'Disciplina', 'valores': []},
+        'orden_cerrado': {'titulo': 'Orden Cerrado', 'valores': []}
+    }
+    
+    for evaluacion in evaluaciones:
+        respuestas = evaluacion.respuestas
+        for categoria, datos in categorias.items():
+            if categoria in respuestas:
+                valores = [int(v) for v in respuestas[categoria].values() if v]
+                if valores:
+                    promedio = sum(valores) / len(valores)
+                    datos['valores'].append(promedio)
+    
+    # Calcular promedios finales y contar evaluaciones
+    datos_grafica = []
+    for categoria, datos in categorias.items():
+        if datos['valores']:
+            promedio_final = sum(datos['valores']) / len(datos['valores'])
+        else:
+            promedio_final = 0
+        
+        datos_grafica.append({
+            'nombre': datos['titulo'],
+            'promedio': round(promedio_final, 2),
+            'cantidad_evaluaciones': len(datos['valores'])
+        })
+    
+    return render_template(
+        'resultados_evaluaciones.html',
+        datos_grafica=datos_grafica,
+        rol_seleccionado=rol_seleccionado,
+        total_evaluaciones=len(evaluaciones),
+        roles_disponibles=['BOMBERO ESPECIALIZADO', 'SUBTENIENTE', 'TENIENTE']
+    )
+
 
 @main.route('/submit_form', methods=['POST'])
 @login_required

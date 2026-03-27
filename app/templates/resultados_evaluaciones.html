@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados de Evaluaciones del Desempeño</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --primary-light: #eff6ff;
+            --secondary: #0891b2;
+            --success: #10b981;
+            --bg: #f0f9ff;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #ecf0f1 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-lg);
+            border-top: 6px solid var(--primary);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .rol-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .rol-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--border);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: var(--text);
+        }
+
+        .rol-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .rol-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .stats-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: var(--primary-light);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .stat-card p {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 5px;
+        }
+
+        .stat-card .value {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .chart-card h3 {
+            font-size: 18px;
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 280px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .chart-stats {
+            text-align: center;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+
+        .chart-stats p {
+            color: var(--text-light);
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        .chart-stats .big-number {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .empty-state {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 60px 30px;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .empty-state p {
+            color: var(--text-light);
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+
+        .back-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .chart-card h3 {
+                font-size: 16px;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Resultados de Evaluaciones del Desempeño</h1>
+            
+            <div class="header-controls">
+                <div class="rol-selector">
+                    {% for rol in roles_disponibles %}
+                        <a href="{{ url_for('main.resultados_evaluaciones', rol=rol) }}" 
+                           class="rol-btn {% if rol == rol_seleccionado %}active{% endif %}">
+                            {{ rol }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="stats-info">
+                <div class="stat-card">
+                    <p>Total de Evaluaciones</p>
+                    <div class="value">{{ total_evaluaciones }}</div>
+                </div>
+                <div class="stat-card">
+                    <p>Rol Seleccionado</p>
+                    <div class="value" style="font-size: 14px; font-weight: 600;">{{ rol_seleccionado }}</div>
+                </div>
+            </div>
+        </div>
+
+        {% if datos_grafica %}
+            <div class="charts-grid">
+                {% for dato in datos_grafica %}
+                    <div class="chart-card">
+                        <h3>{{ dato.nombre }}</h3>
+                        <div class="chart-container">
+                            <canvas id="chart_{{ loop.index }}"></canvas>
+                        </div>
+                        <div class="chart-stats">
+                            <p>Promedio General</p>
+                            <div class="big-number">{{ dato.promedio }}/5</div>
+                            <p style="margin-top: 10px; font-size: 12px;">
+                                Basado en {{ dato.cantidad_evaluaciones }} 
+                                evaluacione{{ 's' if dato.cantidad_evaluaciones != 1 else '' }}
+                            </p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>No hay evaluaciones disponibles para el rol seleccionado.</p>
+                <a href="{{ url_for('main.dashboard') }}" class="back-btn">Volver al Dashboard</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Configuración de colores
+        const colors = [
+            'rgba(37, 99, 235, 0.8)',
+            'rgba(74, 222, 128, 0.8)',
+            'rgba(251, 146, 60, 0.8)',
+            'rgba(236, 72, 153, 0.8)'
+        ];
+
+        const borderColors = [
+            'rgba(37, 99, 235, 1)',
+            'rgba(74, 222, 128, 1)',
+            'rgba(251, 146, 60, 1)',
+            'rgba(236, 72, 153, 1)'
+        ];
+
+        const backgroundColors = [
+            'rgba(37, 99, 235, 0.1)',
+            'rgba(74, 222, 128, 0.1)',
+            'rgba(251, 146, 60, 0.1)',
+            'rgba(236, 72, 153, 0.1)'
+        ];
+
+        // Datos de evaluaciones
+        const datos = {
+            'comunicacion': {
+                'titulo': 'Comunicación',
+                'promedio': {{ datos_grafica[0].promedio if datos_grafica|length > 0 else 0 }}
+            },
+            'habilidades_blandas': {
+                'titulo': 'Habilidades Blandas',
+                'promedio': {{ datos_grafica[1].promedio if datos_grafica|length > 1 else 0 }}
+            },
+            'disciplina': {
+                'titulo': 'Disciplina',
+                'promedio': {{ datos_grafica[2].promedio if datos_grafica|length > 2 else 0 }}
+            },
+            'orden_cerrado': {
+                'titulo': 'Orden Cerrado',
+                'promedio': {{ datos_grafica[3].promedio if datos_grafica|length > 3 else 0 }}
+            }
+        };
+
+        // Crear gráficas
+        {% for dato in datos_grafica %}
+            const ctx{{ loop.index }} = document.getElementById('chart_{{ loop.index }}').getContext('2d');
+            
+            // Crear datos para la gráfica donut
+            const chartData{{ loop.index }} = {
+                labels: ['Promedio Alcanzado', 'Por Mejorar'],
+                datasets: [{
+                    label: '{{ dato.nombre }}',
+                    data: [{{ dato.promedio }}, {{ 5 - dato.promedio }}],
+                    backgroundColor: [
+                        colors[{{ loop.index0 }}],
+                        'rgba(229, 231, 235, 0.5)'
+                    ],
+                    borderColor: [
+                        borderColors[{{ loop.index0 }}],
+                        'rgba(229, 231, 235, 1)'
+                    ],
+                    borderWidth: 2,
+                    borderRadius: 8
+                }]
+            };
+
+            new Chart(ctx{{ loop.index }}, {
+                type: 'doughnut',
+                data: chartData{{ loop.index }},
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { size: 11, weight: '600' },
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: { size: 13, weight: 'bold' },
+                            bodyFont: { size: 12 },
+                            borderColor: '#ddd',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.parsed + '/5';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        {% endfor %}
+    </script>
+</body>
+</html>
