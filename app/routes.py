@@ -727,16 +727,16 @@ def buscar_usuario(username):
 def listar_usuarios():
     usuarios = User.query.filter(User.id != current_user.id).all()
     
-    # Si el usuario es COORDINADOR OPERATIVO, filtrar todos los que empiecen con TENIENTE
+    # Si el usuario es COORDINADOR OPERATIVO, filtrar solo TENIENTE
     if current_user.puesto == "COORDINADOR OPERATIVO":
-        usuarios = [u for u in usuarios if u.puesto.startswith("TENIENTE")]
+        usuarios = [u for u in usuarios if u.puesto == "TENIENTE"]
     
     # Si el usuario es SUBTENIENTE, filtrar solo BOMBERO ESPECIALIZADO
     elif current_user.puesto == "SUBTENIENTE":
         usuarios = [u for u in usuarios if u.puesto == "BOMBERO ESPECIALIZADO"]
     
-    # Si el usuario es TENIENTE (incluyendo variantes como TENIENTE SECTOR 1), filtrar solo SUBTENIENTE
-    elif current_user.puesto.startswith("TENIENTE"):
+    # Si el usuario es TENIENTE, filtrar solo SUBTENIENTE
+    elif current_user.puesto == "TENIENTE":
         usuarios = [u for u in usuarios if u.puesto == "SUBTENIENTE"]
     
     lista = [{"username": u.username, "nombre": u.nombre, "turno": u.turno or ""} for u in usuarios]
@@ -749,7 +749,7 @@ def evaluacion():
     if current_user.puesto == "SUBTENIENTE":
         return render_template('evaluacion_subteniente.html', usuario_actual=current_user)
 
-    elif current_user.puesto.startswith("TENIENTE"):
+    elif current_user.puesto == "TENIENTE":
         return render_template('evaluacion_teniente.html', usuario_actual=current_user)
 
     elif current_user.puesto == "COORDINADOR OPERATIVO":
