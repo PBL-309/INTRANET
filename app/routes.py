@@ -531,7 +531,7 @@ def submit_evaluacion():
 @login_required
 def resultados_evaluaciones():
     try:
-        rol_seleccionado = request.args.get('rol', 'SUBTENIENTE')
+        rol_seleccionado = request.args.get('rol', 'BOMBERO ESPECIALIZADO')
         
         # Obtener todos los usuarios del rol seleccionado
         usuarios = User.query.filter_by(puesto=rol_seleccionado).all()
@@ -547,20 +547,20 @@ def resultados_evaluaciones():
         
         # Definir categorías por rol evaluado
         categorias_por_rol = {
-            'SUBTENIENTE': {
+            'BOMBERO ESPECIALIZADO': {
                 'comunicacion': {'titulo': 'Comunicación', 'valores': []},
                 'habilidades_blandas': {'titulo': 'Habilidades Blandas', 'valores': []},
                 'disciplina': {'titulo': 'Disciplina', 'valores': []},
                 'orden_cerrado': {'titulo': 'Orden Cerrado', 'valores': []}
             },
-            'TENIENTE': {
+            'SUBTENIENTE': {
                 'conocimientos': {'titulo': 'Conocimientos Bomberiles', 'valores': []},
                 'habilidades_blandas': {'titulo': 'Habilidades Blandas', 'valores': []},
                 'comunicacion_subordinados': {'titulo': 'Comunicación con Subordinados', 'valores': []},
                 'disciplina': {'titulo': 'Disciplina', 'valores': []},
                 'orden_cerrado': {'titulo': 'Orden Cerrado', 'valores': []}
             },
-            'COORDINADOR': {
+            'TENIENTE': {
                 'direccion': {'titulo': 'Dirección de Guardias y Turnos', 'valores': []},
                 'gestion': {'titulo': 'Gestión de Estaciones', 'valores': []},
                 'comunicacion_subordinados': {'titulo': 'Comunicación con Subordinados', 'valores': []},
@@ -570,7 +570,7 @@ def resultados_evaluaciones():
         }
         
         # Obtener categorías para el rol seleccionado
-        categorias = categorias_por_rol.get(rol_seleccionado, categorias_por_rol['SUBTENIENTE'])
+        categorias = categorias_por_rol.get(rol_seleccionado, categorias_por_rol['BOMBERO ESPECIALIZADO'])
         
         for evaluacion in evaluaciones:
             if not evaluacion or not evaluacion.respuestas:
@@ -625,7 +625,7 @@ def resultados_evaluaciones():
             datos_grafica=datos_grafica,
             rol_seleccionado=rol_seleccionado,
             total_evaluaciones=len(evaluaciones),
-            roles_disponibles=['SUBTENIENTE', 'TENIENTE', 'COORDINADOR']
+            roles_disponibles=['BOMBERO ESPECIALIZADO', 'SUBTENIENTE', 'TENIENTE']
         )
     except Exception as e:
         logging.error(f"Error en resultados_evaluaciones: {str(e)}")
