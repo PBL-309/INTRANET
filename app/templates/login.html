@@ -7,8 +7,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- ML5.js - Lightweight Face Detection -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ml5js/0.12.0/ml5.min.js" defer></script>
+    <!-- Face Detection Library - Tracking.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tracking.js/1.9.3/tracking.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tracking.js/1.9.3/data/face.min.js"></script>
 </head>
 <body>
 
@@ -115,11 +116,13 @@
     </div>
 
     <script>
-        // ===== FACIAL RECOGNITION WITH ML5.JS =====
+        // ===== FACIAL RECOGNITION SIMPLE & FAST =====
         let usuariosDisponibles = [];
         let cameraStream = null;
-        let faceDetector = null;
         let identificado = false;
+        let tracker = null;
+        let detectionIntervals = [];
+
         const facialModal = document.getElementById('facialModal');
         const facialRecognitionBtn = document.getElementById('facialRecognitionBtn');
         const closeFacialModal = document.getElementById('closeFacialModal');
@@ -127,16 +130,18 @@
         const statusMessage = document.getElementById('statusMessage');
         const loadingSpinner = document.getElementById('loadingSpinner');
 
-        // Cargar lista de usuarios
+        // Cargar usuarios
         async function cargarUsuarios() {
             try {
                 const response = await fetch('/api/listado_fotos');
                 const data = await response.json();
                 if (data.success) {
                     usuariosDisponibles = data.usuarios;
+                    console.log(`Cargados ${usuariosDisponibles.length} usuarios`);
                 }
             } catch (error) {
                 console.error('Error al cargar usuarios:', error);
+                statusMessage.textContent = '❌ Error al cargar usuarios';
             }
         }
 
@@ -149,148 +154,134 @@
                         width: { ideal: 480 },
                         height: { ideal: 640 },
                         facingMode: 'user'
-                    }
+                    },
+                    audio: false
                 });
+
                 cameraVideo.srcObject = cameraStream;
-                statusMessage.textContent = '⏳ Cargando modelo de detección (rápido)...';
+                cameraVideo.onloadedmetadata = () => {
+                    console.log('Video listo');
+                    statusMessage.textContent = '✅ Cámara lista - Colóquese frente a ella';
+                    loadingSpinner.style.display = 'none';
+                    iniciarDeteccion();
+                };
 
-                // Inicializar ml5 faceApi
-                initializeML5();
             } catch (error) {
-                statusMessage.textContent = '❌ No se pudo acceder a la cámara. Verifique permisos.';
-                console.error('Error:', error);
-            }
-        }
-
-        // Inicializar ML5.js
-        function initializeML5() {
-            ml5.faceApi(cameraVideo, { 
-                withLandmarks: true,
-                withDescriptors: false
-            }, () => {
-                statusMessage.textContent = '✅ Listo - Colóquese frente a la cámara';
+                console.error('Error cámara:', error);
+                statusMessage.textContent = '❌ Error al acceder a la cámara';
                 loadingSpinner.style.display = 'none';
-                detectarRostroML5();
-            });
+            }
         }
 
-        // Detección continua y automática
-        function detectarRostroML5() {
-            if (!facialModal.style.display || facialModal.style.display === 'none' || identificado) {
-                return;
-            }
+        // Iniciar detección
+        function iniciarDeteccion() {
+            tracker = new tracking.ObjectTracker('face');
+            tracker.setInitialScale(4);
+            tracker.setStepSize(2);
+            tracker.setEdgesDensity(0.1);
 
-            ml5.faceApi.detect(cameraVideo, async (err, results) => {
-                if (err) {
-                    console.error('Error en detección:', err);
-                    requestAnimationFrame(detectarRostroML5);
-                    return;
-                }
+            tracking.track('#cameraVideo', tracker);
 
-                if (results && results.length > 0) {
-                    // Se detectó al menos un rostro
-                    if (!statusMessage.textContent.includes('Analizando')) {
-                        statusMessage.textContent = '🔍 Rostro detectado - Analizando...';
-                    }
+            tracker.on('track', async (event) => {
+                if (identificado) return;
 
-                    // Capturar frame actual y comparar
-                    await compararRostro();
+                if (event.data.length > 0) {
+                    statusMessage.textContent = '🔍 Rostro detectado - Analizando...';
+                    
+                    // Dar tiempo para mejor detección
+                    setTimeout(async () => {
+                        if (!identificado) {
+                            await compararRostro();
+                        }
+                    }, 300);
                 } else {
                     statusMessage.textContent = '👁️ Colóquese mejor frente a la cámara';
                 }
-
-                requestAnimationFrame(detectarRostroML5);
             });
         }
 
-        // Comparar rostro usando correlación de píxeles (más rápido)
+        // Comparar rostro
         async function compararRostro() {
             try {
                 const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
                 canvas.width = cameraVideo.videoWidth;
                 canvas.height = cameraVideo.videoHeight;
+                const ctx = canvas.getContext('2d');
                 ctx.drawImage(cameraVideo, 0, 0);
                 
-                const fotoActual = canvas.toDataURL('image/jpeg', 0.8);
+                const fotoActual = canvas.toDataURL('image/jpeg', 0.7);
 
-                let mejorPuntuacion = 0;
-                let mejorCoincidencia = null;
+                let mejorScore = 0;
+                let mejorUsuario = null;
 
                 for (const usuario of usuariosDisponibles) {
                     try {
-                        const puntuacion = await compararImagenes(fotoActual, usuario.foto);
-                        if (puntuacion > mejorPuntuacion) {
-                            mejorPuntuacion = puntuacion;
-                            mejorCoincidencia = usuario;
+                        const score = await compararImagenes(fotoActual, usuario.foto);
+                        if (score > mejorScore) {
+                            mejorScore = score;
+                            mejorUsuario = usuario;
                         }
-                    } catch (error) {
-                        console.log(`Error comparando con ${usuario.username}`);
+                    } catch (e) {
+                        console.log(`Error con ${usuario.username}`);
                     }
                 }
 
-                // Si la puntuación es suficientemente buena (>0.4 = 40% similitud)
-                if (mejorPuntuacion > 0.4 && mejorCoincidencia) {
+                // Threshold: 35% similitud
+                if (mejorScore > 0.35 && mejorUsuario) {
                     identificado = true;
                     detenerCamara();
+                    statusMessage.textContent = `✅ ¡Bienvenido ${mejorUsuario.nombre}!`;
                     loadingSpinner.style.display = 'none';
-                    statusMessage.textContent = `✅ ¡Bienvenido ${mejorCoincidencia.nombre}!`;
-                    
-                    // Login automático
-                    const usernameInput = document.getElementById('usernameInput');
-                    usernameInput.value = mejorCoincidencia.username;
-                    usernameInput.dispatchEvent(new Event('input'));
                     
                     setTimeout(() => {
+                        document.getElementById('usernameInput').value = mejorUsuario.username;
                         document.getElementById('loginForm').submit();
-                    }, 1500);
+                    }, 1000);
                 }
             } catch (error) {
-                console.error('Error en comparación:', error);
+                console.error('Error comparación:', error);
             }
         }
 
-        // Función rápida de comparación de imágenes
+        // Comparar imágenes rápido
         function compararImagenes(img1Src, img2Src) {
             return new Promise((resolve) => {
                 try {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 200;
-                    canvas.height = 200;
-                    const ctx = canvas.getContext('2d');
+                    const canvas1 = document.createElement('canvas');
+                    canvas1.width = 100;
+                    canvas1.height = 100;
+                    const ctx1 = canvas1.getContext('2d');
 
-                    // Cargar primera imagen
                     const img1 = new Image();
                     img1.crossOrigin = 'anonymous';
                     img1.onload = () => {
-                        ctx.drawImage(img1, 0, 0, 200, 200);
-                        const imageData1 = ctx.getImageData(0, 0, 200, 200).data;
+                        ctx1.drawImage(img1, 0, 0, 100, 100);
+                        const data1 = ctx1.getImageData(0, 0, 100, 100).data;
 
-                        // Cargar segunda imagen
                         const img2 = new Image();
                         img2.src = img2Src;
                         img2.onload = () => {
-                            ctx.clearRect(0, 0, 200, 200);
-                            ctx.drawImage(img2, 0, 0, 200, 200);
-                            const imageData2 = ctx.getImageData(0, 0, 200, 200).data;
+                            const canvas2 = document.createElement('canvas');
+                            canvas2.width = 100;
+                            canvas2.height = 100;
+                            const ctx2 = canvas2.getContext('2d');
+                            ctx2.drawImage(img2, 0, 0, 100, 100);
+                            const data2 = ctx2.getImageData(0, 0, 100, 100).data;
 
-                            // Calcular similitud
                             let similares = 0;
-                            for (let i = 0; i < imageData1.length; i += 4) {
-                                const diff = Math.abs(imageData1[i] - imageData2[i]) +
-                                           Math.abs(imageData1[i+1] - imageData2[i+1]) +
-                                           Math.abs(imageData1[i+2] - imageData2[i+2]);
-                                if (diff < 30) similares++;
+                            for (let i = 0; i < data1.length; i += 4) {
+                                const r = Math.abs(data1[i] - data2[i]);
+                                const g = Math.abs(data1[i+1] - data2[i+1]);
+                                const b = Math.abs(data1[i+2] - data2[i+2]);
+                                if ((r + g + b) / 3 < 25) similares++;
                             }
-
-                            const puntuacion = similares / (imageData1.length / 4);
-                            resolve(puntuacion);
+                            resolve(similares / (data1.length / 4));
                         };
                         img2.onerror = () => resolve(0);
                     };
                     img1.src = img1Src;
                     img1.onerror = () => resolve(0);
-                } catch (error) {
+                } catch (e) {
                     resolve(0);
                 }
             });
@@ -298,10 +289,16 @@
 
         // Detener cámara
         function detenerCamara() {
+            if (tracker) {
+                tracking.off('track');
+                tracker = null;
+            }
             if (cameraStream) {
-                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream.getTracks().forEach(t => t.stop());
                 cameraStream = null;
             }
+            detectionIntervals.forEach(id => clearInterval(id));
+            detectionIntervals = [];
         }
 
         // Event Listeners
@@ -309,6 +306,9 @@
             e.preventDefault();
             identificado = false;
             facialModal.style.display = 'flex';
+            loadingSpinner.style.display = 'block';
+            statusMessage.textContent = '⏳ Cargando...';
+            
             await cargarUsuarios();
             await iniciarCamara();
         });
@@ -320,7 +320,6 @@
             loadingSpinner.style.display = 'none';
         });
 
-        // Cerrar modal al hacer clic fuera
         facialModal.addEventListener('click', (e) => {
             if (e.target === facialModal) {
                 facialModal.style.display = 'none';
@@ -328,9 +327,8 @@
             }
         });
 
-        // ===== ORIGINAL LOGIN LOGIC =====
+        // ===== LOGIN ORIGINAL =====
         document.addEventListener('DOMContentLoaded', function() {
-            // Auto-dismiss alerts after 4 seconds
             setTimeout(function() {
                 const alerts = document.querySelectorAll('.alert');
                 alerts.forEach(function(alert) {
@@ -358,9 +356,7 @@
                 }
             }
 
-            // Check immediately in case of auto-fill
             checkUser();
-            
             usernameInput.addEventListener('input', checkUser);
             usernameInput.addEventListener('blur', checkUser);
         });
