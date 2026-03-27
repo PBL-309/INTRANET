@@ -425,7 +425,7 @@ def submit_evaluacion():
         puesto = request.form.get('puesto')
         
         # Almacenamos las respuestas del formulario en un diccionario
-        # Estructura genérica que soporta ambas evaluaciones (subteniente y teniente)
+        # Estructura genérica que soporta evaluaciones (subteniente, teniente y coordinador)
         respuestas = {
             # Para evaluación de Subteniente
             'comunicacion': {
@@ -441,6 +441,20 @@ def submit_evaluacion():
                 'normatividad': request.form.get('conocimientos_normatividad') or None,
                 'toma_decisiones': request.form.get('conocimientos_toma_decisiones') or None
             },
+            # Para evaluación de Coordinador - Dirección de Guardias
+            'direccion': {
+                'direccion_guardias': request.form.get('direccion_guardias') or None,
+                'toma_decisiones': request.form.get('direccion_toma_decisiones') or None,
+                'motivacion': request.form.get('direccion_motivacion') or None,
+                'normatividad': request.form.get('direccion_normatividad') or None
+            },
+            # Para evaluación de Coordinador - Gestión de Estaciones
+            'gestion': {
+                'organizacion': request.form.get('gestion_organizacion') or None,
+                'protocolos': request.form.get('gestion_protocolos') or None,
+                'supervisiona_mantenimiento': request.form.get('gestion_supervisiona_mantenimiento') or None,
+                'adaptabilidad': request.form.get('gestion_adaptabilidad') or None
+            },
             # Habilidades Blandas
             'habilidades_blandas': {
                 'trabajo_equipo': request.form.get('blandas_trabajo_equipo') or None,
@@ -450,7 +464,7 @@ def submit_evaluacion():
                 'liderazgo': request.form.get('blandas_liderazgo') or None,
                 'resolucion_conflictos': request.form.get('blandas_resolucion_conflictos') or None
             },
-            # Comunicación con Subordinados (para Teniente)
+            # Comunicación con Subordinados (para Teniente y Coordinador)
             'comunicacion_subordinados': {
                 'claridad_instrucciones': request.form.get('comunicacion_claridad_instrucciones') or None,
                 'retroalimentacion': request.form.get('comunicacion_retroalimentacion') or None,
@@ -535,6 +549,8 @@ def resultados_evaluaciones():
         categorias = {
             'comunicacion': {'titulo': 'Comunicación', 'valores': []},
             'conocimientos': {'titulo': 'Conocimientos Bomberiles', 'valores': []},
+            'direccion': {'titulo': 'Dirección de Guardias y Turnos', 'valores': []},
+            'gestion': {'titulo': 'Gestión de Estaciones', 'valores': []},
             'habilidades_blandas': {'titulo': 'Habilidades Blandas', 'valores': []},
             'comunicacion_subordinados': {'titulo': 'Comunicación con Subordinados', 'valores': []},
             'disciplina': {'titulo': 'Disciplina', 'valores': []},
