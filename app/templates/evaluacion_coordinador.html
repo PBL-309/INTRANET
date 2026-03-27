@@ -9,15 +9,18 @@
       --primary: #2563eb;
       --primary-dark: #1e40af;
       --primary-light: #eff6ff;
-      --bg: #f8fafc;
+      --secondary: #0891b2;
+      --success: #10b981;
+      --bg: #f0f9ff;
       --card: #ffffff;
       --text: #1e293b;
       --text-light: #64748b;
       --border: #e2e8f0;
       --border-dark: #cbd5e1;
-      --radius: 12px;
+      --radius: 16px;
       --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
     }
 
     * {
@@ -27,7 +30,7 @@
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
       margin: 0;
-      background: linear-gradient(135deg, var(--bg) 0%, #f1f5f9 100%);
+      background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #ecf0f1 100%);
       display: flex;
       justify-content: center;
       padding: 40px 20px;
@@ -37,20 +40,24 @@
 
     .page {
       background-color: var(--card);
-      max-width: 850px;
+      max-width: 1100px;
       width: 100%;
-      padding: 40px 35px;
+      padding: 50px;
       border-radius: var(--radius);
-      box-shadow: var(--shadow-lg);
+      box-shadow: var(--shadow-xl);
+      border-top: 6px solid var(--primary);
     }
 
     h2 {
       text-align: center;
-      margin: 0 0 30px 0;
-      font-size: 28px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      color: var(--text);
+      margin: 0 0 40px 0;
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     form {
@@ -410,21 +417,43 @@
     <h2>EVALUACIÓN DEL DESEMPEÑO</h2>
     <form action="{{ url_for('main.submit_evaluacion') }}" method="POST">    	
     <div class="header">
-      <div>
-        <label>Seleccionar Usuario a Evaluar:<br></label>
-        <div class="search-container">
-          <input type="text" id="buscar_usuario" class="search-input" placeholder="Ingrese el número de nómina o nombre..." autocomplete="off" />
-          <div id="dropdown_usuarios" class="dropdown-list"></div>
+      <div class="header-info">
+        <div>
+          <label class="header-label">Seleccionar Usuario a Evaluar</label>
+          <div class="search-container">
+            <input type="text" id="buscar_usuario" class="search-input" placeholder="Nómina o nombre..." autocomplete="off" />
+            <div id="dropdown_usuarios" class="dropdown-list"></div>
+          </div>
+          <input type="hidden" id="username_seleccionado" name="nombre" required />
         </div>
-        <input type="hidden" id="username_seleccionado" name="nombre" required />
+        <div class="header-field">
+          <label class="header-label">Nombre del Evaluado</label>
+          <input type="text" id="nombre_evaluado" class="header-input" readonly />
+        </div>
+        <div class="header-field">
+          <label class="header-label">Puesto</label>
+          <input type="text" id="puesto_evaluado" class="header-input" readonly />
+        </div>
+        <div class="header-field">
+          <label class="header-label">Turno</label>
+          <input type="text" id="turno_evaluado" class="header-input" readonly />
+        </div>
+        <div class="header-field">
+          <label class="header-label">Fecha</label>
+          <input type="date" name="fecha" id="fecha_hoy" class="header-input" required />
+        </div>
+        <div class="header-field">
+          <label class="header-label">Evaluador</label>
+          <input type="text" id="nombre_coordinador" class="header-input" readonly />
+        </div>
+        <input type="hidden" id="puesto_coordinador" name="puesto" />
+        <input type="hidden" id="nomina_evaluado_hidden" name="nomina" />
       </div>
-      <label>Nombre del Evaluado:<br><input type="text" id="nombre_evaluado" readonly /></label>
-      <label>Puesto del Evaluado:<br><input type="text" id="puesto_evaluado" readonly /></label>
-      <label>Turno del Evaluado:<br><input type="text" id="turno_evaluado" readonly /></label>
-      <label>Fecha:<br><input type="date" name="fecha" id="fecha_hoy" placeholder="dd/mm/aaaa" required /></label>
-      <label>Nombre del Coordinador:<br><input type="text" id="nombre_coordinador" readonly /></label>
-      <input type="hidden" id="puesto_coordinador" name="puesto" />
-      <input type="hidden" id="nomina_evaluado_hidden" name="nomina" />
+      <div class="profile-card">
+        <img id="foto_evaluado" src="/static/images/default.jpg" alt="Foto de perfil" class="profile-pic" />
+        <div class="profile-name" id="profile-name-text">Seleccionar usuario</div>
+        <div class="profile-role" id="profile-role-text">---</div>
+      </div>
     </div>
 
     <p class="instruction">
@@ -657,6 +686,9 @@
       const puestoEvaluado = document.getElementById('puesto_evaluado');
       const turnoEvaluado = document.getElementById('turno_evaluado');
       const nominaEvaluadoHidden = document.getElementById('nomina_evaluado_hidden');
+      const fotoEvaluado = document.getElementById('foto_evaluado');
+      const profileNameText = document.getElementById('profile-name-text');
+      const profileRoleText = document.getElementById('profile-role-text');
 
       let usuariosDisponibles = [];
 
@@ -717,6 +749,20 @@
               puestoEvaluado.value = data.puesto;
               turnoEvaluado.value = data.turno || '';
               nominaEvaluadoHidden.value = data.nomina || '';
+              
+              // Cargar foto de perfil
+              profileNameText.textContent = data.nombre || 'Seleccionar usuario';
+              profileRoleText.textContent = data.puesto || '---';
+              
+              if (data.image_file) {
+                fotoEvaluado.src = `/static/images/${data.image_file}`;
+                // Si hay error cargando la imagen, usar default
+                fotoEvaluado.onerror = function() {
+                  this.src = '/static/images/default.jpg';
+                };
+              } else {
+                fotoEvaluado.src = '/static/images/default.jpg';
+              }
             }
           } catch (error) {
             console.error('Error al buscar usuario:', error);

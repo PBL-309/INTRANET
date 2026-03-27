@@ -718,7 +718,8 @@ def buscar_usuario(username):
             "nombre": usuario.nombre,
             "puesto": usuario.puesto,
             "turno": usuario.turno or "",
-            "nomina": usuario.username
+            "nomina": usuario.username,
+            "image_file": usuario.image_file or "default.jpg"
         })
     return jsonify({"success": False, "error": "Usuario no encontrado"}), 404
 
