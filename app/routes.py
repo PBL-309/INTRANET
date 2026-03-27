@@ -395,87 +395,94 @@ def logout():
 @main.route('/submit_evaluacion', methods=['POST'])
 @login_required
 def submit_evaluacion():
-    # Obtener el ID del usuario que será evaluado
-    evaluado_id = request.form.get('evaluado_id')
-    
-    if not evaluado_id:
-        flash("Usuario no seleccionado", "danger")
-        return redirect(request.referrer)
-    
-    evaluado_id = int(evaluado_id)
-    
-    # Verificar si ya existe una evaluación del mismo evaluador al mismo evaluado
-    evaluacion_existente = EvaluacionDesempeno.query.filter_by(
-        user_id=evaluado_id,
-        evaluador_id=current_user.id
-    ).first()
-    
-    if evaluacion_existente:
-        flash("Ya has evaluado a esta persona. No puedes hacer una evaluación duplicada.", "warning")
-        return redirect(request.referrer)
-    
-    # Recibimos los datos del formulario
-    nombre = request.form.get('nombre')
-    fecha_str = request.form.get('fecha')
-    fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
-    area = request.form.get('area') or ""  # área es opcional
-    estacion = request.form.get('estacion') or ""  # estación es opcional
-    nomina = request.form.get('nomina')
-    puesto = request.form.get('puesto')
-    
-    # Almacenamos las respuestas del formulario en un diccionario
-    respuestas = {
-        'comunicacion': {
-            'claridad': request.form.get('comunicacion_claridad'),
-            'escucha': request.form.get('comunicacion_escucha'),
-            'equipo': request.form.get('comunicacion_equipo'),
-            'conflictos': request.form.get('comunicacion_conflictos')
-        },
-        'habilidades_blandas': {
-            'trabajo_equipo': request.form.get('blandas_trabajo_equipo'),
-            'empatia': request.form.get('blandas_empatia'),
-            'adaptabilidad': request.form.get('blandas_adaptabilidad'),
-            'responsabilidad': request.form.get('blandas_responsabilidad')
-        },
-        'disciplina': {
-            'puntualidad': request.form.get('disciplina_puntualidad'),
-            'normas': request.form.get('disciplina_normas'),
-            'presentacion': request.form.get('disciplina_presentacion'),
-            'recursos': request.form.get('disciplina_recursos')
-        },
-        'orden_cerrado': {
-            'dominio': request.form.get('orden_cerrado_dominio'),
-            'coordinacion': request.form.get('orden_cerrado_coordinacion'),
-            'atencion': request.form.get('orden_cerrado_atencion'),
-            'postura': request.form.get('orden_cerrado_postura')
+    try:
+        # Obtener el ID del usuario que será evaluado
+        evaluado_id = request.form.get('evaluado_id')
+        
+        if not evaluado_id:
+            flash("Usuario no seleccionado", "danger")
+            return redirect(request.referrer)
+        
+        evaluado_id = int(evaluado_id)
+        
+        # Verificar si ya existe una evaluación del mismo evaluador al mismo evaluado
+        evaluacion_existente = EvaluacionDesempeno.query.filter_by(
+            user_id=evaluado_id,
+            evaluador_id=current_user.id
+        ).first()
+        
+        if evaluacion_existente:
+            flash("Ya has evaluado a esta persona. No puedes hacer una evaluación duplicada.", "warning")
+            return redirect(request.referrer)
+        
+        # Recibimos los datos del formulario
+        nombre = request.form.get('nombre')
+        fecha_str = request.form.get('fecha')
+        fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+        area = request.form.get('area') or ""  # área es opcional
+        estacion = request.form.get('estacion') or ""  # estación es opcional
+        nomina = request.form.get('nomina')
+        puesto = request.form.get('puesto')
+        
+        # Almacenamos las respuestas del formulario en un diccionario
+        respuestas = {
+            'comunicacion': {
+                'claridad': request.form.get('comunicacion_claridad'),
+                'escucha': request.form.get('comunicacion_escucha'),
+                'equipo': request.form.get('comunicacion_equipo'),
+                'conflictos': request.form.get('comunicacion_conflictos')
+            },
+            'habilidades_blandas': {
+                'trabajo_equipo': request.form.get('blandas_trabajo_equipo'),
+                'empatia': request.form.get('blandas_empatia'),
+                'adaptabilidad': request.form.get('blandas_adaptabilidad'),
+                'responsabilidad': request.form.get('blandas_responsabilidad')
+            },
+            'disciplina': {
+                'puntualidad': request.form.get('disciplina_puntualidad'),
+                'normas': request.form.get('disciplina_normas'),
+                'presentacion': request.form.get('disciplina_presentacion'),
+                'recursos': request.form.get('disciplina_recursos')
+            },
+            'orden_cerrado': {
+                'dominio': request.form.get('orden_cerrado_dominio'),
+                'coordinacion': request.form.get('orden_cerrado_coordinacion'),
+                'atencion': request.form.get('orden_cerrado_atencion'),
+                'postura': request.form.get('orden_cerrado_postura')
+            }
         }
-    }
 
-    observaciones = request.form.get('observaciones')
+        observaciones = request.form.get('observaciones')
 
-    # Crear un objeto de la evaluación
-    evaluacion = EvaluacionDesempeno(
-        user_id=evaluado_id,
-        evaluador_id=current_user.id,
-        nombre=nombre,
-        fecha=fecha,
-        area=area,
-        estacion=estacion,
-        nomina=nomina,
-        puesto=puesto,
-        respuestas=respuestas,
-        evaluacion_general=observaciones,
-        comentario=observaciones
-    )
+        # Crear un objeto de la evaluación
+        evaluacion = EvaluacionDesempeno(
+            user_id=evaluado_id,
+            evaluador_id=current_user.id,
+            nombre=nombre,
+            fecha=fecha,
+            area=area,
+            estacion=estacion,
+            nomina=nomina,
+            puesto=puesto,
+            respuestas=respuestas,
+            evaluacion_general=observaciones,
+            comentario=observaciones
+        )
 
-    # Guardar la evaluación en la base de datos
-    db.session.add(evaluacion)
-    db.session.commit()
+        # Guardar la evaluación en la base de datos
+        db.session.add(evaluacion)
+        db.session.commit()
 
-    flash("Evaluación enviada exitosamente", "success")  # Mostrar un mensaje de éxito
+        flash("Evaluación enviada exitosamente", "success")  # Mostrar un mensaje de éxito
 
-    # Redirigir al dashboard
-    return redirect(url_for('main.dashboard'))
+        # Redirigir al dashboard
+        return redirect(url_for('main.dashboard'))
+    
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error en submit_evaluacion: {str(e)}")
+        flash(f"Error al guardar la evaluación: {str(e)}", "danger")
+        return redirect(request.referrer)
 
 
 @main.route('/submit_form', methods=['POST'])
@@ -1057,7 +1064,8 @@ def evaluacion():
         return render_template('evaluacion_coordinador.html', usuario_actual=current_user)
 
     else:
-        return render_template('evaluacion.html')  # bomberos u otros
+        flash('No tienes permiso para acceder a evaluaciones', 'warning')
+        return redirect(url_for('main.dashboard'))
 
 @main.route('/findeaño12w')
 @login_required
