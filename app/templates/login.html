@@ -118,6 +118,12 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').catch(function(err) {
+                    console.warn('No se pudo registrar service worker:', err);
+                });
+            }
+
             const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/model/';
             const FACE_THRESHOLD = 0.43;
             const RECOGNITION_INTERVAL_MS = 650;

@@ -352,6 +352,14 @@ def serve_uploaded_file(filename):
     upload_folder = current_app.config['UPLOAD_FOLDER']
     return send_from_directory(upload_folder, filename)
 
+
+@main.route('/sw.js')
+def service_worker():
+    response = send_from_directory(os.path.join(current_app.root_path, 'static', 'js'), 'sw.js')
+    response.headers['Service-Worker-Allowed'] = '/'
+    response.headers['Cache-Control'] = 'no-cache'
+    return response
+
 @main.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated: 

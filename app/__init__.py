@@ -26,6 +26,7 @@ def create_app():
     app.config['MAIL_USERNAME'] = 'sgcpbl@gmail.com'  # tu cuenta de Gmail
     app.config['MAIL_PASSWORD'] = 'xayh sphs fbbd agbt'  # contraseña de aplicación
     app.config['MAIL_DEFAULT_SENDER'] = 'sgcpbl@gmail.com'
+    app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000
 
     # Configuración de Google reCAPTCHA v2
     # Claves de producción proporcionadas por el usuario
