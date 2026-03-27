@@ -577,12 +577,25 @@ def resultados_evaluaciones():
         # Obtener categorías para el rol seleccionado
         categorias = categorias_por_rol.get(rol_seleccionado, categorias_por_rol['BOMBERO ESPECIALIZADO'])
         
+        logging.info(f"Consultando evaluaciones para rol: {rol_seleccionado}, turno: {turno_seleccionado}")
+        logging.info(f"Total de evaluaciones encontradas: {len(evaluaciones)}")
+        
         for evaluacion in evaluaciones:
             if not evaluacion or not evaluacion.respuestas:
                 continue
             
             respuestas = evaluacion.respuestas
+            
+            # Si respuestas es string (JSON encoded), deserializarlo
+            if isinstance(respuestas, str):
+                try:
+                    respuestas = pyjson.loads(respuestas)
+                except pyjson.JSONDecodeError:
+                    logging.error(f"Error deserializando JSON en evaluación {evaluacion.id}")
+                    continue
+            
             if not isinstance(respuestas, dict):
+                logging.warning(f"Respuestas no es dict: {type(respuestas)}")
                 continue
             
             for categoria, datos in categorias.items():
