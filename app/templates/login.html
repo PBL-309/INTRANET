@@ -96,12 +96,9 @@
                         <i class="bi bi-x-lg"></i>
                     </button>
                     <h3>Reconocimiento Facial</h3>
-                    <p>Valide el captcha de este modal y despues inicie la camara.</p>
+                    <p>Valide el captcha de este modal y la camara iniciara automaticamente.</p>
                     <div id="facialCaptchaWrap" style="margin-bottom: 14px;">
                         <div id="facialRecaptcha"></div>
-                        <button type="button" id="startFacialAfterCaptchaBtn" class="btn-capture" style="margin-top: 10px;">
-                            Validar captcha e iniciar camara
-                        </button>
                     </div>
                     <div class="camera-container">
                         <video id="cameraVideo" autoplay playsinline muted></video>
@@ -132,7 +129,6 @@
             const cameraVideo = document.getElementById('cameraVideo');
             const statusMessage = document.getElementById('statusMessage');
             const loadingSpinner = document.getElementById('loadingSpinner');
-            const startFacialAfterCaptchaBtn = document.getElementById('startFacialAfterCaptchaBtn');
 
             let cameraStream = null;
             let matcher = null;
@@ -146,6 +142,7 @@
             let candidateCount = 0;
             let facialCaptchaToken = '';
             let facialRecaptchaWidgetId = null;
+            let facialFlowStarting = false;
 
             setTimeout(function() {
                 const alerts = document.querySelectorAll('.alert');
@@ -181,19 +178,8 @@
             facialRecognitionBtn.addEventListener('click', async function(e) {
                 e.preventDefault();
                 abrirModalFacial();
-                setStatus('Resuelva el captcha del modal para iniciar la camara.', false);
+                setStatus('Resuelva el captcha del modal para iniciar la camara automaticamente.', false);
                 await ensureFacialRecaptchaWidget();
-            });
-
-            startFacialAfterCaptchaBtn.addEventListener('click', async function() {
-                const token = getFacialCaptchaToken();
-                if (!token) {
-                    setStatus('Primero resuelva el captcha del modal.', false);
-                    return;
-                }
-
-                facialCaptchaToken = token;
-                await iniciarFlujoFacial();
             });
 
             closeFacialModal.addEventListener('click', function() {
@@ -207,7 +193,12 @@
             });
 
             async function iniciarFlujoFacial() {
+                if (facialFlowStarting) {
+                    return;
+                }
+
                 try {
+                    facialFlowStarting = true;
                     stopped = false;
                     setStatus('Cargando modelos de reconocimiento...', true);
 
@@ -219,6 +210,8 @@
                     console.error(error);
                     setStatus('No fue posible iniciar el reconocimiento facial.', false);
                     detenerReconocimiento();
+                } finally {
+                    facialFlowStarting = false;
                 }
             }
 
@@ -240,7 +233,18 @@
 
                 facialRecaptchaWidgetId = window.grecaptcha.render('facialRecaptcha', {
                     sitekey: '{{ config.RECAPTCHA_PUBLIC_KEY }}',
-                    theme: 'light'
+                    theme: 'light',
+                    callback: async function(token) {
+                        facialCaptchaToken = token || '';
+                        if (!facialCaptchaToken) {
+                            return;
+                        }
+                        await iniciarFlujoFacial();
+                    },
+                    'expired-callback': function() {
+                        facialCaptchaToken = '';
+                        setStatus('Captcha expirado. Resuelvalo nuevamente.', false);
+                    }
                 });
             }
 
