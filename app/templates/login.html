@@ -80,33 +80,7 @@
                 <button type="submit" id="submitBtn">
                     Ingresar <i class="bi bi-arrow-right"></i>
                 </button>
-
-                <div class="divider">o</div>
-
-                <button type="button" id="facialRecognitionBtn" class="btn-facial">
-                    <i class="bi bi-camera-fill"></i> Iniciar con reconocimiento facial
-                </button>
             </form>
-
-            <div id="facialModal" class="modal-overlay" style="display: none;">
-                <div class="modal-content">
-                    <button class="modal-close" id="closeFacialModal" type="button">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-                    <h3>Reconocimiento Facial</h3>
-                    <p id="modalDescription">Muestre su rostro a la cámara para iniciar sesión.</p>
-                    
-                    <div class="camera-container">
-                        <video id="cameraVideo" autoplay playsinline muted width="640" height="480"></video>
-                        <canvas id="captureCanvas" style="display: none;"></canvas>
-                        <div id="loadingSpinner" class="spinner">
-                            <div class="spinner-item"></div>
-                        </div>
-                    </div>
-                    
-                    <p id="statusMessage" class="status-message">Iniciando cámara...</p>
-                </div>
-            </div>
 
             <div class="copyright">
                 &copy; 2026 H. Cuerpo de Bomberos. Todos los derechos reservados.
@@ -114,24 +88,8 @@
         </div>
     </div>
 
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const facialModal = document.getElementById('facialModal');
-            const facialRecognitionBtn = document.getElementById('facialRecognitionBtn');
-            const closeFacialModal = document.getElementById('closeFacialModal');
-            const cameraVideo = document.getElementById('cameraVideo');
-            const captureCanvas = document.getElementById('captureCanvas');
-            const statusMessage = document.getElementById('statusMessage');
-            const loadingSpinner = document.getElementById('loadingSpinner');
-
-            let cameraStream = null;
-            let recognitionTimer = null;
-            let processingFrame = false;
-            let stopped = false;
-            let facialServiceReady = false;
-
             // Ocultar alertas después de 4 segundos
             setTimeout(function() {
                 const alerts = document.querySelectorAll('.alert');
@@ -143,29 +101,6 @@
                     }, 500);
                 });
             }, 4000);
-
-            // Verificar estado del servicio facial en background
-            async function checkFacialService() {
-                try {
-                    const resp = await fetch('/api/facial_status');
-                    const data = await resp.json();
-                    facialServiceReady = data.ready;
-                    
-                    if (facialServiceReady) {
-                        console.log('[Facial] Servicio listo:', data.count, 'descriptores');
-                    } else {
-                        console.log('[Facial] Cargando descriptores...');
-                        // Reintentar en 2 segundos
-                        setTimeout(checkFacialService, 2000);
-                    }
-                } catch (e) {
-                    console.warn('[Facial] Error verificando servicio:', e);
-                    setTimeout(checkFacialService, 2000);
-                }
-            }
-            
-            // Iniciar verificación sin bloquear
-            checkFacialService();
 
             // Lógica para mostrar/ocultar campo de contraseña
             const usernameInput = document.getElementById('usernameInput');
@@ -180,142 +115,17 @@
                 } else {
                     passwordContainer.style.display = 'none';
                     passwordInput.removeAttribute('required');
-                    passwordInput.value = '' ;
+                    passwordInput.value = '';
                 }
             }
 
             checkUser();
             usernameInput.addEventListener('input', checkUser);
             usernameInput.addEventListener('blur', checkUser);
-
-            // Botón de reconocimiento facial
-            facialRecognitionBtn.addEventListener('click', async function(e) {
-                e.preventDefault();
-                abrirModalFacial();
-                
-                // Si el servicio no está listo, esperar
-                if (!facialServiceReady) {
-                    setStatus('Esperando servicio de reconocimiento...', true);
-                    let attempts = 0;
-                    while (!facialServiceReady && attempts < 30) {
-                        await new Promise(r => setTimeout(r, 500));
-                        attempts += 1;
-                    }
-                }
-                
-                setStatus('Iniciando cámara...', true);
-                
-                try {
-                    await iniciarCamara();
-                    setStatus('Rostro detectado. Acérquese un poco.', false);
-                    iniciarReconocimiento();
-                } catch (error) {
-                    setStatus('Error al acceder a la cámara.', false);
-                    console.error(error);
-                }
-            });
-
-            closeFacialModal.addEventListener('click', function() {
-                cerrarModalFacial();
-            });
-
-            facialModal.addEventListener('click', function(e) {
-                if (e.target === facialModal) {
-                    cerrarModalFacial();
-                }
-            });
-
-            function abrirModalFacial() {
-                facialModal.style.display = 'flex';
-            }
-
-            function cerrarModalFacial() {
-                facialModal.style.display = 'none';
-                detenerReconocimiento();
-            }
-
-            function setStatus(message, loading) {
-                statusMessage.textContent = message;
-                loadingSpinner.style.display = loading ? 'flex' : 'none';
-            }
-
-            async function iniciarCamara() {
-                cameraStream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        width: { ideal: 640 },
-                        height: { ideal: 480 },
-                        facingMode: 'user'
-                    },
-                    audio: false
-                });
-
-                cameraVideo.srcObject = cameraStream;
-
-                return new Promise((resolve) => {
-                    cameraVideo.onloadedmetadata = () => {
-                        cameraVideo.play();
-                        resolve();
-                    };
-                });
-            }
-
-            function iniciarReconocimiento() {
-                if (recognitionTimer) {
-                    clearInterval(recognitionTimer);
-                }
-
-                recognitionTimer = setInterval(async function() {
-                    if (processingFrame || stopped || !cameraVideo.srcObject) {
-                        return;
-                    }
-
-                    processingFrame = true;
-                    try {
-                        // Capturar frame del video
-                        const canvas = captureCanvas;
-                        canvas.width = cameraVideo.videoWidth;
-                        canvas.height = cameraVideo.videoHeight;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(cameraVideo, 0, 0);
-
-                        // Convertir a base64
-                        const imageBase64 = canvas.toDataURL('image/jpeg', 0.8);
-
-                        // Enviar al servidor para reconocimiento
-                        const resp = await fetch('/api/recognize_face', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ image: imageBase64 })
-                        });
-
-                        const data = await resp.json();
-
-                        if (data.success && data.username) {
-                            const nombre = data.nombre || data.username;
-                            setStatus(`Usuario reconocido: ${nombre}. Iniciando sesión...`, true);
-                            stopped = true;
-                            detenerReconocimiento();
-                            
-                            // Hacer login automático
-                            await loginFacial(data.username);
-                        } else {
-                            setStatus('Rostro detectado. Acérquese un poco.', false);
-                        }
-                    } catch (err) {
-                        console.warn('Error en reconocimiento:', err);
-                    } finally {
-                        processingFrame = false;
-                    }
-                }, 750);  // Intentar cada 750ms
-            }
-
-            async function loginFacial(username) {
-                try {
-                    const resp = await fetch('/api/login_facial', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username: username })
-                    });
+        });
+    </script>
+</body>
+</html>
 
                     const data = await resp.json();
 
