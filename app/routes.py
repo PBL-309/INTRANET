@@ -743,6 +743,30 @@ def listar_usuarios():
     lista = [{"username": u.username, "nombre": u.nombre, "turno": u.turno or ""} for u in usuarios]
     return jsonify({"success": True, "usuarios": lista})
 
+@main.route('/api/listado_fotos')
+def listado_fotos():
+    """Retorna lista de usuarios con URLs de fotos para reconocimiento facial"""
+    usuarios = User.query.filter(User.id != 1).all()  # Excluir admin
+    import os
+    import base64
+    
+    usuarios_info = []
+    for usuario in usuarios:
+        foto_path = os.path.join(current_app.root_path, 'static', 'uploads', f'{usuario.username}.jpg')
+        if os.path.exists(foto_path):
+            try:
+                with open(foto_path, 'rb') as f:
+                    foto_data = base64.b64encode(f.read()).decode('utf-8')
+                usuarios_info.append({
+                    "username": usuario.username,
+                    "nombre": usuario.nombre,
+                    "foto": f"data:image/jpeg;base64,{foto_data}"
+                })
+            except Exception as e:
+                print(f"Error al leer foto: {e}")
+    
+    return jsonify({"success": True, "usuarios": usuarios_info})
+
 @main.route('/evaluacion_del_desempeño')
 @login_required
 def evaluacion():
