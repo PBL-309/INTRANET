@@ -570,7 +570,7 @@ def resultados_evaluaciones():
         }
         
         # Obtener categorías para el rol seleccionado
-        categorias = categorias_por_rol.get(rol_seleccionado, categorias_por_rol['BOMBERO ESPECIALIZADO'])
+        categorias = categorias_por_rol.get(rol_seleccionado, categorias_por_rol['SUBTENIENTE'])
         
         for evaluacion in evaluaciones:
             if not evaluacion or not evaluacion.respuestas:
