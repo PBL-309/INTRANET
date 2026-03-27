@@ -390,7 +390,7 @@ def submit_evaluacion():
     fecha_str = request.form.get('fecha')
     fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
     area = request.form.get('area')
-    estacion = request.form.get('estacion')
+    estacion = request.form.get('estacion') or ""  # Ahora es opcional
     nomina = request.form.get('nomina')
     puesto = request.form.get('puesto')
     
@@ -717,6 +717,7 @@ def buscar_usuario(username):
             "success": True,
             "nombre": usuario.nombre,
             "puesto": usuario.puesto,
+            "turno": usuario.turno or "",
             "nomina": usuario.username
         })
     return jsonify({"success": False, "error": "Usuario no encontrado"}), 404
@@ -725,7 +726,7 @@ def buscar_usuario(username):
 @login_required
 def listar_usuarios():
     usuarios = User.query.filter(User.id != current_user.id).all()
-    lista = [{"username": u.username, "nombre": u.nombre} for u in usuarios]
+    lista = [{"username": u.username, "nombre": u.nombre, "turno": u.turno or ""} for u in usuarios]
     return jsonify({"success": True, "usuarios": lista})
 
 @main.route('/evaluacion_del_desempeño')

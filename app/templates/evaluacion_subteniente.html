@@ -327,19 +327,19 @@
       <div>
         <label>Seleccionar Usuario a Evaluar:<br></label>
         <div class="search-container">
-          <input type="text" id="buscar_usuario" class="search-input" placeholder="Escribe el username..." autocomplete="off" />
+          <input type="text" id="buscar_usuario" class="search-input" placeholder="Ingrese el número de nómina o nombre..." autocomplete="off" />
           <div id="dropdown_usuarios" class="dropdown-list"></div>
         </div>
         <input type="hidden" id="username_seleccionado" name="nombre" required />
       </div>
       <label>Nombre del Evaluado:<br><input type="text" id="nombre_evaluado" readonly /></label>
       <label>Puesto del Evaluado:<br><input type="text" id="puesto_evaluado" readonly /></label>
-      <label>Nómina del Evaluado:<br><input type="text" id="nomina_evaluado" name="nomina" readonly /></label>
-      <label>Fecha:<br><input type="date" name="fecha" placeholder="dd/mm/aaaa" required /></label>
+      <label>Turno del Evaluado:<br><input type="text" id="turno_evaluado" readonly /></label>
+      <label>Fecha:<br><input type="date" name="fecha" id="fecha_hoy" placeholder="dd/mm/aaaa" required /></label>
       <label>Área:<br><input type="text" name="area" required /></label>
-      <label>Estación:<br><input type="text" name="estacion" required /></label>
       <label>Nombre del Subteniente:<br><input type="text" id="nombre_subteniente" readonly /></label>
       <input type="hidden" id="puesto_subteniente" name="puesto" />
+      <input type="hidden" id="nomina_evaluado_hidden" name="nomina" />
     </div>
 
     <p class="instruction">
@@ -556,6 +556,10 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      // Establecer fecha de hoy
+      const hoy = new Date().toISOString().split('T')[0];
+      document.getElementById('fecha_hoy').value = hoy;
+
       // Auto-llenar nombre del subteniente
       document.getElementById('nombre_subteniente').value = '{{ usuario_actual.nombre }}';
       document.getElementById('puesto_subteniente').value = '{{ usuario_actual.puesto }}';
@@ -566,7 +570,8 @@
       const usernameSeleccionado = document.getElementById('username_seleccionado');
       const nombreEvaluado = document.getElementById('nombre_evaluado');
       const puestoEvaluado = document.getElementById('puesto_evaluado');
-      const nominaEvaluado = document.getElementById('nomina_evaluado');
+      const turnoEvaluado = document.getElementById('turno_evaluado');
+      const nominaEvaluadoHidden = document.getElementById('nomina_evaluado_hidden');
 
       let usuariosDisponibles = [];
 
@@ -593,7 +598,7 @@
         }
 
         const filtrados = usuariosDisponibles.filter(u => 
-          u.username.toLowerCase().includes(valor)
+          u.username.toLowerCase().includes(valor) || u.nombre.toLowerCase().includes(valor)
         );
 
         if (filtrados.length > 0) {
@@ -625,7 +630,8 @@
             if (data.success) {
               nombreEvaluado.value = data.nombre;
               puestoEvaluado.value = data.puesto;
-              nominaEvaluado.value = data.nomina || '';
+              turnoEvaluado.value = data.turno || '';
+              nominaEvaluadoHidden.value = data.nomina || '';
             }
           } catch (error) {
             console.error('Error al buscar usuario:', error);
