@@ -746,20 +746,25 @@ def listar_usuarios():
 @main.route('/api/listado_fotos')
 def listado_fotos():
     """Retorna lista de usuarios con URLs de fotos para reconocimiento facial."""
-    usuarios = User.query.filter(User.id != 1).all()  # Excluir admin
+    usuarios = User.query.filter(User.username != 'admin').all()
     import os
     
     usuarios_info = []
+    firma_partes = []
     for usuario in usuarios:
         foto_path = os.path.join(current_app.root_path, 'static', 'uploads', f'{usuario.username}.jpg')
         if os.path.exists(foto_path):
+            mtime = int(os.path.getmtime(foto_path))
             usuarios_info.append({
                 "username": usuario.username,
                 "nombre": usuario.nombre,
-                "foto_url": url_for('static', filename=f'uploads/{usuario.username}.jpg')
+                "foto_url": url_for('static', filename=f'uploads/{usuario.username}.jpg'),
+                "mtime": mtime
             })
+            firma_partes.append(f"{usuario.username}:{mtime}")
     
-    return jsonify({"success": True, "usuarios": usuarios_info})
+    firma = "|".join(sorted(firma_partes))
+    return jsonify({"success": True, "usuarios": usuarios_info, "firma": firma})
 
 @main.route('/evaluacion_del_desempeño')
 @login_required

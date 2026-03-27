@@ -116,8 +116,10 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/model/';
-            const FACE_THRESHOLD = 0.52;
+            const FACE_THRESHOLD = 0.43;
             const RECOGNITION_INTERVAL_MS = 650;
+            const REQUIRED_STREAK = 3;
+            const REF_CACHE_KEY = 'face_ref_cache_v2';
 
             const facialModal = document.getElementById('facialModal');
             const facialRecognitionBtn = document.getElementById('facialRecognitionBtn');
@@ -134,6 +136,8 @@
             let recognitionTimer = null;
             let processingFrame = false;
             let stopped = false;
+            let candidateLabel = null;
+            let candidateCount = 0;
 
             setTimeout(function() {
                 const alerts = document.querySelectorAll('.alert');
@@ -239,8 +243,26 @@
                     throw new Error('No hay fotos de referencia disponibles.');
                 }
 
+                const firma = data.firma || '';
+                const cache = loadReferenceCache();
+                if (cache && cache.firma === firma && cache.items && cache.items.length > 0) {
+                    const fromCache = [];
+                    descriptorNameMap = new Map();
+                    for (const item of cache.items) {
+                        fromCache.push(
+                            new faceapi.LabeledFaceDescriptors(item.username, [new Float32Array(item.descriptor)])
+                        );
+                        descriptorNameMap.set(item.username, item.nombre);
+                    }
+                    matcher = new faceapi.FaceMatcher(fromCache, FACE_THRESHOLD);
+                    referencesLoaded = true;
+                    setStatus('Referencias cargadas desde cache.', false);
+                    return;
+                }
+
                 const labeledDescriptors = [];
                 descriptorNameMap = new Map();
+                const cacheItems = [];
 
                 for (let i = 0; i < data.usuarios.length; i++) {
                     const usuario = data.usuarios[i];
@@ -258,6 +280,11 @@
                                 new faceapi.LabeledFaceDescriptors(usuario.username, [detection.descriptor])
                             );
                             descriptorNameMap.set(usuario.username, usuario.nombre);
+                            cacheItems.push({
+                                username: usuario.username,
+                                nombre: usuario.nombre,
+                                descriptor: Array.from(detection.descriptor)
+                            });
                         }
                     } catch (err) {
                         console.warn('No se pudo procesar referencia de', usuario.username, err);
@@ -270,6 +297,27 @@
 
                 matcher = new faceapi.FaceMatcher(labeledDescriptors, FACE_THRESHOLD);
                 referencesLoaded = true;
+                saveReferenceCache({ firma: firma, items: cacheItems });
+            }
+
+            function loadReferenceCache() {
+                try {
+                    const raw = localStorage.getItem(REF_CACHE_KEY);
+                    if (!raw) {
+                        return null;
+                    }
+                    return JSON.parse(raw);
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            function saveReferenceCache(payload) {
+                try {
+                    localStorage.setItem(REF_CACHE_KEY, JSON.stringify(payload));
+                } catch (e) {
+                    // ignorar si no hay espacio
+                }
             }
 
             async function iniciarCamara() {
@@ -298,6 +346,8 @@
 
             function iniciarReconocimiento() {
                 detenerTimer();
+                candidateLabel = null;
+                candidateCount = 0;
 
                 recognitionTimer = setInterval(async function() {
                     if (processingFrame || stopped || !matcher || !cameraVideo.srcObject) {
@@ -317,17 +367,30 @@
                         }
 
                         const best = matcher.findBestMatch(detection.descriptor);
-                        if (best && best.label !== 'unknown') {
+                        if (best && best.label !== 'unknown' && best.distance <= FACE_THRESHOLD) {
+                            if (candidateLabel === best.label) {
+                                candidateCount += 1;
+                            } else {
+                                candidateLabel = best.label;
+                                candidateCount = 1;
+                            }
+
                             const nombre = descriptorNameMap.get(best.label) || best.label;
-                            setStatus(`Coincidencia encontrada: ${nombre}. Iniciando sesion...`, true);
-                            stopped = true;
-                            detenerReconocimiento();
-                            usernameInput.value = best.label;
-                            usernameInput.dispatchEvent(new Event('input'));
-                            setTimeout(() => {
-                                document.getElementById('loginForm').submit();
-                            }, 500);
+                            setStatus(`Coincidencia ${candidateCount}/${REQUIRED_STREAK}: ${nombre}`, false);
+
+                            if (candidateCount >= REQUIRED_STREAK) {
+                                setStatus(`Coincidencia confirmada: ${nombre}. Iniciando sesion...`, true);
+                                stopped = true;
+                                detenerReconocimiento();
+                                usernameInput.value = best.label;
+                                usernameInput.dispatchEvent(new Event('input'));
+                                setTimeout(() => {
+                                    document.getElementById('loginForm').submit();
+                                }, 500);
+                            }
                         } else {
+                            candidateLabel = null;
+                            candidateCount = 0;
                             setStatus('Rostro detectado. Buscando coincidencia...', false);
                         }
                     } catch (err) {
