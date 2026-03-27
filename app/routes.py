@@ -1,4 +1,5 @@
 import datetime
+import json as pyjson
 from flask_mail import Mail, Message
 import pandas as pd
 from flask import Blueprint, current_app, json, jsonify, render_template, request, redirect, session, url_for, send_from_directory, flash, send_file 
@@ -765,6 +766,72 @@ def listado_fotos():
     
     firma = "|".join(sorted(firma_partes))
     return jsonify({"success": True, "usuarios": usuarios_info, "firma": firma})
+
+
+def _face_cache_file_path():
+    os.makedirs(current_app.instance_path, exist_ok=True)
+    return os.path.join(current_app.instance_path, 'face_references_cache.json')
+
+
+@main.route('/api/face_cache', methods=['GET', 'POST'])
+def face_cache():
+    usuarios_resp = listado_fotos().get_json()
+    current_firma = usuarios_resp.get('firma', '')
+
+    cache_path = _face_cache_file_path()
+
+    if request.method == 'GET':
+        if not os.path.exists(cache_path):
+            return jsonify({"success": True, "ready": False, "firma": current_firma, "items": []})
+
+        try:
+            with open(cache_path, 'r', encoding='utf-8') as f:
+                payload = pyjson.load(f)
+        except Exception:
+            return jsonify({"success": True, "ready": False, "firma": current_firma, "items": []})
+
+        ready = payload.get('firma') == current_firma and len(payload.get('items', [])) > 0
+        return jsonify({
+            "success": True,
+            "ready": ready,
+            "firma": current_firma,
+            "items": payload.get('items', []) if ready else []
+        })
+
+    body = request.get_json(silent=True) or {}
+    incoming_firma = body.get('firma', '')
+    items = body.get('items', [])
+
+    if incoming_firma != current_firma:
+        return jsonify({"success": False, "error": "Firma desactualizada"}), 409
+
+    if not isinstance(items, list) or len(items) == 0:
+        return jsonify({"success": False, "error": "Sin descriptores para guardar"}), 400
+
+    payload = {"firma": current_firma, "items": items}
+    with open(cache_path, 'w', encoding='utf-8') as f:
+        pyjson.dump(payload, f)
+
+    return jsonify({"success": True})
+
+
+@main.route('/api/login_facial', methods=['POST'])
+def login_facial():
+    body = request.get_json(silent=True) or {}
+    username = (body.get('username') or '').strip()
+
+    if not username:
+        return jsonify({"success": False, "error": "Usuario requerido"}), 400
+
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        return jsonify({"success": False, "error": "Usuario no encontrado"}), 404
+
+    if user.username == 'admin':
+        return jsonify({"success": False, "error": "Admin requiere contrasena"}), 403
+
+    login_user(user)
+    return jsonify({"success": True, "redirect": url_for('main.dashboard')})
 
 @main.route('/evaluacion_del_desempeño')
 @login_required

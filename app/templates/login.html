@@ -119,7 +119,6 @@
             const FACE_THRESHOLD = 0.43;
             const RECOGNITION_INTERVAL_MS = 650;
             const REQUIRED_STREAK = 3;
-            const REF_CACHE_KEY = 'face_ref_cache_v2';
 
             const facialModal = document.getElementById('facialModal');
             const facialRecognitionBtn = document.getElementById('facialRecognitionBtn');
@@ -244,11 +243,12 @@
                 }
 
                 const firma = data.firma || '';
-                const cache = loadReferenceCache();
-                if (cache && cache.firma === firma && cache.items && cache.items.length > 0) {
+                const serverCacheResp = await fetch('/api/face_cache', { cache: 'no-store' });
+                const serverCache = await serverCacheResp.json();
+                if (serverCache.success && serverCache.ready && serverCache.items && serverCache.items.length > 0) {
                     const fromCache = [];
                     descriptorNameMap = new Map();
-                    for (const item of cache.items) {
+                    for (const item of serverCache.items) {
                         fromCache.push(
                             new faceapi.LabeledFaceDescriptors(item.username, [new Float32Array(item.descriptor)])
                         );
@@ -256,7 +256,7 @@
                     }
                     matcher = new faceapi.FaceMatcher(fromCache, FACE_THRESHOLD);
                     referencesLoaded = true;
-                    setStatus('Referencias cargadas desde cache.', false);
+                    setStatus('Referencias compartidas cargadas.', false);
                     return;
                 }
 
@@ -297,26 +297,15 @@
 
                 matcher = new faceapi.FaceMatcher(labeledDescriptors, FACE_THRESHOLD);
                 referencesLoaded = true;
-                saveReferenceCache({ firma: firma, items: cacheItems });
-            }
 
-            function loadReferenceCache() {
                 try {
-                    const raw = localStorage.getItem(REF_CACHE_KEY);
-                    if (!raw) {
-                        return null;
-                    }
-                    return JSON.parse(raw);
+                    await fetch('/api/face_cache', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ firma: firma, items: cacheItems })
+                    });
                 } catch (e) {
-                    return null;
-                }
-            }
-
-            function saveReferenceCache(payload) {
-                try {
-                    localStorage.setItem(REF_CACHE_KEY, JSON.stringify(payload));
-                } catch (e) {
-                    // ignorar si no hay espacio
+                    console.warn('No se pudo guardar cache compartido de referencias', e);
                 }
             }
 
@@ -382,11 +371,7 @@
                                 setStatus(`Coincidencia confirmada: ${nombre}. Iniciando sesion...`, true);
                                 stopped = true;
                                 detenerReconocimiento();
-                                usernameInput.value = best.label;
-                                usernameInput.dispatchEvent(new Event('input'));
-                                setTimeout(() => {
-                                    document.getElementById('loginForm').submit();
-                                }, 500);
+                                await loginFacial(best.label);
                             }
                         } else {
                             candidateLabel = null;
@@ -400,6 +385,32 @@
                         processingFrame = false;
                     }
                 }, RECOGNITION_INTERVAL_MS);
+            }
+
+            async function loginFacial(username) {
+                try {
+                    const resp = await fetch('/api/login_facial', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: username })
+                    });
+                    const data = await resp.json();
+
+                    if (data.success && data.redirect) {
+                        window.location.href = data.redirect;
+                        return;
+                    }
+
+                    stopped = false;
+                    setStatus(data.error || 'No se pudo iniciar sesion facial.', false);
+                    await iniciarCamara();
+                    iniciarReconocimiento();
+                } catch (e) {
+                    stopped = false;
+                    setStatus('Error al iniciar sesion facial.', false);
+                    await iniciarCamara();
+                    iniciarReconocimiento();
+                }
             }
 
             function detenerTimer() {
