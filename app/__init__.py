@@ -48,48 +48,48 @@ def create_app():
         from app.models import User
         db.create_all()
         
-        # Inicializar servicio de reconocimiento facial (no bloqueante)
-        try:
-            from app.facial_service import init_facial_service, facial_service
-            if init_facial_service(app):
-                logging.info("[Facial] Servicio de reconocimiento facial inicializado")
-                
-                # Precalcular descriptores en background (no bloquea el servidor)
-                def precalculate_descriptors_background():
-                    try:
-                        with app.app_context():
-                            usuarios = User.query.filter(
-                                User.foto_url != None,
-                                User.foto_url != ''
-                            ).all()
-                            
-                            if usuarios:
-                                usuarios_fotos = [
-                                    {
-                                        'username': u.username,
-                                        'nombre': u.nombre,
-                                        'foto_url': u.foto_url
-                                    }
-                                    for u in usuarios
-                                ]
-                                
-                                result = facial_service.precompute_descriptors(usuarios_fotos)
-                                logging.info(f"[Facial] Precálculo completado en background: {result} descriptores")
-                    except Exception as e:
-                        logging.error(f"[Facial] Error en precálculo background: {e}")
-                
-                # Lanzar precálculo en thread separado si caché está vacío
-                if not facial_service.face_descriptors:
-                    logging.info("[Facial] Iniciando precálculo en background...")
-                    bg_thread = threading.Thread(target=precalculate_descriptors_background, daemon=True)
-                    bg_thread.start()
-                else:
-                    logging.info(f"[Facial] Caché cargado: {len(facial_service.face_descriptors)} descriptores listos")
-                    
-        except ImportError:
-            logging.warning("[Facial] Servicio facial no disponible (librerías no instaladas)")
-        except Exception as e:
-            logging.error(f"[Facial] Error inicializando servicio facial: {e}")
+        # Inicializar servicio de reconocimiento facial (DESHABILITADO - Usuario quitó facial recognition)
+        # try:
+        #     from app.facial_service import init_facial_service, facial_service
+        #     if init_facial_service(app):
+        #         logging.info("[Facial] Servicio de reconocimiento facial inicializado")
+        #         
+        #         # Precalcular descriptores en background (no bloquea el servidor)
+        #         def precalculate_descriptors_background():
+        #             try:
+        #                 with app.app_context():
+        #                     usuarios = User.query.filter(
+        #                         User.foto_url != None,
+        #                         User.foto_url != ''
+        #                     ).all()
+        #                     
+        #                     if usuarios:
+        #                         usuarios_fotos = [
+        #                             {
+        #                                 'username': u.username,
+        #                                 'nombre': u.nombre,
+        #                                 'foto_url': u.foto_url
+        #                             }
+        #                             for u in usuarios
+        #                         ]
+        #                         
+        #                         result = facial_service.precompute_descriptors(usuarios_fotos)
+        #                         logging.info(f"[Facial] Precálculo completado en background: {result} descriptores")
+        #             except Exception as e:
+        #                 logging.error(f"[Facial] Error en precálculo background: {e}")
+        #         
+        #         # Lanzar precálculo en thread separado si caché está vacío
+        #         if not facial_service.face_descriptors:
+        #             logging.info("[Facial] Iniciando precálculo en background...")
+        #             bg_thread = threading.Thread(target=precalculate_descriptors_background, daemon=True)
+        #             bg_thread.start()
+        #         else:
+        #             logging.info(f"[Facial] Caché cargado: {len(facial_service.face_descriptors)} descriptores listos")
+        #             
+        # except ImportError:
+        #     logging.warning("[Facial] Servicio facial no disponible (librerías no instaladas)")
+        # except Exception as e:
+        #     logging.error(f"[Facial] Error inicializando servicio facial: {e}")
     
     @login_manager.user_loader
     def load_user(user_id):

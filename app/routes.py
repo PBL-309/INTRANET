@@ -395,6 +395,25 @@ def logout():
 @main.route('/submit_evaluacion', methods=['POST'])
 @login_required
 def submit_evaluacion():
+    # Obtener el ID del usuario que será evaluado
+    evaluado_id = request.form.get('evaluado_id')
+    
+    if not evaluado_id:
+        flash("Usuario no seleccionado", "danger")
+        return redirect(request.referrer)
+    
+    evaluado_id = int(evaluado_id)
+    
+    # Verificar si ya existe una evaluación del mismo evaluador al mismo evaluado
+    evaluacion_existente = EvaluacionDesempeno.query.filter_by(
+        user_id=evaluado_id,
+        evaluador_id=current_user.id
+    ).first()
+    
+    if evaluacion_existente:
+        flash("Ya has evaluado a esta persona. No puedes hacer una evaluación duplicada.", "warning")
+        return redirect(request.referrer)
+    
     # Recibimos los datos del formulario
     nombre = request.form.get('nombre')
     fecha_str = request.form.get('fecha')
@@ -436,7 +455,8 @@ def submit_evaluacion():
 
     # Crear un objeto de la evaluación
     evaluacion = EvaluacionDesempeno(
-        user_id=current_user.id,
+        user_id=evaluado_id,
+        evaluador_id=current_user.id,
         nombre=nombre,
         fecha=fecha,
         area=area,
@@ -725,6 +745,7 @@ def buscar_usuario(username):
     if usuario:
         return jsonify({
             "success": True,
+            "id": usuario.id,
             "nombre": usuario.nombre,
             "puesto": usuario.puesto,
             "turno": usuario.turno or "",

@@ -132,7 +132,8 @@ class RegistroCompetencia(db.Model):
 class EvaluacionDesempeno(db.Model):
     __tablename__ = 'evaluacion_desempeno'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Quien es evaluado
+    evaluador_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Quien evalúa
     nombre = db.Column(db.String(100), nullable=False)
     fecha = db.Column(db.Date, nullable=False)
     area = db.Column(db.String(100), nullable=False)
@@ -144,7 +145,9 @@ class EvaluacionDesempeno(db.Model):
     comentario = db.Column(db.String(500), nullable=True)
     fecha_creacion = db.Column(db.DateTime, default=datetime.utcnow)
 
-    user = db.relationship('User', backref=db.backref('evaluaciones_desempeno', lazy=True))
+    # Relaciones
+    usuario_evaluado = db.relationship('User', foreign_keys=[user_id], backref=db.backref('evaluaciones_recibidas', lazy=True))
+    usuario_evaluador = db.relationship('User', foreign_keys=[evaluador_id], backref=db.backref('evaluaciones_realizadas', lazy=True))
 
     def __repr__(self):
         return f'<EvaluacionDesempeno {self.id}>'

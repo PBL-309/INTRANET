@@ -520,6 +520,7 @@
             <div id="dropdown_usuarios" class="dropdown-list"></div>
           </div>
           <input type="hidden" id="username_seleccionado" name="nombre" required />
+          <input type="hidden" id="evaluado_id" name="evaluado_id" required />
         </div>
         <div class="header-field">
           <label class="header-label">Nombre del Evaluado</label>
@@ -777,6 +778,7 @@
       const buscarInput = document.getElementById('buscar_usuario');
       const dropdownUsuarios = document.getElementById('dropdown_usuarios');
       const usernameSeleccionado = document.getElementById('username_seleccionado');
+      const evaluadoId = document.getElementById('evaluado_id');
       const nombreEvaluado = document.getElementById('nombre_evaluado');
       const puestoEvaluado = document.getElementById('puesto_evaluado');
       const turnoEvaluado = document.getElementById('turno_evaluado');
@@ -840,6 +842,7 @@
             const response = await fetch(`/api/buscar_usuario/${username}`);
             const data = await response.json();
             if (data.success) {
+              evaluadoId.value = data.id;
               nombreEvaluado.value = data.nombre;
               puestoEvaluado.value = data.puesto;
               turnoEvaluado.value = data.turno || '';
