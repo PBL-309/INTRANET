@@ -731,6 +731,10 @@ def listar_usuarios():
     if current_user.puesto == "SUBTENIENTE":
         usuarios = [u for u in usuarios if u.puesto == "BOMBERO ESPECIALIZADO"]
     
+    # Si el usuario es TENIENTE, filtrar solo SUBTENIENTE
+    elif current_user.puesto.startswith("TENIENTE"):
+        usuarios = [u for u in usuarios if u.puesto == "SUBTENIENTE"]
+    
     lista = [{"username": u.username, "nombre": u.nombre, "turno": u.turno or ""} for u in usuarios]
     return jsonify({"success": True, "usuarios": lista})
 
