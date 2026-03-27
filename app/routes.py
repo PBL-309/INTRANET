@@ -531,7 +531,7 @@ def submit_evaluacion():
 @login_required
 def resultados_evaluaciones():
     try:
-        rol_seleccionado = request.args.get('rol', 'BOMBERO ESPECIALIZADO')
+        rol_seleccionado = request.args.get('rol', 'SUBTENIENTE')
         
         # Obtener todos los usuarios del rol seleccionado
         usuarios = User.query.filter_by(puesto=rol_seleccionado).all()
@@ -545,14 +545,8 @@ def resultados_evaluaciones():
         else:
             evaluaciones = []
         
-        # Definir categorías por rol
+        # Definir categorías por rol evaluado
         categorias_por_rol = {
-            'BOMBERO ESPECIALIZADO': {
-                'comunicacion': {'titulo': 'Comunicación', 'valores': []},
-                'habilidades_blandas': {'titulo': 'Habilidades Blandas', 'valores': []},
-                'disciplina': {'titulo': 'Disciplina', 'valores': []},
-                'orden_cerrado': {'titulo': 'Orden Cerrado', 'valores': []}
-            },
             'SUBTENIENTE': {
                 'comunicacion': {'titulo': 'Comunicación', 'valores': []},
                 'habilidades_blandas': {'titulo': 'Habilidades Blandas', 'valores': []},
@@ -631,7 +625,7 @@ def resultados_evaluaciones():
             datos_grafica=datos_grafica,
             rol_seleccionado=rol_seleccionado,
             total_evaluaciones=len(evaluaciones),
-            roles_disponibles=['BOMBERO ESPECIALIZADO', 'SUBTENIENTE', 'TENIENTE', 'COORDINADOR']
+            roles_disponibles=['SUBTENIENTE', 'TENIENTE', 'COORDINADOR']
         )
     except Exception as e:
         logging.error(f"Error en resultados_evaluaciones: {str(e)}")
