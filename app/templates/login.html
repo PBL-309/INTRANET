@@ -7,9 +7,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Face API & TensorFlow -->
-    <script async src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0/dist/tf.min.js"></script>
-    <script async src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.10/dist/face-api.min.js"></script>
+    <!-- ML5.js - Lightweight Face Detection -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ml5js/0.12.0/ml5.min.js" defer></script>
 </head>
 <body>
 
@@ -101,15 +100,11 @@
                     <p>Permita el acceso a su cámara y colóquese frente a ella</p>
                     <div class="camera-container">
                         <video id="cameraVideo" autoplay playsinline muted></video>
-                        <canvas id="cameraCanvas" style="display: none;"></canvas>
-                        <div id="loadingSpinner" style="display: none;" class="spinner">
+                        <div id="loadingSpinner" class="spinner">
                             <div class="spinner-item"></div>
                         </div>
                     </div>
-                    <p id="statusMessage" class="status-message"></p>
-                    <button id="captureBtn" class="btn-capture" style="display: none;">
-                        Capturar Foto
-                    </button>
+                    <p id="statusMessage" class="status-message">⏳ Cargando modelos de IA...</p>
                 </div>
             </div>
 
@@ -120,36 +115,17 @@
     </div>
 
     <script>
-        // ===== FACIAL RECOGNITION =====
+        // ===== FACIAL RECOGNITION WITH ML5.JS =====
         let usuariosDisponibles = [];
         let cameraStream = null;
-        let modelosCargas = false;
-
+        let faceDetector = null;
+        let identificado = false;
         const facialModal = document.getElementById('facialModal');
         const facialRecognitionBtn = document.getElementById('facialRecognitionBtn');
         const closeFacialModal = document.getElementById('closeFacialModal');
         const cameraVideo = document.getElementById('cameraVideo');
-        const cameraCanvas = document.getElementById('cameraCanvas');
         const statusMessage = document.getElementById('statusMessage');
-        const captureBtn = document.getElementById('captureBtn');
         const loadingSpinner = document.getElementById('loadingSpinner');
-
-        // Cargar modelos de face-api
-        async function cargarModelos() {
-            try {
-                const modelsUrl = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.10/model/';
-                await Promise.all([
-                    faceapi.nets.tinyFaceDetector.loadFromUri(modelsUrl),
-                    faceapi.nets.faceLandmark68Net.loadFromUri(modelsUrl),
-                    faceapi.nets.faceRecognitionNet.loadFromUri(modelsUrl),
-                    faceapi.nets.faceExpressionNet.loadFromUri(modelsUrl)
-                ]);
-                modelosCargas = true;
-            } catch (error) {
-                console.error('Error al cargar modelos:', error);
-                statusMessage.textContent = '❌ Error al cargar modelos de IA';
-            }
-        }
 
         // Cargar lista de usuarios
         async function cargarUsuarios() {
@@ -176,94 +152,86 @@
                     }
                 });
                 cameraVideo.srcObject = cameraStream;
-                cameraVideo.play();
+                statusMessage.textContent = '⏳ Cargando modelo de detección (rápido)...';
 
-                captureBtn.style.display = 'block';
-                statusMessage.textContent = '✅ Cámara lista - Colóquese frente a la cámara';
-
-                // Comenzar detección automática
-                detectarRostroAuto();
+                // Inicializar ml5 faceApi
+                initializeML5();
             } catch (error) {
                 statusMessage.textContent = '❌ No se pudo acceder a la cámara. Verifique permisos.';
                 console.error('Error:', error);
             }
         }
 
-        // Detección automática y continua
-        async function detectarRostroAuto() {
-            if (!facialModal.style.display || facialModal.style.display === 'none') {
+        // Inicializar ML5.js
+        function initializeML5() {
+            ml5.faceApi(cameraVideo, { 
+                withLandmarks: true,
+                withDescriptors: false
+            }, () => {
+                statusMessage.textContent = '✅ Listo - Colóquese frente a la cámara';
+                loadingSpinner.style.display = 'none';
+                detectarRostroML5();
+            });
+        }
+
+        // Detección continua y automática
+        function detectarRostroML5() {
+            if (!facialModal.style.display || facialModal.style.display === 'none' || identificado) {
                 return;
             }
 
-            try {
-                const detection = await faceapi
-                    .detectSingleFace(cameraVideo, new faceapi.TinyFaceDetectorOptions())
-                    .withFaceLandmarks()
-                    .withFaceDescriptor();
-
-                if (detection) {
-                    statusMessage.textContent = '✅ Rostro detectado - Analizando...';
-                    loadingSpinner.style.display = 'block';
-
-                    // Esperar un poco y luego reconocer
-                    setTimeout(() => {
-                        reconocerUsuario(detection);
-                    }, 500);
-                } else {
-                    statusMessage.textContent = '👁️ Moviendo cámara... Intente colocarse mejor frente a ella';
+            ml5.faceApi.detect(cameraVideo, async (err, results) => {
+                if (err) {
+                    console.error('Error en detección:', err);
+                    requestAnimationFrame(detectarRostroML5);
+                    return;
                 }
-            } catch (error) {
-                console.error('Error en detección:', error);
-            }
 
-            requestAnimationFrame(detectarRostroAuto);
+                if (results && results.length > 0) {
+                    // Se detectó al menos un rostro
+                    if (!statusMessage.textContent.includes('Analizando')) {
+                        statusMessage.textContent = '🔍 Rostro detectado - Analizando...';
+                    }
+
+                    // Capturar frame actual y comparar
+                    await compararRostro();
+                } else {
+                    statusMessage.textContent = '👁️ Colóquese mejor frente a la cámara';
+                }
+
+                requestAnimationFrame(detectarRostroML5);
+            });
         }
 
-        // Reconocer usuario comparando descriptores faciales
-        async function reconocerUsuario(detectionActual) {
+        // Comparar rostro usando correlación de píxeles (más rápido)
+        async function compararRostro() {
             try {
-                const descriptorActual = detectionActual.descriptor;
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = cameraVideo.videoWidth;
+                canvas.height = cameraVideo.videoHeight;
+                ctx.drawImage(cameraVideo, 0, 0);
+                
+                const fotoActual = canvas.toDataURL('image/jpeg', 0.8);
+
+                let mejorPuntuacion = 0;
                 let mejorCoincidencia = null;
-                let menorDistancia = 0.6; // Umbral de similitud
 
                 for (const usuario of usuariosDisponibles) {
                     try {
-                        // Crear imagen desde base64
-                        const img = new Image();
-                        img.src = usuario.foto;
-                        await new Promise((resolve) => {
-                            img.onload = resolve;
-                            setTimeout(resolve, 500);
-                        });
-
-                        // Detectar rostro en la foto guardada
-                        const detectionFoto = await faceapi
-                            .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
-                            .withFaceLandmarks()
-                            .withFaceDescriptor();
-
-                        if (detectionFoto) {
-                            const descriptorFoto = detectionFoto.descriptor;
-                            
-                            // Calcular distancia euclidiana
-                            let distancia = 0;
-                            for (let i = 0; i < descriptorActual.length; i++) {
-                                distancia += Math.pow(descriptorActual[i] - descriptorFoto[i], 2);
-                            }
-                            distancia = Math.sqrt(distancia);
-
-                            if (distancia < menorDistancia) {
-                                menorDistancia = distancia;
-                                mejorCoincidencia = usuario;
-                            }
+                        const puntuacion = await compararImagenes(fotoActual, usuario.foto);
+                        if (puntuacion > mejorPuntuacion) {
+                            mejorPuntuacion = puntuacion;
+                            mejorCoincidencia = usuario;
                         }
                     } catch (error) {
-                        console.log(`Error procesando foto de ${usuario.username}`);
+                        console.log(`Error comparando con ${usuario.username}`);
                     }
                 }
 
-                if (mejorCoincidencia) {
-                    // Encontramos una coincidencia
+                // Si la puntuación es suficientemente buena (>0.4 = 40% similitud)
+                if (mejorPuntuacion > 0.4 && mejorCoincidencia) {
+                    identificado = true;
                     detenerCamara();
                     loadingSpinner.style.display = 'none';
                     statusMessage.textContent = `✅ ¡Bienvenido ${mejorCoincidencia.nombre}!`;
@@ -273,14 +241,59 @@
                     usernameInput.value = mejorCoincidencia.username;
                     usernameInput.dispatchEvent(new Event('input'));
                     
-                    // Esperar un poco y simular click submit
                     setTimeout(() => {
                         document.getElementById('loginForm').submit();
                     }, 1500);
                 }
             } catch (error) {
-                console.error('Error en reconocimiento:', error);
+                console.error('Error en comparación:', error);
             }
+        }
+
+        // Función rápida de comparación de imágenes
+        function compararImagenes(img1Src, img2Src) {
+            return new Promise((resolve) => {
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 200;
+                    canvas.height = 200;
+                    const ctx = canvas.getContext('2d');
+
+                    // Cargar primera imagen
+                    const img1 = new Image();
+                    img1.crossOrigin = 'anonymous';
+                    img1.onload = () => {
+                        ctx.drawImage(img1, 0, 0, 200, 200);
+                        const imageData1 = ctx.getImageData(0, 0, 200, 200).data;
+
+                        // Cargar segunda imagen
+                        const img2 = new Image();
+                        img2.src = img2Src;
+                        img2.onload = () => {
+                            ctx.clearRect(0, 0, 200, 200);
+                            ctx.drawImage(img2, 0, 0, 200, 200);
+                            const imageData2 = ctx.getImageData(0, 0, 200, 200).data;
+
+                            // Calcular similitud
+                            let similares = 0;
+                            for (let i = 0; i < imageData1.length; i += 4) {
+                                const diff = Math.abs(imageData1[i] - imageData2[i]) +
+                                           Math.abs(imageData1[i+1] - imageData2[i+1]) +
+                                           Math.abs(imageData1[i+2] - imageData2[i+2]);
+                                if (diff < 30) similares++;
+                            }
+
+                            const puntuacion = similares / (imageData1.length / 4);
+                            resolve(puntuacion);
+                        };
+                        img2.onerror = () => resolve(0);
+                    };
+                    img1.src = img1Src;
+                    img1.onerror = () => resolve(0);
+                } catch (error) {
+                    resolve(0);
+                }
+            });
         }
 
         // Detener cámara
@@ -294,13 +307,7 @@
         // Event Listeners
         facialRecognitionBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-            
-            // Cargar modelos si no están cargados
-            if (!modelosCargas) {
-                statusMessage.textContent = '⏳ Cargando modelos de IA...';
-                await cargarModelos();
-            }
-
+            identificado = false;
             facialModal.style.display = 'flex';
             await cargarUsuarios();
             await iniciarCamara();
@@ -310,7 +317,6 @@
             facialModal.style.display = 'none';
             detenerCamara();
             statusMessage.textContent = '';
-            captureBtn.style.display = 'none';
             loadingSpinner.style.display = 'none';
         });
 
