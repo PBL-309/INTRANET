@@ -389,8 +389,8 @@ def submit_evaluacion():
     nombre = request.form.get('nombre')
     fecha_str = request.form.get('fecha')
     fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
-    area = request.form.get('area')
-    estacion = request.form.get('estacion') or ""  # Ahora es opcional
+    area = request.form.get('area') or ""  # área es opcional
+    estacion = request.form.get('estacion') or ""  # estación es opcional
     nomina = request.form.get('nomina')
     puesto = request.form.get('puesto')
     
@@ -726,6 +726,11 @@ def buscar_usuario(username):
 @login_required
 def listar_usuarios():
     usuarios = User.query.filter(User.id != current_user.id).all()
+    
+    # Si el usuario es SUBTENIENTE, filtrar solo BOMBERO ESPECIALIZADO
+    if current_user.puesto == "SUBTENIENTE":
+        usuarios = [u for u in usuarios if u.puesto == "BOMBERO ESPECIALIZADO"]
+    
     lista = [{"username": u.username, "nombre": u.nombre, "turno": u.turno or ""} for u in usuarios]
     return jsonify({"success": True, "usuarios": lista})
 
