@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Formulario de Evaluación</title>
+  <style>
+    .hidden {
+      display: none;
+    }
+  </style>
+  <!--
+    :root {
+      --bg: #e9e3f5;
+      --card: #ffffff;
+      --primary: #6a5acd;
+      --primary-hover: #574ac9;
+      --border: #000000;
+      --muted: #c2c2c2;
+      --font: Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font);
+      margin: 0;
+      background-color: var(--bg);
+      display: flex;
+      justify-content: center;
+      padding: 30px 10px;
+      color: #111;
+    }
+
+    .page {
+      background-color: var(--card);
+      max-width: 1200px;
+      width: 100%;
+      padding: 40px 30px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+    }
+
+    h2 {
+      text-align: center;
+      margin: 0 0 20px 0;
+      font-size: 24px;
+      letter-spacing: 0.2px;
+    }
+
+    .header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px 20px;
+      margin-bottom: 20px;
+    }
+
+    .header label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .header input {
+      width: 100%;
+      border: none;
+      border-bottom: 2px solid var(--border);
+      font-size: 16px;
+      padding: 6px 4px;
+      background: none;
+      outline: none;
+    }
+
+    .instruction {
+      font-size: 16px;
+      margin: 18px 0 12px 0;
+      line-height: 1.35;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 15px;
+      table-layout: fixed; /* evita que celdas largas rompan el layout */
+    }
+
+    td,
+    th {
+      border: 1px solid var(--border);
+      text-align: center;
+      padding: 8px 6px;
+      vertical-align: top;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      line-height: 1.25;
+    }
+
+    .section-title {
+      background-color: var(--muted);
+      font-weight: 700;
+      text-align: left;
+      padding: 10px 10px;
+    }
+
+    .question {
+      text-align: left;
+      font-weight: 400;
+      padding-left: 10px;
+    }
+
+    input[type="radio"] {
+      transform: scale(1.35);
+      transform-origin: top left;
+      margin-top: 4px;
+    }
+
+    .radio-label {
+      font-size: 12.5px;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+
+    .radio-label span {
+      display: block;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .next-btn,
+    .prev-btn {
+      margin-top: 30px;
+      background-color: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 12px 26px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .next-btn:hover,
+    .prev-btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    /* Textareas */
+    .textarea-field {
+      width: 100%;
+      font-size: 15px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 10px;
+      font-family: var(--font);
+      outline: none;
+      resize: vertical;
+    }
+
+    .textarea-observaciones {
+      height: 100px;
+    }
+
+    .textarea-comentario {
+      height: 80px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Flash Messages Styles */
+    .alert {
+      padding: 14px;
+      margin-bottom: 20px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .alert-success {
+      color: #3c763d;
+      background-color: #dff0d8;
+      border-color: #d6e9c6;
+    }
+
+    .alert-danger,
+    .alert-error {
+      color: #a94442;
+      background-color: #f2dede;
+      border-color: #ebccd1;
+    }
+
+    .alert-info {
+      color: #31708f;
+      background-color: #d9edf7;
+      border-color: #bce8f1;
+    }
+
+    .alert-warning {
+      color: #8a6d3b;
+      background-color: #fcf8e3;
+      border-color: #faebcc;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 20px 8px;
+      }
+
+      .page {
+        padding: 20px 15px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      .header {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .header label {
+        font-size: 15px;
+      }
+
+      .instruction {
+        font-size: 14.5px;
+      }
+
+      table {
+        font-size: 13.5px;
+      }
+
+      input[type="radio"] {
+        transform: scale(1.1);
+      }
+
+      td,
+      th {
+        padding: 7px 4px;
+      }
+
+      .next-btn,
+      .prev-btn {
+        width: 100%;
+      }
+    }
+  -->
+  <style>
+    :root {
+      --bg: #f2f3ff;
+      --card: #ffffff;
+      --primary: #5b5bd6;
+      --primary-hover: #4747c4;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: rgba(17, 24, 39, 0.18);
+      --section: #e9eaef;
+      --radius: 10px;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: var(--bg);
+      display: flex;
+      justify-content: center;
+      padding: 24px 10px;
+      color: var(--text);
+    }
+
+    .page {
+      background-color: var(--card);
+      max-width: 1200px;
+      width: 100%;
+      padding: 28px 22px;
+      border-radius: var(--radius);
+      box-shadow: 0 8px 24px rgba(17, 24, 39, 0.08);
+    }
+
+    h2 {
+      text-align: center;
+      margin: 0 0 16px 0;
+      font-size: 22px;
+      letter-spacing: 0.2px;
+    }
+
+    form {
+      margin: 0;
+    }
+
+    .header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px 16px;
+      margin-bottom: 18px;
+    }
+
+    .header label {
+      display: block;
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .header input {
+      width: 100%;
+      border: 0;
+      border-bottom: 2px solid rgba(17, 24, 39, 0.8);
+      background: transparent;
+      font-size: 15px;
+      padding: 6px 4px;
+      outline: none;
+    }
+
+    .instruction {
+      font-size: 15px;
+      margin: 14px 0 12px 0;
+      line-height: 1.35;
+      color: var(--text);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 14px;
+      table-layout: fixed;
+    }
+
+    td,
+    th {
+      border: 1px solid var(--border);
+      text-align: center;
+      padding: 8px 6px;
+      vertical-align: top;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      line-height: 1.2;
+    }
+
+    .section-title {
+      background-color: var(--section);
+      font-weight: 800;
+      text-align: left;
+      padding: 10px 10px;
+      border-color: rgba(17, 24, 39, 0.22);
+    }
+
+    .question {
+      text-align: left;
+      font-weight: 600;
+      padding-left: 10px;
+    }
+
+    input[type="radio"] {
+      transform: scale(1.25);
+      transform-origin: center;
+    }
+
+    .radio-label {
+      font-size: 12.5px;
+      font-weight: 800;
+    }
+
+    .next-btn,
+    .prev-btn {
+      margin-top: 18px;
+      background-color: var(--primary);
+      color: #fff;
+      border: 0;
+      padding: 12px 22px;
+      font-size: 15px;
+      font-weight: 800;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .next-btn:hover,
+    .prev-btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .textarea-field {
+      width: 100%;
+      font-size: 14.5px;
+      box-sizing: border-box;
+      border: 1px solid rgba(17, 24, 39, 0.22);
+      border-radius: 8px;
+      padding: 10px;
+      font-family: Arial, sans-serif;
+      outline: none;
+      resize: vertical;
+    }
+
+    .textarea-observaciones {
+      height: 100px;
+    }
+
+    .textarea-comentario {
+      height: 80px;
+    }
+
+    /* Flash Messages */
+    .alert {
+      padding: 12px 14px;
+      margin-bottom: 18px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .alert-success {
+      color: #14532d;
+      background-color: #dcfce7;
+      border: 1px solid rgba(20, 83, 45, 0.18);
+    }
+
+    .alert-danger,
+    .alert-error {
+      color: #7f1d1d;
+      background-color: #fee2e2;
+      border: 1px solid rgba(127, 29, 29, 0.18);
+    }
+
+    .alert-info {
+      color: #1e3a8a;
+      background-color: #dbeafe;
+      border: 1px solid rgba(30, 58, 138, 0.18);
+    }
+
+    .alert-warning {
+      color: #7c2d12;
+      background-color: #ffedd5;
+      border: 1px solid rgba(124, 45, 18, 0.18);
+    }
+
+    @media (max-width: 700px) {
+      body {
+        padding: 18px 8px;
+      }
+
+      .page {
+        padding: 20px 14px;
+      }
+
+      h2 {
+        font-size: 18px;
+      }
+
+      .header {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .instruction {
+        font-size: 14px;
+      }
+
+      table {
+        font-size: 12.5px;
+      }
+
+      input[type="radio"] {
+        transform: scale(1.05);
+      }
+
+      td,
+      th {
+        padding: 7px 4px;
+      }
+
+      .next-btn,
+      .prev-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page" id="page">
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'error' else 'danger' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <h2>EVALUACIÓN DEL DESEMPEÑO</h2>
+    <form action="{{ url_for('main.submit_evaluacion') }}" method="POST">    	
+    <div class="header">
+      <label>Nombre:<br><input type="text"  name="nombre" required /></label>
+      <label>Fecha:<br><input type="date" name="fecha" placeholder="dd/mm/aaaa" required /></label>
+      <label>Área:<br><input type="text" name="area" required /></label>
+      <label>Estación:<br><input type="text" name="estacion" required /></label>
+      <label>No. de Nómina:<br><input type="text" name="nomina" required /></label>
+      <label>Puesto:<br><input type="text" name="puesto" required /></label>
+    </div>
+
+    <p class="instruction">
+      Instrucción: Califique cada criterio del 1 al 5 de acuerdo a la siguiente escala:
+      <br><strong>1 = Deficiente | 2 = Regular | 3 = Aceptable | 4 = Bueno | 5 = Excelente</strong>
+    </p>
+
+    <!-- ═══════ COMUNICACIÓN ═══════ -->
+    <table>
+      <tr>
+        <td colspan="6" class="section-title">1. COMUNICACIÓN</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td class="radio-label">1<br><span>Deficiente</span></td>
+        <td class="radio-label">2<br><span>Regular</span></td>
+        <td class="radio-label">3<br><span>Aceptable</span></td>
+        <td class="radio-label">4<br><span>Bueno</span></td>
+        <td class="radio-label">5<br><span>Excelente</span></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Claridad verbal</strong><br>Se expresa con precisión y coherencia en situaciones operativas y cotidianas</td>
+        <td><input type="radio" name="comunicacion_claridad" value="1" required /></td>
+        <td><input type="radio" name="comunicacion_claridad" value="2" /></td>
+        <td><input type="radio" name="comunicacion_claridad" value="3" /></td>
+        <td><input type="radio" name="comunicacion_claridad" value="4" /></td>
+        <td><input type="radio" name="comunicacion_claridad" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Escucha activa</strong><br>Atiende instrucciones, sugerencias y retroalimentación sin interrupciones</td>
+        <td><input type="radio" name="comunicacion_escucha" value="1" required /></td>
+        <td><input type="radio" name="comunicacion_escucha" value="2" /></td>
+        <td><input type="radio" name="comunicacion_escucha" value="3" /></td>
+        <td><input type="radio" name="comunicacion_escucha" value="4" /></td>
+        <td><input type="radio" name="comunicacion_escucha" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Comunicación en equipo</strong><br>Comparte información relevante con sus compañeros de forma oportuna</td>
+        <td><input type="radio" name="comunicacion_equipo" value="1" required /></td>
+        <td><input type="radio" name="comunicacion_equipo" value="2" /></td>
+        <td><input type="radio" name="comunicacion_equipo" value="3" /></td>
+        <td><input type="radio" name="comunicacion_equipo" value="4" /></td>
+        <td><input type="radio" name="comunicacion_equipo" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Manejo de conflictos</strong><br>Resuelve desacuerdos con respeto y profesionalismo</td>
+        <td><input type="radio" name="comunicacion_conflictos" value="1" required /></td>
+        <td><input type="radio" name="comunicacion_conflictos" value="2" /></td>
+        <td><input type="radio" name="comunicacion_conflictos" value="3" /></td>
+        <td><input type="radio" name="comunicacion_conflictos" value="4" /></td>
+        <td><input type="radio" name="comunicacion_conflictos" value="5" /></td>
+      </tr>
+    </table>
+
+    <!-- ═══════ HABILIDADES BLANDAS ═══════ -->
+    <table>
+      <tr>
+        <td colspan="6" class="section-title">2. HABILIDADES BLANDAS</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td class="radio-label">1<br><span>Deficiente</span></td>
+        <td class="radio-label">2<br><span>Regular</span></td>
+        <td class="radio-label">3<br><span>Aceptable</span></td>
+        <td class="radio-label">4<br><span>Bueno</span></td>
+        <td class="radio-label">5<br><span>Excelente</span></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Trabajo en equipo</strong><br>Colabora eficazmente en tareas grupales y operaciones</td>
+        <td><input type="radio" name="blandas_trabajo_equipo" value="1" required /></td>
+        <td><input type="radio" name="blandas_trabajo_equipo" value="2" /></td>
+        <td><input type="radio" name="blandas_trabajo_equipo" value="3" /></td>
+        <td><input type="radio" name="blandas_trabajo_equipo" value="4" /></td>
+        <td><input type="radio" name="blandas_trabajo_equipo" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Empatía</strong><br>Muestra sensibilidad ante las necesidades de compañeros y ciudadanos</td>
+        <td><input type="radio" name="blandas_empatia" value="1" required /></td>
+        <td><input type="radio" name="blandas_empatia" value="2" /></td>
+        <td><input type="radio" name="blandas_empatia" value="3" /></td>
+        <td><input type="radio" name="blandas_empatia" value="4" /></td>
+        <td><input type="radio" name="blandas_empatia" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Adaptabilidad</strong><br>Se ajusta con rapidez a cambios operativos o administrativos</td>
+        <td><input type="radio" name="blandas_adaptabilidad" value="1" required /></td>
+        <td><input type="radio" name="blandas_adaptabilidad" value="2" /></td>
+        <td><input type="radio" name="blandas_adaptabilidad" value="3" /></td>
+        <td><input type="radio" name="blandas_adaptabilidad" value="4" /></td>
+        <td><input type="radio" name="blandas_adaptabilidad" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Responsabilidad</strong><br>Cumple con sus funciones sin necesidad de supervisión constante</td>
+        <td><input type="radio" name="blandas_responsabilidad" value="1" required /></td>
+        <td><input type="radio" name="blandas_responsabilidad" value="2" /></td>
+        <td><input type="radio" name="blandas_responsabilidad" value="3" /></td>
+        <td><input type="radio" name="blandas_responsabilidad" value="4" /></td>
+        <td><input type="radio" name="blandas_responsabilidad" value="5" /></td>
+      </tr>
+    </table>
+
+    <!-- ═══════ DISCIPLINA ═══════ -->
+    <table>
+      <tr>
+        <td colspan="6" class="section-title">3. DISCIPLINA</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td class="radio-label">1<br><span>Deficiente</span></td>
+        <td class="radio-label">2<br><span>Regular</span></td>
+        <td class="radio-label">3<br><span>Aceptable</span></td>
+        <td class="radio-label">4<br><span>Bueno</span></td>
+        <td class="radio-label">5<br><span>Excelente</span></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Puntualidad</strong><br>Respeta horarios de entrada, salida y actividades</td>
+        <td><input type="radio" name="disciplina_puntualidad" value="1" required /></td>
+        <td><input type="radio" name="disciplina_puntualidad" value="2" /></td>
+        <td><input type="radio" name="disciplina_puntualidad" value="3" /></td>
+        <td><input type="radio" name="disciplina_puntualidad" value="4" /></td>
+        <td><input type="radio" name="disciplina_puntualidad" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Respeto a normas</strong><br>Acata reglamentos internos y protocolos operativos</td>
+        <td><input type="radio" name="disciplina_normas" value="1" required /></td>
+        <td><input type="radio" name="disciplina_normas" value="2" /></td>
+        <td><input type="radio" name="disciplina_normas" value="3" /></td>
+        <td><input type="radio" name="disciplina_normas" value="4" /></td>
+        <td><input type="radio" name="disciplina_normas" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Presentación personal</strong><br>Mantiene uniforme y equipo en condiciones adecuadas</td>
+        <td><input type="radio" name="disciplina_presentacion" value="1" required /></td>
+        <td><input type="radio" name="disciplina_presentacion" value="2" /></td>
+        <td><input type="radio" name="disciplina_presentacion" value="3" /></td>
+        <td><input type="radio" name="disciplina_presentacion" value="4" /></td>
+        <td><input type="radio" name="disciplina_presentacion" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Uso adecuado de recursos</strong><br>Cuida instalaciones, vehículos y herramientas asignadas</td>
+        <td><input type="radio" name="disciplina_recursos" value="1" required /></td>
+        <td><input type="radio" name="disciplina_recursos" value="2" /></td>
+        <td><input type="radio" name="disciplina_recursos" value="3" /></td>
+        <td><input type="radio" name="disciplina_recursos" value="4" /></td>
+        <td><input type="radio" name="disciplina_recursos" value="5" /></td>
+      </tr>
+    </table>
+
+    <!-- ═══════ ORDEN CERRADO ═══════ -->
+    <table>
+      <tr>
+        <td colspan="6" class="section-title">4. ORDEN CERRADO</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td class="radio-label">1<br><span>Deficiente</span></td>
+        <td class="radio-label">2<br><span>Regular</span></td>
+        <td class="radio-label">3<br><span>Aceptable</span></td>
+        <td class="radio-label">4<br><span>Bueno</span></td>
+        <td class="radio-label">5<br><span>Excelente</span></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Dominio de formaciones</strong><br>Ejecuta correctamente alineaciones, marchas y desplazamientos</td>
+        <td><input type="radio" name="orden_cerrado_dominio" value="1" required /></td>
+        <td><input type="radio" name="orden_cerrado_dominio" value="2" /></td>
+        <td><input type="radio" name="orden_cerrado_dominio" value="3" /></td>
+        <td><input type="radio" name="orden_cerrado_dominio" value="4" /></td>
+        <td><input type="radio" name="orden_cerrado_dominio" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Coordinación grupal</strong><br>Se sincroniza con el grupo en movimientos y comandos</td>
+        <td><input type="radio" name="orden_cerrado_coordinacion" value="1" required /></td>
+        <td><input type="radio" name="orden_cerrado_coordinacion" value="2" /></td>
+        <td><input type="radio" name="orden_cerrado_coordinacion" value="3" /></td>
+        <td><input type="radio" name="orden_cerrado_coordinacion" value="4" /></td>
+        <td><input type="radio" name="orden_cerrado_coordinacion" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Atención a comandos</strong><br>Responde con precisión y rapidez a indicaciones del mando</td>
+        <td><input type="radio" name="orden_cerrado_atencion" value="1" required /></td>
+        <td><input type="radio" name="orden_cerrado_atencion" value="2" /></td>
+        <td><input type="radio" name="orden_cerrado_atencion" value="3" /></td>
+        <td><input type="radio" name="orden_cerrado_atencion" value="4" /></td>
+        <td><input type="radio" name="orden_cerrado_atencion" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Postura y presencia</strong><br>Mantiene porte firme y actitud profesional durante actos oficiales</td>
+        <td><input type="radio" name="orden_cerrado_postura" value="1" required /></td>
+        <td><input type="radio" name="orden_cerrado_postura" value="2" /></td>
+        <td><input type="radio" name="orden_cerrado_postura" value="3" /></td>
+        <td><input type="radio" name="orden_cerrado_postura" value="4" /></td>
+        <td><input type="radio" name="orden_cerrado_postura" value="5" /></td>
+      </tr>
+    </table>
+
+    <!-- ═══════ OBSERVACIONES GENERALES ═══════ -->
+    <table>
+      <tr>
+        <td colspan="6" class="section-title">5. OBSERVACIONES GENERALES</td>
+      </tr>
+      <tr>
+        <td colspan="6" class="question">
+          <strong>Comentarios del Subteniente sobre el desempeño, fortalezas y áreas de mejora:</strong><br><br>
+          <textarea class="textarea-field textarea-observaciones" name="observaciones" required></textarea>
+        </td>
+      </tr>
+    </table>
+
+    <div class="button-container">
+      <button class="next-btn" type="submit">Enviar Evaluación</button>
+    </div>
+    </form>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(function() {
+        var alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+          alert.style.transition = 'opacity 0.5s ease-out';
+          alert.style.opacity = '0';
+          setTimeout(function() {
+            alert.remove();
+          }, 500);
+        });
+      }, 4000);
+    });
+  </script>
+</body>
+</html>
+
+
+

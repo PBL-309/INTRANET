@@ -14,6 +14,7 @@ class User(db.Model, UserMixin):
     image_file = db.Column(db.String(100), nullable=False, default='default.jpg')
     password_changed = db.Column(db.Boolean, default=False)
     turno = db.Column(db.String(30))
+    puesto = db.Column(db.String(50))  # ← agregar esta línea
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

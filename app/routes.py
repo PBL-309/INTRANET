@@ -711,7 +711,18 @@ def formulario():
 @main.route('/evaluacion_del_desempeño')
 @login_required
 def evaluacion():
-    return render_template('evaluacion.html')
+
+    if current_user.puesto == "SUBTENIENTE":
+        return render_template('evaluacion_subteniente.html')
+
+    elif current_user.puesto.startswith("TENIENTE"):
+        return render_template('evaluacion_teniente.html')
+
+    elif current_user.puesto == "COORDINADOR OPERATIVO":
+        return render_template('evaluacion_coordinador.html')
+
+    else:
+        return render_template('evaluacion.html')  # bomberos u otros
 
 @main.route('/findeaño12w')
 @login_required
