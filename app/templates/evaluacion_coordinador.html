@@ -292,12 +292,15 @@
       resize: vertical;
       transition: all 0.2s;
       background: #fafbfc;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+      line-height: 1.6;
     }
 
     .textarea-field:focus {
       border-color: var(--primary);
       background: white;
-      box-shadow: 0 0 0 3px var(--primary-light);
+      box-shadow: 0 0 0 4px var(--primary-light), 0 4px 12px rgba(37, 99, 235, 0.15);
+      transform: translateY(-1px);
     }
 
     .textarea-observaciones {

@@ -83,39 +83,62 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 24px;
-      background: linear-gradient(135deg, var(--primary-light) 0%, #f0f9ff 100%);
-      border-radius: 12px;
+      padding: 28px 24px;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+      border-radius: 14px;
       border: 2px solid var(--primary);
       text-align: center;
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
     }
 
     .profile-pic {
-      width: 140px;
-      height: 140px;
+      width: 100px;
+      height: 100px;
       border-radius: 50%;
       object-fit: cover;
-      border: 4px solid var(--primary);
+      border: 3px solid var(--primary);
       background-color: #e5e7eb;
-      margin-bottom: 16px;
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+      margin-bottom: 14px;
+      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.25);
+      transition: transform 0.3s ease;
+    }
+
+    .profile-pic:hover {
+      transform: scale(1.05);
     }
 
     .profile-name {
-      font-size: 16px;
-      font-weight: 700;
+      font-size: 15px;
+      font-weight: 800;
       color: var(--text);
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       word-wrap: break-word;
       max-width: 100%;
+      letter-spacing: -0.3px;
     }
 
     .profile-role {
-      font-size: 12px;
-      color: var(--text-light);
+      font-size: 11px;
+      color: var(--primary);
       text-transform: uppercase;
-      letter-spacing: 0.3px;
-      font-weight: 600;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+      background: var(--primary-light);
+      padding: 4px 12px;
+      border-radius: 20px;
+      display: inline-block;
     }
 
     .search-container {
@@ -125,7 +148,7 @@
 
     .search-input {
       width: 100%;
-      padding: 12px 16px;
+      padding: 13px 16px;
       font-size: 14px;
       border: 2px solid var(--border);
       border-radius: 10px;
@@ -133,12 +156,14 @@
       transition: all 0.3s;
       background: #fafbfc;
       font-weight: 500;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
     }
 
     .search-input:focus {
       border-color: var(--primary);
       background: white;
-      box-shadow: 0 0 0 4px var(--primary-light);
+      box-shadow: 0 0 0 4px var(--primary-light), 0 4px 12px rgba(37, 99, 235, 0.15);
+      transform: translateY(-1px);
     }
 
     .header-field {
@@ -147,12 +172,12 @@
     }
 
     .header-label {
-      font-size: 12px;
-      font-weight: 700;
+      font-size: 11px;
+      font-weight: 800;
       color: var(--text);
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       text-transform: uppercase;
-      letter-spacing: 0.4px;
+      letter-spacing: 0.6px;
     }
 
     .header-input {
@@ -161,17 +186,19 @@
       border-radius: 10px;
       background: #fafbfc;
       font-size: 14px;
-      padding: 12px 14px;
+      padding: 13px 16px;
       outline: none;
       transition: all 0.3s;
       color: var(--text);
       font-weight: 500;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
     }
 
     .header-input:focus {
       border-color: var(--primary);
       background: white;
-      box-shadow: 0 0 0 4px var(--primary-light);
+      box-shadow: 0 0 0 4px var(--primary-light), 0 4px 12px rgba(37, 99, 235, 0.15);
+      transform: translateY(-1px);
     }
 
     .header-input[readonly] {
@@ -330,18 +357,18 @@
     }
 
     .next-btn {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      background: linear-gradient(135deg, var(--primary) 0%, #1b5fd8 100%);
       color: #fff;
       border: none;
-      padding: 16px 48px;
-      font-size: 15px;
-      font-weight: 700;
+      padding: 14px 48px;
+      font-size: 14px;
+      font-weight: 800;
       border-radius: 10px;
       cursor: pointer;
       transition: all 0.4s;
-      box-shadow: var(--shadow-lg);
+      box-shadow: 0 10px 28px rgba(37, 99, 235, 0.3);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.6px;
       position: relative;
       overflow: hidden;
     }
@@ -381,12 +408,15 @@
       resize: vertical;
       transition: all 0.3s;
       background: #fafbfc;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+      line-height: 1.6;
     }
 
     .textarea-field:focus {
       border-color: var(--primary);
       background: white;
-      box-shadow: 0 0 0 4px var(--primary-light);
+      box-shadow: 0 0 0 4px var(--primary-light), 0 4px 12px rgba(37, 99, 235, 0.15);
+      transform: translateY(-1px);
     }
 
     .textarea-observaciones {
@@ -443,12 +473,12 @@
       }
 
       .profile-card {
-        padding: 20px;
+        padding: 24px;
       }
 
       .profile-pic {
-        width: 120px;
-        height: 120px;
+        width: 100px;
+        height: 100px;
       }
 
       table {
