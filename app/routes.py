@@ -536,11 +536,6 @@ def resultados_evaluaciones():
         
         # Obtener todos los usuarios del rol seleccionado
         usuarios = User.query.filter_by(puesto=rol_seleccionado).all()
-        
-        # Filtrar por turno si no es GENERAL
-        if turno_seleccionado != 'GENERAL':
-            usuarios = [u for u in usuarios if u.turno == turno_seleccionado]
-        
         usuario_ids = [u.id for u in usuarios]
         
         # Obtener todas las evaluaciones de estos usuarios
@@ -548,6 +543,10 @@ def resultados_evaluaciones():
             evaluaciones = EvaluacionDesempeno.query.filter(
                 EvaluacionDesempeno.user_id.in_(usuario_ids)
             ).all()
+            
+            # Filtrar por turno si no es GENERAL (el turno está en el campo 'estacion' de la evaluación)
+            if turno_seleccionado != 'GENERAL':
+                evaluaciones = [e for e in evaluaciones if e.estacion == turno_seleccionado]
         else:
             evaluaciones = []
         
