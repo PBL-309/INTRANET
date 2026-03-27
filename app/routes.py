@@ -819,10 +819,36 @@ def face_cache():
 def login_facial():
     body = request.get_json(silent=True) or {}
     username = (body.get('username') or '').strip()
-    recaptcha_token = (body.get('recaptcha_token') or '').strip()
 
     if not username:
         return jsonify({"success": False, "error": "Usuario requerido"}), 400
+
+    verified_at = session.get('facial_captcha_verified_at')
+    if not verified_at:
+        return jsonify({"success": False, "error": "Captcha facial no verificado"}), 403
+
+
+    if datetime.utcnow().timestamp() - float(verified_at) > 300:
+        session.pop('facial_captcha_verified_at', None)
+        return jsonify({"success": False, "error": "Captcha facial expirado"}), 403
+
+    session.pop('facial_captcha_verified_at', None)
+
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        return jsonify({"success": False, "error": "Usuario no encontrado"}), 404
+
+    if user.username == 'admin':
+        return jsonify({"success": False, "error": "Admin requiere contrasena"}), 403
+
+    login_user(user)
+    return jsonify({"success": True, "redirect": url_for('main.dashboard')})
+
+
+@main.route('/api/verify_facial_captcha', methods=['POST'])
+def verify_facial_captcha():
+    body = request.get_json(silent=True) or {}
+    recaptcha_token = (body.get('recaptcha_token') or '').strip()
 
     if not recaptcha_token:
         return jsonify({"success": False, "error": "Captcha requerido"}), 400
@@ -848,15 +874,8 @@ def login_facial():
     if not verify_data.get('success'):
         return jsonify({"success": False, "error": "Captcha invalido o expirado"}), 403
 
-    user = User.query.filter_by(username=username).first()
-    if not user:
-        return jsonify({"success": False, "error": "Usuario no encontrado"}), 404
-
-    if user.username == 'admin':
-        return jsonify({"success": False, "error": "Admin requiere contrasena"}), 403
-
-    login_user(user)
-    return jsonify({"success": True, "redirect": url_for('main.dashboard')})
+    session['facial_captcha_verified_at'] = datetime.utcnow().timestamp()
+    return jsonify({"success": True})
 
 @main.route('/evaluacion_del_desempeño')
 @login_required

@@ -140,9 +140,10 @@
             let stopped = false;
             let candidateLabel = null;
             let candidateCount = 0;
-            let facialCaptchaToken = '';
             let facialRecaptchaWidgetId = null;
             let facialFlowStarting = false;
+            let modelsPromise = null;
+            let referencesPromise = null;
 
             setTimeout(function() {
                 const alerts = document.querySelectorAll('.alert');
@@ -175,6 +176,11 @@
             usernameInput.addEventListener('input', checkUser);
             usernameInput.addEventListener('blur', checkUser);
 
+            // Precarga silenciosa para evitar esperas al abrir reconocimiento facial
+            setTimeout(() => {
+                preloadFacialResources();
+            }, 300);
+
             facialRecognitionBtn.addEventListener('click', async function(e) {
                 e.preventDefault();
                 abrirModalFacial();
@@ -203,7 +209,7 @@
                     setStatus('Cargando modelos de reconocimiento...', true);
 
                     await ensureModelsLoaded();
-                    await ensureReferencesLoaded();
+                    await ensureReferencesLoaded(false);
                     await iniciarCamara();
                     iniciarReconocimiento();
                 } catch (error) {
@@ -212,6 +218,15 @@
                     detenerReconocimiento();
                 } finally {
                     facialFlowStarting = false;
+                }
+            }
+
+            async function preloadFacialResources() {
+                try {
+                    await ensureModelsLoaded();
+                    await ensureReferencesLoaded(true);
+                } catch (e) {
+                    console.warn('Precarga facial no disponible por ahora:', e);
                 }
             }
 
@@ -235,14 +250,20 @@
                     sitekey: '{{ config.RECAPTCHA_PUBLIC_KEY }}',
                     theme: 'light',
                     callback: async function(token) {
-                        facialCaptchaToken = token || '';
-                        if (!facialCaptchaToken) {
+                        if (!token) {
+                            return;
+                        }
+                        const ok = await verifyFacialCaptchaToken(token);
+                        if (!ok) {
+                            setStatus('Captcha invalido o expirado. Intente de nuevo.', false);
+                            if (facialRecaptchaWidgetId !== null && window.grecaptcha && typeof window.grecaptcha.reset === 'function') {
+                                window.grecaptcha.reset(facialRecaptchaWidgetId);
+                            }
                             return;
                         }
                         await iniciarFlujoFacial();
                     },
                     'expired-callback': function() {
-                        facialCaptchaToken = '';
                         setStatus('Captcha expirado. Resuelvalo nuevamente.', false);
                     }
                 });
@@ -266,7 +287,6 @@
             function cerrarModalFacial() {
                 facialModal.style.display = 'none';
                 detenerReconocimiento();
-                facialCaptchaToken = '';
                 if (facialRecaptchaWidgetId !== null && window.grecaptcha && typeof window.grecaptcha.reset === 'function') {
                     window.grecaptcha.reset(facialRecaptchaWidgetId);
                 }
@@ -282,20 +302,35 @@
                     return;
                 }
 
-                await Promise.all([
+                if (modelsPromise) {
+                    await modelsPromise;
+                    return;
+                }
+
+                modelsPromise = Promise.all([
                     faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
                     faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL),
                     faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
                 ]);
+
+                await modelsPromise;
                 modelsLoaded = true;
             }
 
-            async function ensureReferencesLoaded() {
+            async function ensureReferencesLoaded(silent) {
                 if (referencesLoaded && matcher) {
                     return;
                 }
 
-                setStatus('Preparando fotos de referencia...', true);
+                if (referencesPromise) {
+                    await referencesPromise;
+                    return;
+                }
+
+                referencesPromise = (async () => {
+                if (!silent) {
+                    setStatus('Preparando fotos de referencia...', true);
+                }
 
                 const resp = await fetch('/api/listado_fotos', { cache: 'no-store' });
                 const data = await resp.json();
@@ -318,7 +353,9 @@
                     }
                     matcher = new faceapi.FaceMatcher(fromCache, FACE_THRESHOLD);
                     referencesLoaded = true;
-                    setStatus('Referencias compartidas cargadas.', false);
+                    if (!silent) {
+                        setStatus('Referencias compartidas cargadas.', false);
+                    }
                     return;
                 }
 
@@ -328,7 +365,9 @@
 
                 for (let i = 0; i < data.usuarios.length; i++) {
                     const usuario = data.usuarios[i];
-                    setStatus(`Analizando referencia ${i + 1}/${data.usuarios.length}...`, true);
+                    if (!silent) {
+                        setStatus(`Analizando referencia ${i + 1}/${data.usuarios.length}...`, true);
+                    }
 
                     try {
                         const img = await faceapi.fetchImage(usuario.foto_url);
@@ -368,6 +407,13 @@
                     });
                 } catch (e) {
                     console.warn('No se pudo guardar cache compartido de referencias', e);
+                }
+                })();
+
+                try {
+                    await referencesPromise;
+                } finally {
+                    referencesPromise = null;
                 }
             }
 
@@ -451,20 +497,10 @@
 
             async function loginFacial(username) {
                 try {
-                    const tokenActual = getFacialCaptchaToken();
-                    if (!tokenActual) {
-                        stopped = false;
-                        setStatus('Captcha del modal expirado. Resuelvalo de nuevo.', false);
-                        if (facialRecaptchaWidgetId !== null && window.grecaptcha && typeof window.grecaptcha.reset === 'function') {
-                            window.grecaptcha.reset(facialRecaptchaWidgetId);
-                        }
-                        return;
-                    }
-
                     const resp = await fetch('/api/login_facial', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username: username, recaptcha_token: tokenActual || facialCaptchaToken })
+                        body: JSON.stringify({ username: username })
                     });
                     const data = await resp.json();
 
@@ -482,6 +518,20 @@
                     setStatus('Error al iniciar sesion facial.', false);
                     await iniciarCamara();
                     iniciarReconocimiento();
+                }
+            }
+
+            async function verifyFacialCaptchaToken(token) {
+                try {
+                    const resp = await fetch('/api/verify_facial_captcha', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ recaptcha_token: token })
+                    });
+                    const data = await resp.json();
+                    return !!data.success;
+                } catch (e) {
+                    return false;
                 }
             }
 
