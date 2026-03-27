@@ -727,17 +727,17 @@ def buscar_usuario(username):
 def listar_usuarios():
     usuarios = User.query.filter(User.id != current_user.id).all()
     
+    # Si el usuario es COORDINADOR OPERATIVO, filtrar todos los que empiecen con TENIENTE
+    if current_user.puesto == "COORDINADOR OPERATIVO":
+        usuarios = [u for u in usuarios if u.puesto.startswith("TENIENTE")]
+    
     # Si el usuario es SUBTENIENTE, filtrar solo BOMBERO ESPECIALIZADO
-    if current_user.puesto == "SUBTENIENTE":
+    elif current_user.puesto == "SUBTENIENTE":
         usuarios = [u for u in usuarios if u.puesto == "BOMBERO ESPECIALIZADO"]
     
     # Si el usuario es TENIENTE (incluyendo variantes como TENIENTE SECTOR 1), filtrar solo SUBTENIENTE
     elif current_user.puesto.startswith("TENIENTE"):
         usuarios = [u for u in usuarios if u.puesto == "SUBTENIENTE"]
-    
-    # Si el usuario es COORDINADOR OPERATIVO, filtrar todos los que empiecen con TENIENTE
-    elif current_user.puesto == "COORDINADOR OPERATIVO":
-        usuarios = [u for u in usuarios if u.puesto.startswith("TENIENTE")]
     
     lista = [{"username": u.username, "nombre": u.nombre, "turno": u.turno or ""} for u in usuarios]
     return jsonify({"success": True, "usuarios": lista})
