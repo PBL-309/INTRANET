@@ -145,6 +145,9 @@
             let facialFlowStarting = false;
             let modelsPromise = null;
             let referencesPromise = null;
+            let facialResourcesReady = false;
+            let preloadStarted = false;
+            const facialButtonDefaultHtml = facialRecognitionBtn.innerHTML;
 
             setTimeout(function() {
                 const alerts = document.querySelectorAll('.alert');
@@ -177,13 +180,20 @@
             usernameInput.addEventListener('input', checkUser);
             usernameInput.addEventListener('blur', checkUser);
 
-            // Precarga silenciosa para evitar esperas al abrir reconocimiento facial
-            setTimeout(() => {
-                preloadFacialResources();
-            }, 300);
+            // Precarga total al cargar la pagina para no esperar al momento de hacer clic.
+            preloadFacialResources();
 
             facialRecognitionBtn.addEventListener('click', async function(e) {
                 e.preventDefault();
+                if (!facialResourcesReady) {
+                    abrirModalFacial();
+                    setStatus('El reconocimiento aun se esta preparando. Espere unos segundos...', true);
+                    await preloadFacialResources();
+                    if (!facialResourcesReady) {
+                        setStatus('No se pudo preparar el reconocimiento facial. Reintente.', false);
+                        return;
+                    }
+                }
                 abrirModalFacial();
                 setStatus('Resuelva el captcha del modal para iniciar la camara automaticamente.', false);
                 await ensureFacialRecaptchaWidget();
@@ -207,10 +217,10 @@
                 try {
                     facialFlowStarting = true;
                     stopped = false;
-                    setStatus('Cargando modelos de reconocimiento...', true);
+                    setStatus('Iniciando camara...', true);
 
                     await ensureModelsLoaded();
-                    await ensureReferencesLoaded(false);
+                    await ensureReferencesLoaded(true);
                     await iniciarCamara();
                     iniciarReconocimiento();
                 } catch (error) {
@@ -223,11 +233,36 @@
             }
 
             async function preloadFacialResources() {
+                if (preloadStarted) {
+                    if (modelsPromise) {
+                        await modelsPromise;
+                    }
+                    if (referencesPromise) {
+                        await referencesPromise;
+                    }
+                    return;
+                }
+
+                preloadStarted = true;
+                facialRecognitionBtn.disabled = true;
+                facialRecognitionBtn.style.opacity = '0.7';
+                facialRecognitionBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Preparando reconocimiento...';
+
                 try {
                     await ensureModelsLoaded();
                     await ensureReferencesLoaded(true);
+                    await ensureFacialRecaptchaWidget();
+                    facialResourcesReady = true;
+                    facialRecognitionBtn.disabled = false;
+                    facialRecognitionBtn.style.opacity = '1';
+                    facialRecognitionBtn.innerHTML = facialButtonDefaultHtml;
                 } catch (e) {
                     console.warn('Precarga facial no disponible por ahora:', e);
+                    facialResourcesReady = false;
+                    preloadStarted = false;
+                    facialRecognitionBtn.disabled = false;
+                    facialRecognitionBtn.style.opacity = '1';
+                    facialRecognitionBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Reintentar reconocimiento facial';
                 }
             }
 
