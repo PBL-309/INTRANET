@@ -531,18 +531,23 @@ def submit_evaluacion():
 @login_required
 def resultados_evaluaciones():
     try:
-        rol_seleccionado = request.args.get('rol', 'BOMBERO ESPECIALIZADO')
-        turno_seleccionado = request.args.get('turno', 'GENERAL')
+        rol_seleccionado = request.args.get('rol', 'BOMBERO ESPECIALIZADO').strip()
+        turno_seleccionado = request.args.get('turno', 'GENERAL').strip()
+        
+        logging.info(f"[DEBUG] Parámetros recibidos: rol='{rol_seleccionado}', turno='{turno_seleccionado}'")
         
         # Obtener todos los usuarios del rol seleccionado
         if turno_seleccionado == 'GENERAL':
             # Si es GENERAL, obtener todos los usuarios del rol sin filtrar por turno
+            logging.info(f"[DEBUG] Filtrando GENERAL - obteniendo todos los usuarios con puesto='{rol_seleccionado}'")
             usuarios = User.query.filter_by(puesto=rol_seleccionado).all()
         else:
             # Si es un turno específico, filtrar por puesto y turno
+            logging.info(f"[DEBUG] Filtrando turno específico - puesto='{rol_seleccionado}', turno='{turno_seleccionado}'")
             usuarios = User.query.filter_by(puesto=rol_seleccionado, turno=turno_seleccionado).all()
         
         usuario_ids = [u.id for u in usuarios]
+        logging.info(f"[DEBUG] Usuarios encontrados: {len(usuarios)} con IDs: {usuario_ids[:10]}...")  # Mostrar primeros 10
         
         # Obtener todas las evaluaciones de estos usuarios
         if usuario_ids:
@@ -653,6 +658,176 @@ def resultados_evaluaciones():
         logging.error(f"Error en resultados_evaluaciones: {str(e)}")
         flash(f"Error al cargar los resultados: {str(e)}", "danger")
         return redirect(url_for('main.dashboard'))
+
+
+@main.route('/descargar_resultados_excel', methods=['GET'])
+@login_required
+def descargar_resultados_excel():
+    try:
+        rol_seleccionado = request.args.get('rol', 'BOMBERO ESPECIALIZADO')
+        turno_seleccionado = request.args.get('turno', 'GENERAL')
+        
+        # Obtener usuarios del rol seleccionado
+        if turno_seleccionado == 'GENERAL':
+            usuarios = User.query.filter_by(puesto=rol_seleccionado).all()
+        else:
+            usuarios = User.query.filter_by(puesto=rol_seleccionado, turno=turno_seleccionado).all()
+        
+        usuario_ids = [u.id for u in usuarios]
+        
+        # Obtener evaluaciones
+        if usuario_ids:
+            evaluaciones = EvaluacionDesempeno.query.filter(
+                EvaluacionDesempeno.user_id.in_(usuario_ids)
+            ).all()
+        else:
+            evaluaciones = []
+        
+        # Definir categorías por rol
+        categorias_por_rol = {
+            'BOMBERO ESPECIALIZADO': {
+                'comunicacion': 'Comunicación',
+                'habilidades_blandas': 'Habilidades Blandas',
+                'disciplina': 'Disciplina',
+                'orden_cerrado': 'Orden Cerrado'
+            },
+            'SUBTENIENTE': {
+                'conocimientos': 'Conocimientos Bomberiles',
+                'habilidades_blandas': 'Habilidades Blandas',
+                'comunicacion_subordinados': 'Comunicación con Subordinados',
+                'disciplina': 'Disciplina',
+                'orden_cerrado': 'Orden Cerrado'
+            },
+            'TENIENTE': {
+                'direccion': 'Dirección de Guardias y Turnos',
+                'gestion': 'Gestión de Estaciones',
+                'comunicacion_subordinados': 'Comunicación con Subordinados',
+                'disciplina': 'Disciplina',
+                'orden_cerrado': 'Orden Cerrado'
+            }
+        }
+        
+        categorias = categorias_por_rol.get(rol_seleccionado, categorias_por_rol['BOMBERO ESPECIALIZADO'])
+        
+        # Procesar datos de evaluaciones
+        datos_categorias = {cat: [] for cat in categorias.keys()}
+        
+        for evaluacion in evaluaciones:
+            if not evaluacion or not evaluacion.respuestas:
+                continue
+            
+            respuestas = evaluacion.respuestas
+            
+            if isinstance(respuestas, str):
+                try:
+                    respuestas = pyjson.loads(respuestas)
+                except:
+                    continue
+            
+            if not isinstance(respuestas, dict):
+                continue
+            
+            for categoria in categorias.keys():
+                if categoria not in respuestas:
+                    continue
+                
+                categoria_data = respuestas[categoria]
+                if not isinstance(categoria_data, dict):
+                    continue
+                
+                valores = []
+                for v in categoria_data.values():
+                    if v:
+                        try:
+                            valores.append(int(v))
+                        except (ValueError, TypeError):
+                            pass
+                
+                if valores:
+                    promedio = sum(valores) / len(valores)
+                    datos_categorias[categoria].append(promedio)
+        
+        # Crear Excel
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Resultados"
+        
+        # Estilos
+        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+        
+        header_fill = PatternFill(start_color="2563eb", end_color="2563eb", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF", size=12)
+        subheader_fill = PatternFill(start_color="dbeafe", end_color="dbeafe", fill_type="solid")
+        subheader_font = Font(bold=True, size=11)
+        
+        thin_border = Border(
+            left=Side(style='thin'),
+            right=Side(style='thin'),
+            top=Side(style='thin'),
+            bottom=Side(style='thin')
+        )
+        
+        # Encabezado
+        ws['A1'] = "RESULTADOS DE EVALUACIONES DEL DESEMPEÑO"
+        ws['A1'].font = Font(bold=True, size=14, color="1e293b")
+        ws.merge_cells('A1:C1')
+        
+        ws['A2'] = f"Rol: {rol_seleccionado}"
+        ws['B2'] = f"Turno: {turno_seleccionado}"
+        ws['C2'] = f"Total de Evaluaciones: {len(evaluaciones)}"
+        
+        # Tabla de resultados
+        row = 4
+        ws[f'A{row}'] = "Categoría"
+        ws[f'B{row}'] = "Promedio (de 5)"
+        ws[f'C{row}'] = "Cantidad de Evaluaciones"
+        
+        for col in ['A', 'B', 'C']:
+            ws[f'{col}{row}'].fill = header_fill
+            ws[f'{col}{row}'].font = header_font
+            ws[f'{col}{row}'].alignment = Alignment(horizontal='center', vertical='center')
+            ws[f'{col}{row}'].border = thin_border
+        
+        row += 1
+        for categoria, titulo in categorias.items():
+            valores = datos_categorias[categoria]
+            promedio = sum(valores) / len(valores) if valores else 0
+            cantidad = len(valores)
+            
+            ws[f'A{row}'] = titulo
+            ws[f'B{row}'] = round(promedio, 2)
+            ws[f'C{row}'] = cantidad
+            
+            for col in ['A', 'B', 'C']:
+                ws[f'{col}{row}'].border = thin_border
+                ws[f'{col}{row}'].alignment = Alignment(horizontal='center', vertical='center')
+            
+            row += 1
+        
+        # Ajustar anchos de columnas
+        ws.column_dimensions['A'].width = 35
+        ws.column_dimensions['B'].width = 20
+        ws.column_dimensions['C'].width = 25
+        
+        # Guardar en BytesIO
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
+        
+        # Enviar archivo
+        fecha = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        filename = f"Evaluaciones_{rol_seleccionado.replace(' ', '_')}_{turno_seleccionado}_{fecha}.xlsx"
+        
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=filename
+        )
+    except Exception as e:
+        logging.error(f"Error al descargar resultados en Excel: {str(e)}")
+        flash(f"Error al descargar los resultados: {str(e)}", "danger")
+        return redirect(url_for('main.resultados_evaluaciones'))
 
 
 @main.route('/submit_form', methods=['POST'])

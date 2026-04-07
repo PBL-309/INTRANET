@@ -203,6 +203,25 @@
             box-shadow: var(--shadow-lg);
         }
 
+        .download-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #10b981;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 2px solid #10b981;
+            cursor: pointer;
+        }
+
+        .download-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
         @media (max-width: 768px) {
             .header {
                 padding: 20px;
@@ -236,10 +255,10 @@
                 <div>
                     <strong style="display: block; margin-bottom: 10px; color: var(--text);">Rol:</strong>
                     <div class="rol-selector">
-                        {% for rol in roles_disponibles %}
-                            <a href="{{ url_for('main.resultados_evaluaciones', rol=rol, turno=turno_seleccionado) }}" 
-                               class="rol-btn {% if rol == rol_seleccionado %}active{% endif %}">
-                                {{ rol }}
+                        {% for rol_item in roles_disponibles %}
+                            <a href="{{ url_for('main.resultados_evaluaciones', rol=rol_item, turno=turno_seleccionado) }}" 
+                               class="rol-btn {% if rol_item == rol_seleccionado %}active{% endif %}">
+                                {{ rol_item }}
                             </a>
                         {% endfor %}
                     </div>
@@ -247,10 +266,10 @@
                 <div>
                     <strong style="display: block; margin-bottom: 10px; color: var(--text);">Turno:</strong>
                     <div class="rol-selector">
-                        {% for turno in turnos_disponibles %}
-                            <a href="{{ url_for('main.resultados_evaluaciones', rol=rol_seleccionado, turno=turno) }}" 
-                               class="rol-btn {% if turno == turno_seleccionado %}active{% endif %}">
-                                {{ turno }}
+                        {% for turno_item in turnos_disponibles %}
+                            <a href="{{ url_for('main.resultados_evaluaciones', rol=rol_seleccionado, turno=turno_item) }}" 
+                               class="rol-btn {% if turno_item == turno_seleccionado %}active{% endif %}">
+                                {{ turno_item }}
                             </a>
                         {% endfor %}
                     </div>
@@ -271,6 +290,15 @@
                     <div class="value" style="font-size: 14px; font-weight: 600;">{{ turno_seleccionado }}</div>
                 </div>
             </div>
+
+            {% if total_evaluaciones|int > 0 %}
+            <div style="margin-top: 20px;">
+                <a href="{{ url_for('main.descargar_resultados_excel', rol=rol_seleccionado, turno=turno_seleccionado) }}" 
+                   class="download-btn">
+                    📥 Descargar Resultados en Excel
+                </a>
+            </div>
+            {% endif %}
         </div>
 
         {% if datos_grafica %}
@@ -299,16 +327,13 @@
             </div>
         {% endif %}
     </div>
-
     <script>
-        // Configuración de colores
         const colors = [
             'rgba(37, 99, 235, 0.8)',
             'rgba(74, 222, 128, 0.8)',
             'rgba(251, 146, 60, 0.8)',
             'rgba(236, 72, 153, 0.8)'
         ];
-
         const borderColors = [
             'rgba(37, 99, 235, 1)',
             'rgba(74, 222, 128, 1)',
@@ -322,8 +347,6 @@
             'rgba(251, 146, 60, 0.1)',
             'rgba(236, 72, 153, 0.1)'
         ];
-
-        // Datos de evaluaciones
         const datos = {
             'comunicacion': {
                 'titulo': 'Comunicación',
@@ -343,7 +366,6 @@
             }
         };
 
-        // Crear gráficas
         {% for dato in datos_grafica %}
             const ctx{{ loop.index }} = document.getElementById('chart_{{ loop.index }}').getContext('2d');
             
