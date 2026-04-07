@@ -709,11 +709,16 @@ def descargar_resultados_excel():
         
         categorias = categorias_por_rol.get(rol_seleccionado, categorias_por_rol['BOMBERO ESPECIALIZADO'])
         
-        # Procesar datos de evaluaciones
-        datos_categorias = {cat: [] for cat in categorias.keys()}
+        # Procesar datos de evaluaciones - DATOS AGREGADOS y DETALLADOS
+        datos_categorias_agregados = {cat: [] for cat in categorias.keys()}
+        datos_usuarios = {}  # {usuario_id: {categoria: [valores]}}
         
         for evaluacion in evaluaciones:
             if not evaluacion or not evaluacion.respuestas:
+                continue
+            
+            usuario = User.query.get(evaluacion.user_id)
+            if not usuario:
                 continue
             
             respuestas = evaluacion.respuestas
@@ -727,6 +732,16 @@ def descargar_resultados_excel():
             if not isinstance(respuestas, dict):
                 continue
             
+            # Inicializar datos del usuario si no existen
+            if evaluacion.user_id not in datos_usuarios:
+                datos_usuarios[evaluacion.user_id] = {
+                    'nombre': usuario.nombre,
+                    'puesto': usuario.puesto,
+                    'turno': usuario.turno or 'N/A',
+                    'categorias': {cat: [] for cat in categorias.keys()}
+                }
+            
+            # Procesar cada categoría
             for categoria in categorias.keys():
                 if categoria not in respuestas:
                     continue
@@ -745,20 +760,22 @@ def descargar_resultados_excel():
                 
                 if valores:
                     promedio = sum(valores) / len(valores)
-                    datos_categorias[categoria].append(promedio)
+                    datos_categorias_agregados[categoria].append(promedio)
+                    datos_usuarios[evaluacion.user_id]['categorias'][categoria].append(promedio)
         
-        # Crear Excel
+        # Crear Excel con dos hojas
         wb = openpyxl.Workbook()
-        ws = wb.active
-        ws.title = "Resultados"
         
         # Estilos
         from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
         
         header_fill = PatternFill(start_color="2563eb", end_color="2563eb", fill_type="solid")
         header_font = Font(bold=True, color="FFFFFF", size=12)
-        subheader_fill = PatternFill(start_color="dbeafe", end_color="dbeafe", fill_type="solid")
-        subheader_font = Font(bold=True, size=11)
+        user_header_fill = PatternFill(start_color="0891b2", end_color="0891b2", fill_type="solid")
+        user_header_font = Font(bold=True, color="FFFFFF", size=11)
+        excellent_fill = PatternFill(start_color="86efac", end_color="86efac", fill_type="solid")  # Verde
+        good_fill = PatternFill(start_color="fbbf24", end_color="fbbf24", fill_type="solid")  # Amarillo
+        poor_fill = PatternFill(start_color="f87171", end_color="f87171", fill_type="solid")  # Rojo
         
         thin_border = Border(
             left=Side(style='thin'),
@@ -767,47 +784,124 @@ def descargar_resultados_excel():
             bottom=Side(style='thin')
         )
         
-        # Encabezado
-        ws['A1'] = "RESULTADOS DE EVALUACIONES DEL DESEMPEÑO"
-        ws['A1'].font = Font(bold=True, size=14, color="1e293b")
-        ws.merge_cells('A1:C1')
+        # ===== HOJA 1: RESUMEN =====
+        ws_resumen = wb.active
+        ws_resumen.title = "Resumen"
         
-        ws['A2'] = f"Rol: {rol_seleccionado}"
-        ws['B2'] = f"Turno: {turno_seleccionado}"
-        ws['C2'] = f"Total de Evaluaciones: {len(evaluaciones)}"
+        ws_resumen['A1'] = "RESULTADOS DE EVALUACIONES DEL DESEMPEÑO"
+        ws_resumen['A1'].font = Font(bold=True, size=14, color="1e293b")
+        ws_resumen.merge_cells('A1:C1')
         
-        # Tabla de resultados
+        ws_resumen['A2'] = f"Rol: {rol_seleccionado}"
+        ws_resumen['B2'] = f"Turno: {turno_seleccionado}"
+        ws_resumen['C2'] = f"Total de Evaluaciones: {len(evaluaciones)}"
+        
+        # Tabla de resumen
         row = 4
-        ws[f'A{row}'] = "Categoría"
-        ws[f'B{row}'] = "Promedio (de 5)"
-        ws[f'C{row}'] = "Cantidad de Evaluaciones"
+        ws_resumen[f'A{row}'] = "Categoría"
+        ws_resumen[f'B{row}'] = "Promedio (de 5)"
+        ws_resumen[f'C{row}'] = "Cantidad de Evaluaciones"
         
         for col in ['A', 'B', 'C']:
-            ws[f'{col}{row}'].fill = header_fill
-            ws[f'{col}{row}'].font = header_font
-            ws[f'{col}{row}'].alignment = Alignment(horizontal='center', vertical='center')
-            ws[f'{col}{row}'].border = thin_border
+            ws_resumen[f'{col}{row}'].fill = header_fill
+            ws_resumen[f'{col}{row}'].font = header_font
+            ws_resumen[f'{col}{row}'].alignment = Alignment(horizontal='center', vertical='center')
+            ws_resumen[f'{col}{row}'].border = thin_border
         
         row += 1
         for categoria, titulo in categorias.items():
-            valores = datos_categorias[categoria]
+            valores = datos_categorias_agregados[categoria]
             promedio = sum(valores) / len(valores) if valores else 0
             cantidad = len(valores)
             
-            ws[f'A{row}'] = titulo
-            ws[f'B{row}'] = round(promedio, 2)
-            ws[f'C{row}'] = cantidad
+            ws_resumen[f'A{row}'] = titulo
+            ws_resumen[f'B{row}'] = round(promedio, 2)
+            ws_resumen[f'C{row}'] = cantidad
             
             for col in ['A', 'B', 'C']:
-                ws[f'{col}{row}'].border = thin_border
-                ws[f'{col}{row}'].alignment = Alignment(horizontal='center', vertical='center')
+                ws_resumen[f'{col}{row}'].border = thin_border
+                ws_resumen[f'{col}{row}'].alignment = Alignment(horizontal='center', vertical='center')
+            
+            row += 1
+        
+        ws_resumen.column_dimensions['A'].width = 35
+        ws_resumen.column_dimensions['B'].width = 20
+        ws_resumen.column_dimensions['C'].width = 25
+        
+        # ===== HOJA 2: DETALLADO POR USUARIO =====
+        ws_detallado = wb.create_sheet("Detallado por Usuario")
+        
+        # Encabezados
+        ws_detallado['A1'] = "EVALUACIONES DETALLADAS POR USUARIO"
+        ws_detallado['A1'].font = Font(bold=True, size=14, color="1e293b")
+        ws_detallado.merge_cells('A1:E1')
+        
+        row = 3
+        ws_detallado[f'A{row}'] = "Nombre del Usuario"
+        ws_detallado[f'B{row}'] = "Puesto"
+        ws_detallado[f'C{row}'] = "Turno"
+        
+        # Agregar columnas para cada categoría
+        col_idx = 4
+        categoria_cols = {}
+        for categoria, titulo in categorias.items():
+            col_letter = openpyxl.utils.get_column_letter(col_idx)
+            ws_detallado[f'{col_letter}{row}'] = titulo
+            categoria_cols[categoria] = col_letter
+            col_idx += 1
+        
+        # Estilos para encabezado
+        for col in range(1, col_idx):
+            col_letter = openpyxl.utils.get_column_letter(col)
+            ws_detallado[f'{col_letter}{row}'].fill = user_header_fill
+            ws_detallado[f'{col_letter}{row}'].font = user_header_font
+            ws_detallado[f'{col_letter}{row}'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+            ws_detallado[f'{col_letter}{row}'].border = thin_border
+        
+        # Llenar datos de usuarios
+        row += 1
+        for user_id in sorted(datos_usuarios.keys()):
+            user_data = datos_usuarios[user_id]
+            
+            ws_detallado[f'A{row}'] = user_data['nombre']
+            ws_detallado[f'B{row}'] = user_data['puesto']
+            ws_detallado[f'C{row}'] = user_data['turno']
+            
+            # Estilos para datos básicos
+            for col in ['A', 'B', 'C']:
+                ws_detallado[f'{col}{row}'].border = thin_border
+                ws_detallado[f'{col}{row}'].alignment = Alignment(horizontal='left', vertical='center')
+            
+            # Llenar promedios por categoría
+            for categoria, col_letter in categoria_cols.items():
+                valores = user_data['categorias'][categoria]
+                if valores:
+                    promedio = sum(valores) / len(valores)
+                    ws_detallado[f'{col_letter}{row}'] = round(promedio, 2)
+                    
+                    # Aplicar color según el promedio
+                    if promedio >= 4.5:
+                        fill_color = excellent_fill
+                    elif promedio >= 3.5:
+                        fill_color = good_fill
+                    else:
+                        fill_color = poor_fill
+                    
+                    ws_detallado[f'{col_letter}{row}'].fill = fill_color
+                else:
+                    ws_detallado[f'{col_letter}{row}'] = "N/A"
+                
+                ws_detallado[f'{col_letter}{row}'].border = thin_border
+                ws_detallado[f'{col_letter}{row}'].alignment = Alignment(horizontal='center', vertical='center')
             
             row += 1
         
         # Ajustar anchos de columnas
-        ws.column_dimensions['A'].width = 35
-        ws.column_dimensions['B'].width = 20
-        ws.column_dimensions['C'].width = 25
+        ws_detallado.column_dimensions['A'].width = 30
+        ws_detallado.column_dimensions['B'].width = 20
+        ws_detallado.column_dimensions['C'].width = 12
+        for categoria, col_letter in categoria_cols.items():
+            ws_detallado.column_dimensions[col_letter].width = 18
         
         # Guardar en BytesIO
         output = BytesIO()
