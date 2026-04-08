@@ -784,7 +784,7 @@ def descargar_resultados_excel():
         wb = openpyxl.Workbook()
         
         # Estilos
-        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side, WrapText
+        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
         
         header_fill = PatternFill(start_color="2563eb", end_color="2563eb", fill_type="solid")
         header_font = Font(bold=True, color="FFFFFF", size=12)
