@@ -583,18 +583,18 @@
                 const colorSombra = calificacion >= 4.5 ? '#1b4332' : (calificacion >= 3.5 ? '#78350f' : '#7f1d1d');
                 
                 temesHTML += `
-                    <div style="margin-bottom: 15px;">
-                        <div style="background: #34495e; color: white; padding: 10px 12px; font-weight: bold; margin-bottom: 8px; border-radius: 4px;">${nombre}</div>
-                        <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 8px;">
+                    <div style="margin-bottom: 10px;">
+                        <div style="background: #34495e; color: white; padding: 4px 8px; font-weight: bold; margin-bottom: 4px; border-radius: 3px; font-size: 9pt;">${nombre}</div>
+                        <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-bottom: 3px;">
                             ${Array.from({length: 6}, (_, i) => {
                                 const num = i + 1;
                                 const isSelected = num === Math.round(calificacion);
-                                return `<div style="width: 100%; aspect-ratio: 1; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14pt; border-radius: 3px; ${isSelected ? `background-color: ${color}; color: ${colorSombra};` : ''}">
+                                return `<div style="width: 100%; aspect-ratio: 1; border: 1px solid #999; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 9pt; border-radius: 2px; ${isSelected ? `background-color: ${color}; color: ${colorSombra};` : 'background: white;'}">
                                     ${isSelected ? calificacion.toFixed(2) : num}
                                 </div>`;
                             }).join('')}
                         </div>
-                        <div style="text-align: right; font-weight: bold; color: #2c3e50; font-size: 12pt;">Promedio: ${calificacion.toFixed(2)}</div>
+                        <div style="text-align: right; font-weight: bold; color: #2c3e50; font-size: 9pt;">Prom: ${calificacion.toFixed(2)}</div>
                     </div>
                 `;
             }
@@ -603,7 +603,13 @@
                 <style>
                     @media print {
                         .no-print-modal { display: none !important; }
-                        .contenido-evaluacion { width: 210mm; height: 297mm; margin: 0; padding: 30mm 20mm; }
+                        .contenido-evaluacion { 
+                            width: 210mm; 
+                            height: 297mm; 
+                            margin: 0; 
+                            padding: 12mm 12mm; 
+                            box-shadow: none;
+                        }
                     }
                 </style>
                 
@@ -611,39 +617,37 @@
                     <button onclick="imprimirEvaluacion()" style="padding: 10px 20px; background: #2c3e50; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">🖨️ Imprimir</button>
                 </div>
 
-                <div class="contenido-evaluacion" style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-radius: 8px; font-family: Arial, sans-serif; font-size: 11pt;">
-                    <div style="text-align: center; border-bottom: 3px solid #2c3e50; padding-bottom: 15px; margin-bottom: 20px;">
-                        <h1 style="font-size: 16pt; color: #2c3e50; margin: 0 0 5px 0;">EVALUACIÓN DE DESEMPEÑO</h1>
-                        <p style="font-size: 10pt; color: #666; margin: 0;">Documento Oficial de Evaluación</p>
+                <div class="contenido-evaluacion" style="background: white; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; font-family: Arial, sans-serif; font-size: 9pt; line-height: 1.2;">
+                    <div style="text-align: center; border-bottom: 2px solid #2c3e50; padding-bottom: 8px; margin-bottom: 12px;">
+                        <h1 style="font-size: 12pt; color: #2c3e50; margin: 0 0 2px 0; font-weight: bold;">EVALUACIÓN DE DESEMPEÑO</h1>
+                        <p style="font-size: 8pt; color: #666; margin: 0;">Documento Oficial</p>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; border: 1px solid #ddd; padding: 15px; background: #f9f9f9; margin-bottom: 20px;">
-                        <div><div style="font-weight: bold; color: #2c3e50; font-size: 10pt;">Nombre del Evaluado</div><div style="padding: 5px; border-bottom: 1px solid #ddd;">${usuario.nombre}</div></div>
-                        <div><div style="font-weight: bold; color: #2c3e50; font-size: 10pt;">Turno</div><div style="padding: 5px; border-bottom: 1px solid #ddd;">${usuario.turno}</div></div>
-                        <div><div style="font-weight: bold; color: #2c3e50; font-size: 10pt;">Estación</div><div style="padding: 5px; border-bottom: 1px solid #ddd;"></div></div>
-                        <div><div style="font-weight: bold; color: #2c3e50; font-size: 10pt;">Nombre del Evaluador</div><div style="padding: 5px; border-bottom: 1px solid #ddd;">${evaluador.nombre}</div></div>
-                        <div><div style="font-weight: bold; color: #2c3e50; font-size: 10pt;">Puesto del Evaluado</div><div style="padding: 5px; border-bottom: 1px solid #ddd;">${usuario.puesto}</div></div>
-                        <div><div style="font-weight: bold; color: #2c3e50; font-size: 10pt;">Nómina</div><div style="padding: 5px; border-bottom: 1px solid #ddd;">${usuario.username}</div></div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; border: 1px solid #ddd; padding: 8px; background: #f9f9f9; margin-bottom: 12px; font-size: 8pt;">
+                        <div><div style="font-weight: bold; color: #2c3e50;">Evaluado</div><div style="border-bottom: 1px solid #ddd; padding: 2px 0;">${usuario.nombre}</div></div>
+                        <div><div style="font-weight: bold; color: #2c3e50;">Turno</div><div style="border-bottom: 1px solid #ddd; padding: 2px 0;">${usuario.turno}</div></div>
+                        <div><div style="font-weight: bold; color: #2c3e50;">Estación</div><div style="border-bottom: 1px solid #ddd; padding: 2px 0;"></div></div>
+                        <div><div style="font-weight: bold; color: #2c3e50;">Evaluador</div><div style="border-bottom: 1px solid #ddd; padding: 2px 0;">${evaluador.nombre}</div></div>
+                        <div><div style="font-weight: bold; color: #2c3e50;">Puesto</div><div style="border-bottom: 1px solid #ddd; padding: 2px 0;">${usuario.puesto}</div></div>
+                        <div><div style="font-weight: bold; color: #2c3e50;">Nómina</div><div style="border-bottom: 1px solid #ddd; padding: 2px 0;">${usuario.username}</div></div>
                     </div>
 
-                    <h3 style="color: #2c3e50; margin: 20px 0 15px 0; font-size: 12pt;">RESULTADOS POR TEMA</h3>
+                    <h3 style="color: #2c3e50; margin: 8px 0 8px 0; font-size: 9pt; font-weight: bold;">RESULTADOS</h3>
                     ${temesHTML}
 
-                    <div style="margin-bottom: 20px; border: 1px solid #ddd; padding: 10px; background: #fafafa;">
-                        <div style="font-weight: bold; color: #2c3e50; margin-bottom: 8px; font-size: 11pt;">Observación del Evaluador</div>
-                        <div style="font-size: 10pt; line-height: 1.5; white-space: pre-wrap;">${data.evaluacion.comentario || '[Sin observaciones]'}</div>
+                    <div style="margin-bottom: 10px; border: 1px solid #ddd; padding: 6px; background: #fafafa; max-height: 80px; overflow-y: auto;">
+                        <div style="font-weight: bold; color: #2c3e50; margin-bottom: 2px; font-size: 8pt;">Observación</div>
+                        <div style="font-size: 7pt; line-height: 1.3; white-space: pre-wrap; word-break: break-word;">${data.evaluacion.comentario || '[Sin observaciones]'}</div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;">
-                        <div style="text-align: center;">
-                            <div>Firma del Evaluado</div>
-                            <div style="border-top: 1px solid #000; margin-top: 50px; min-height: 50px; margin-bottom: 5px;"></div>
-                            <div style="font-size: 10pt; font-weight: bold;">${usuario.nombre}</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 12px; font-size: 8pt;">
+                        <div style="text-align: center; border-top: 1px solid #000; padding-top: 8px;">
+                            <div style="min-height: 25px;"></div>
+                            <div style="font-weight: bold;">${usuario.nombre}</div>
                         </div>
-                        <div style="text-align: center;">
-                            <div>Firma del Evaluador</div>
-                            <div style="border-top: 1px solid #000; margin-top: 50px; min-height: 50px; margin-bottom: 5px;"></div>
-                            <div style="font-size: 10pt; font-weight: bold;">${evaluador.nombre}</div>
+                        <div style="text-align: center; border-top: 1px solid #000; padding-top: 8px;">
+                            <div style="min-height: 25px;"></div>
+                            <div style="font-weight: bold;">${evaluador.nombre}</div>
                         </div>
                     </div>
                 </div>

@@ -1086,24 +1086,23 @@ def api_evaluacion_detalle(eval_id):
         
         for tema, preguntas_dict in respuestas.items():
             valores = [int(v) for v in preguntas_dict.values() if v]
+            # Solo agregar temas que tengan valores
             if valores:
                 promedio = round(sum(valores) / len(valores), 2)
-            else:
-                promedio = 0
-            
-            # Mapear nombres de temas
-            tema_nombres = {
-                'comunicacion': 'Comunicación',
-                'habilidades_blandas': 'Habilidades Blandas',
-                'disciplina': 'Disciplina',
-                'orden_cerrado': 'Orden Cerrado',
-                'conocimientos': 'Conocimientos Bomberiles',
-                'comunicacion_subordinados': 'Comunicación con Subordinados',
-                'liderazgo': 'Liderazgo'
-            }
-            
-            tema_nombre = tema_nombres.get(tema, tema)
-            temas_calificaciones[tema_nombre] = promedio
+                
+                # Mapear nombres de temas
+                tema_nombres = {
+                    'comunicacion': 'Comunicación',
+                    'habilidades_blandas': 'Habilidades Blandas',
+                    'disciplina': 'Disciplina',
+                    'orden_cerrado': 'Orden Cerrado',
+                    'conocimientos': 'Conocimientos Bomberiles',
+                    'comunicacion_subordinados': 'Comunicación con Subordinados',
+                    'liderazgo': 'Liderazgo'
+                }
+                
+                tema_nombre = tema_nombres.get(tema, tema)
+                temas_calificaciones[tema_nombre] = promedio
         
         return jsonify({
             'evaluacion': {
