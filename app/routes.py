@@ -750,12 +750,13 @@ def descargar_resultados_excel():
                 'puesto': usuario.puesto,
                 'turno': usuario.turno or 'N/A',
                 'fecha': evaluacion.fecha,
-                'calificacion_general': evaluacion.evaluacion_general or 'N/A',
+                'calificacion_general': 0,  # Se calculará después
                 'comentario': evaluacion.comentario or '',
                 'categorias': {}
             }
             
             # Procesar cada categoría
+            promedios_categorias = []
             for categoria in categorias.keys():
                 if categoria not in respuestas:
                     continue
@@ -774,9 +775,15 @@ def descargar_resultados_excel():
                 
                 if valores:
                     promedio = sum(valores) / len(valores)
+                    promedios_categorias.append(promedio)
                     datos_categorias_agregados[categoria].append(promedio)
                     datos_usuarios[evaluacion.user_id]['categorias'][categoria].append(promedio)
                     eval_detallada['categorias'][categoria] = round(promedio, 2)
+            
+            # Calcular calificación general como promedio de todos los promedios
+            if promedios_categorias:
+                calificacion_general = sum(promedios_categorias) / len(promedios_categorias)
+                eval_detallada['calificacion_general'] = round(calificacion_general, 2)
             
             lista_evaluaciones_detalladas.append(eval_detallada)
         
