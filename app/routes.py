@@ -975,6 +975,17 @@ def descargar_resultados_excel():
                 ws_completo[f'{col_letter}{row}'].border = thin_border
                 ws_completo[f'{col_letter}{row}'].alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
             
+            # Aplicar color a la Calificación Final (columna F)
+            calificacion_final = eval_data['calificacion_general']
+            if isinstance(calificacion_final, (int, float)):
+                if calificacion_final >= 4.5:
+                    fill_color = excellent_fill
+                elif calificacion_final >= 3.5:
+                    fill_color = good_fill
+                else:
+                    fill_color = poor_fill
+                ws_completo[f'F{row}'].fill = fill_color
+            
             # Agregar calificaciones por categoría
             for categoria, col_letter in categoria_cols_completo.items():
                 calificacion = eval_data['categorias'].get(categoria, 'N/A')
