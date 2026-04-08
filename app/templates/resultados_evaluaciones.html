@@ -292,11 +292,14 @@
             </div>
 
             {% if total_evaluaciones|int > 0 %}
-            <div style="margin-top: 20px;">
+            <div style="margin-top: 20px; display: flex; gap: 15px; flex-wrap: wrap;">
                 <a href="{{ url_for('main.descargar_resultados_excel', rol=rol_seleccionado, turno=turno_seleccionado) }}" 
                    class="download-btn">
                     📥 Descargar Resultados en Excel
                 </a>
+                <button onclick="abrirModalEvaluacionIndividual()" class="download-btn" style="background: #10b981; cursor: pointer; border: none;">
+                    📄 Ver Evaluación Individual
+                </button>
             </div>
             {% endif %}
         </div>
@@ -362,14 +365,13 @@
             },
             'orden_cerrado': {
                 'titulo': 'Orden Cerrado',
+             
                 'promedio': {{ datos_grafica[3].promedio if datos_grafica|length > 3 else 0 }}
             }
         };
 
         {% for dato in datos_grafica %}
             const ctx{{ loop.index }} = document.getElementById('chart_{{ loop.index }}').getContext('2d');
-            
-            // Crear datos para la gráfica donut
             const chartData{{ loop.index }} = {
                 labels: ['Promedio Alcanzado', 'Por Mejorar'],
                 datasets: [{
@@ -420,6 +422,269 @@
                 }
             });
         {% endfor %}
+    </script>
+
+    <!-- Modal de Evaluación Individual -->
+    <div id="modalEvaluacion" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; overflow-y: auto;">
+        <div style="position: relative; max-width: 1200px; margin: 20px auto; background: white; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+            <!-- Header del Modal -->
+            <div style="background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; padding: 30px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center;">
+                <div id="modalTitulo">
+                    <h2 style="margin: 0; font-size: 24px;">📄 Evaluación Individual</h2>
+                    <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 14px;">Búsqueda y visualización de evaluaciones</p>
+                </div>
+                <button onclick="cerrarModalEvaluacion()" style="background: rgba(255,255,255,0.3); border: none; color: white; font-size: 24px; cursor: pointer; padding: 5px 10px; border-radius: 5px; transition: background 0.2s;">✕</button>
+            </div>
+
+            <!-- Contenido del Modal -->
+            <div style="padding: 30px;">
+                <!-- Sección de Búsqueda -->
+                <div id="seccionBusqueda">
+                    <div style="margin-bottom: 25px;">
+                        <label style="display: block; margin-bottom: 10px; font-weight: 600; color: var(--text); font-size: 14px;">Buscar por Nombre o Nómina</label>
+                        <div style="position: relative;">
+                            <input 
+                                type="text" 
+                                id="inputBusqueda" 
+                                placeholder="Ej: Juan Pérez o 12345"
+                                autocomplete="off"
+                                style="width: 100%; padding: 12px 15px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px; background: #f8fafc; transition: all 0.3s;"
+                                onfocus="this.style.outline='none'; this.style.borderColor='var(--primary)'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(37, 99, 235, 0.1)';"
+                                onblur="this.style.outline=''; this.style.borderColor='var(--border)'; this.style.background='#f8fafc'; this.style.boxShadow='';"
+                            >
+                            <div id="dropdownBusqueda" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; max-height: 300px; overflow-y: auto; z-index: 1001; display: none;"></div>
+                        </div>
+                    </div>
+
+                    <div style="background: #f0fdf4; border-left: 4px solid var(--success); padding: 15px; border-radius: 8px; margin-bottom: 20px; color: #15803d; font-size: 14px;">
+                        💡 Ingresa el nombre completo o número de nómina del bombero que deseas evaluar.
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <button onclick="abrirEvaluacionSeleccionada()" id="btnVerEvaluacion" disabled style="padding: 12px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: not-allowed; transition: all 0.3s;">
+                            Ver Evaluación
+                        </button>
+                        <button onclick="limpiarBusqueda()" style="padding: 12px 20px; background: #f1f5f9; color: var(--text); border: 2px solid var(--border); border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.3s;">
+                            Limpiar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sección de Visualización -->
+                <div id="seccionVisualizacion" style="display: none;">
+                    <button onclick="volverABusqueda()" style="background: none; border: none; color: var(--primary); font-weight: 600; cursor: pointer; margin-bottom: 20px; font-size: 14px;">← Volver a Búsqueda</button>
+                    
+                    <div id="contenidoEvaluacion"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let evaluacionesDisponibles = [];
+        let evaluacionSeleccionada = null;
+
+        // Cargar evaluaciones al iniciar
+        async function cargarEvaluacionesDisponibles() {
+            try {
+                const response = await fetch('/api/evaluaciones_disponibles');
+                const data = await response.json();
+                evaluacionesDisponibles = data.evaluaciones || [];
+            } catch (error) {
+                console.error('Error cargando evaluaciones:', error);
+            }
+        }
+
+        function abrirModalEvaluacionIndividual() {
+            document.getElementById('modalEvaluacion').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            cargarEvaluacionesDisponibles();
+        }
+
+        function cerrarModalEvaluacion() {
+            document.getElementById('modalEvaluacion').style.display = 'none';
+            document.body.style.overflow = 'auto';
+            limpiarBusqueda();
+        }
+
+        document.getElementById('inputBusqueda').addEventListener('input', function() {
+            const valor = this.value.toLowerCase().trim();
+            const dropdown = document.getElementById('dropdownBusqueda');
+            
+            if (valor.length < 2) {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            const items = evaluacionesDisponibles.filter(e => 
+                e.nombre.toLowerCase().includes(valor) ||
+                e.nomina.includes(valor)
+            );
+
+            if (items.length === 0) {
+                dropdown.innerHTML = '<div style="padding: 12px 15px; color: var(--text-light);">No se encontraron resultados</div>';
+                dropdown.style.display = 'block';
+                return;
+            }
+
+            dropdown.innerHTML = items.map(item => `
+                <div onclick="seleccionarEvaluacion(${item.eval_id}, '${item.nombre}', '${item.nomina}')" 
+                     style="padding: 12px 15px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.2s;"
+                     onmouseover="this.style.background='var(--primary-light)'; this.style.color='var(--primary)'; this.style.fontWeight='500';"
+                     onmouseout="this.style.background=''; this.style.color=''; this.style.fontWeight='400';">
+                    <div style="font-weight: 600;">${item.nombre}</div>
+                    <div style="font-size: 12px; opacity: 0.7; margin-top: 2px;">Nómina: ${item.nomina} | Puesto: ${item.puesto} | ${item.fecha}</div>
+                </div>
+            `).join('');
+
+            dropdown.style.display = 'block';
+        });
+
+        function seleccionarEvaluacion(evalId, nombre, nomina) {
+            evaluacionSeleccionada = { evalId, nombre, nomina };
+            document.getElementById('inputBusqueda').value = `${nombre} (${nomina})`;
+            document.getElementById('dropdownBusqueda').style.display = 'none';
+            document.getElementById('btnVerEvaluacion').disabled = false;
+            document.getElementById('btnVerEvaluacion').style.background = 'var(--primary)';
+            document.getElementById('btnVerEvaluacion').style.cursor = 'pointer';
+        }
+
+        async function abrirEvaluacionSeleccionada() {
+            if (!evaluacionSeleccionada) return;
+
+            document.getElementById('seccionBusqueda').style.display = 'none';
+            document.getElementById('seccionVisualizacion').style.display = 'block';
+            
+            try {
+                const response = await fetch(`/api/evaluacion/${evaluacionSeleccionada.evalId}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    document.getElementById('contenidoEvaluacion').innerHTML = `<div style="background: #fef2f2; border-left: 4px solid #f87171; padding: 15px; border-radius: 8px; color: #991b1b;">Error: ${data.error}</div>`;
+                    return;
+                }
+
+                mostrarEvaluacionEnModal(data);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('contenidoEvaluacion').innerHTML = `<div style="background: #fef2f2; border-left: 4px solid #f87171; padding: 15px; border-radius: 8px; color: #991b1b;">Error al cargar la evaluación</div>`;
+            }
+        }
+
+        function mostrarEvaluacionEnModal(data) {
+            const eva = data.evaluacion;
+            const usuario = data.usuario_evaluado;
+            const evaluador = data.usuario_evaluador;
+            const temas = data.temas_calificaciones;
+
+            let temesHTML = '';
+            for (const [nombre, calificacion] of Object.entries(temas)) {
+                const color = calificacion >= 4.5 ? '#86efac' : (calificacion >= 3.5 ? '#fbbf24' : '#f87171');
+                const colorSombra = calificacion >= 4.5 ? '#1b4332' : (calificacion >= 3.5 ? '#78350f' : '#7f1d1d');
+                
+                temesHTML += `
+                    <div style="margin-bottom: 15px;">
+                        <div style="background: #34495e; color: white; padding: 10px 12px; font-weight: bold; margin-bottom: 8px; border-radius: 4px;">${nombre}</div>
+                        <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 8px;">
+                            ${Array.from({length: 6}, (_, i) => {
+                                const num = i + 1;
+                                const isSelected = num === Math.round(calificacion);
+                                return `<div style="width: 100%; aspect-ratio: 1; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14pt; border-radius: 3px; ${isSelected ? `background-color: ${color}; color: ${colorSombra};` : ''}">
+                                    ${isSelected ? calificacion.toFixed(2) : num}
+                                </div>`;
+                            }).join('')}
+                        </div>
+                        <div style="text-align: right; font-weight: bold; color: #2c3e50; font-size: 12pt;">Promedio: ${calificacion.toFixed(2)}</div>
+                    </div>
+                `;
+            }
+
+            const html = `
+                <style>
+                    @media print {
+                        .no-print-modal { display: none !important; }
+                        .contenido-evaluacion { width: 210mm; height: 297mm; margin: 0; padding: 30mm 20mm; }
+                    }
+                </style>
+                
+                <div class="no-print-modal" style="margin-bottom: 20px; display: flex; gap: 10px;">
+                    <button onclick="imprimirEvaluacion()" style="padding: 10px 20px; background: #2c3e50; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">🖨️ Imprimir</button>
+                </div>
+
+                <div class="contenido-evaluacion" style="background: white; padding: 30px; border: 1px solid #e2e8f0; border-radius: 8px; font-family: Arial, sans-serif; font-size: 11pt;">
+                    <div style="text-align: center; border-bottom: 3px solid #2c3e50; padding-bottom: 15px; margin-bottom: 20px;">
+                        <h1 style="font-size: 16pt; color: #2c3e50; margin: 0 0 5px 0;">EVALUACIÓN DE DESEMPEÑO</h1>
+                        <p style="font-size: 10pt; color: #666; margin: 0;">Documento Oficial de Evaluación</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; border: 1px solid #ddd; padding: 15px; background: #f9f9f9; margin-bottom: 20px;">
+                        <div><div style="font-weight: bold; color: #2c3e50; font-size: 10pt;">Nombre del Evaluado</div><div style="padding: 5px; border-bottom: 1px solid #ddd;">${usuario.nombre}</div></div>
+                        <div><div style="font-weight: bold; color: #2c3e50; font-size: 10pt;">Turno</div><div style="padding: 5px; border-bottom: 1px solid #ddd;">${usuario.turno}</div></div>
+                        <div><div style="font-weight: bold; color: #2c3e50; font-size: 10pt;">Estación</div><div style="padding: 5px; border-bottom: 1px solid #ddd;"></div></div>
+                        <div><div style="font-weight: bold; color: #2c3e50; font-size: 10pt;">Nombre del Evaluador</div><div style="padding: 5px; border-bottom: 1px solid #ddd;">${evaluador.nombre}</div></div>
+                        <div><div style="font-weight: bold; color: #2c3e50; font-size: 10pt;">Puesto del Evaluado</div><div style="padding: 5px; border-bottom: 1px solid #ddd;">${usuario.puesto}</div></div>
+                        <div><div style="font-weight: bold; color: #2c3e50; font-size: 10pt;">Nómina</div><div style="padding: 5px; border-bottom: 1px solid #ddd;">${usuario.username}</div></div>
+                    </div>
+
+                    <h3 style="color: #2c3e50; margin: 20px 0 15px 0; font-size: 12pt;">RESULTADOS POR TEMA</h3>
+                    ${temesHTML}
+
+                    <div style="margin-bottom: 20px; border: 1px solid #ddd; padding: 10px; background: #fafafa;">
+                        <div style="font-weight: bold; color: #2c3e50; margin-bottom: 8px; font-size: 11pt;">Observación del Evaluador</div>
+                        <div style="font-size: 10pt; line-height: 1.5; white-space: pre-wrap;">${data.evaluacion.comentario || '[Sin observaciones]'}</div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;">
+                        <div style="text-align: center;">
+                            <div>Firma del Evaluado</div>
+                            <div style="border-top: 1px solid #000; margin-top: 50px; min-height: 50px; margin-bottom: 5px;"></div>
+                            <div style="font-size: 10pt; font-weight: bold;">${usuario.nombre}</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div>Firma del Evaluador</div>
+                            <div style="border-top: 1px solid #000; margin-top: 50px; min-height: 50px; margin-bottom: 5px;"></div>
+                            <div style="font-size: 10pt; font-weight: bold;">${evaluador.nombre}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('contenidoEvaluacion').innerHTML = html;
+        }
+
+        function imprimirEvaluacion() {
+            window.print();
+        }
+
+        function volverABusqueda() {
+            document.getElementById('seccionBusqueda').style.display = 'block';
+            document.getElementById('seccionVisualizacion').style.display = 'none';
+        }
+
+        function limpiarBusqueda() {
+            document.getElementById('inputBusqueda').value = '';
+            document.getElementById('dropdownBusqueda').style.display = 'none';
+            evaluacionSeleccionada = null;
+            document.getElementById('btnVerEvaluacion').disabled = true;
+            document.getElementById('btnVerEvaluacion').style.background = '#cbd5e1';
+            document.getElementById('btnVerEvaluacion').style.cursor = 'not-allowed';
+            document.getElementById('seccionBusqueda').style.display = 'block';
+            document.getElementById('seccionVisualizacion').style.display = 'none';
+        }
+
+        // Cerrar modal al hacer click fuera
+        document.getElementById('modalEvaluacion').addEventListener('click', function(event) {
+            if (event.target === this) {
+                cerrarModalEvaluacion();
+            }
+        });
+
+        // Cerrar dropdown al hacer click fuera
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('#inputBusqueda') && !event.target.closest('#dropdownBusqueda')) {
+                document.getElementById('dropdownBusqueda').style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>

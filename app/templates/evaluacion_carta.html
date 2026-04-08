@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación de Desempeño - {{ evaluacion.nombre }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        @media print {
+            body {
+                padding: 0;
+                background: white;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .page {
+                page-break-after: always;
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+            }
+            .botones {
+                display: none;
+            }
+        }
+
+        .page {
+            width: 210mm;
+            height: 297mm;
+            margin: 0 auto 20px;
+            padding: 30mm 20mm;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            font-size: 11pt;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        .header-section {
+            text-align: center;
+            border-bottom: 3px solid #2c3e50;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .header-section h1 {
+            font-size: 16pt;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .header-section p {
+            font-size: 10pt;
+            color: #666;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            background: #f9f9f9;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 10pt;
+            margin-bottom: 3px;
+        }
+
+        .info-value {
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+            min-height: 20px;
+            font-size: 11pt;
+        }
+
+        .calificaciones-section {
+            margin-bottom: 20px;
+        }
+
+        .seccion-tema {
+            margin-bottom: 15px;
+            page-break-inside: avoid;
+        }
+
+        .tema-titulo {
+            background: #34495e;
+            color: white;
+            padding: 8px 12px;
+            font-weight: bold;
+            font-size: 11pt;
+            margin-bottom: 10px;
+        }
+
+        .cuadros-calificacion {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .cuadro-calificacion {
+            width: 100%;
+            aspect-ratio: 1;
+            border: 2px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14pt;
+            border-radius: 3px;
+            position: relative;
+        }
+
+        .cuadro-calificacion.evaluado {
+            box-shadow: 0 0 0 3px rgba(0,0,0,0.1);
+        }
+
+        .promedio-tema {
+            text-align: right;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 12pt;
+        }
+
+        /* Colores para calificaciones */
+        .verde { background-color: #86efac; color: #1b4332; }
+        .amarillo { background-color: #fbbf24; color: #78350f; }
+        .rojo { background-color: #f87171; color: #7f1d1d; }
+
+        .observaciones-section {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            min-height: 60px;
+            background: #fafafa;
+        }
+
+        .observaciones-titulo {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 11pt;
+        }
+
+        .observaciones-contenido {
+            font-size: 10pt;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .firmas-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+            page-break-inside: avoid;
+        }
+
+        .firma-bloque {
+            text-align: center;
+        }
+
+        .firma-linea {
+            border-top: 1px solid #000;
+            margin-top: 50px;
+            margin-bottom: 5px;
+            min-height: 50px;
+        }
+
+        .firma-nombre {
+            font-size: 10pt;
+            font-weight: bold;
+        }
+
+        .botones {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 11pt;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: #1a252f;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .fecha-evaluacion {
+            text-align: right;
+            font-size: 9pt;
+            color: #666;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="botones no-print">
+        <button class="btn" onclick="window.print()">🖨️ Imprimir</button>
+        <button class="btn btn-secondary" onclick="window.history.back()">← Volver</button>
+    </div>
+
+    {% if error %}
+    <div style="background: #fee; padding: 15px; border-radius: 5px; color: #c33;">
+        {{ error }}
+    </div>
+    {% else %}
+
+    <div class="page">
+        <div class="fecha-evaluacion">
+            Fecha de Evaluación: {{ evaluacion.fecha.strftime('%d/%m/%Y') }}
+        </div>
+
+        <div class="header-section">
+            <h1>EVALUACIÓN DE DESEMPEÑO</h1>
+            <p>Documento Oficial de Evaluación</p>
+        </div>
+
+        <!-- Información General -->
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">Nombre del Evaluado</div>
+                <div class="info-value">{{ usuario_evaluado.nombre }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Turno</div>
+                <div class="info-value">{{ usuario_evaluado.turno or 'N/A' }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Estación</div>
+                <div class="info-value"></div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Nombre del Evaluador</div>
+                <div class="info-value">{{ usuario_evaluador.nombre }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Puesto del Evaluado</div>
+                <div class="info-value">{{ usuario_evaluado.puesto }}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Nómina</div>
+                <div class="info-value">{{ usuario_evaluado.username }}</div>
+            </div>
+        </div>
+
+        <!-- Calificaciones por Tema -->
+        <div class="calificaciones-section">
+            <h3 style="color: #2c3e50; margin-bottom: 10px; font-size: 12pt;">RESULTADOS POR TEMA</h3>
+            
+            {% for tema_nombre, calificacion in temas_calificaciones.items() %}
+            <div class="seccion-tema">
+                <div class="tema-titulo">{{ tema_nombre }}</div>
+                <div class="cuadros-calificacion">
+                    {% for i in range(1, 7) %}
+                    <div class="cuadro-calificacion {% if i == calificacion|round|int %}evaluado {% if calificacion >= 4.5 %}verde{% elif calificacion >= 3.5 %}amarillo{% else %}rojo{% endif %}{% else %}{% endif %}">
+                        {% if i == calificacion|round|int %}
+                            {{ "%.2f"|format(calificacion) }}
+                        {% else %}
+                            {{ i }}
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="promedio-tema">Promedio: {{ "%.2f"|format(calificacion) }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Observaciones -->
+        <div class="observaciones-section">
+            <div class="observaciones-titulo">Observación del Evaluador</div>
+            <div class="observaciones-contenido">{{ evaluacion.comentario or '[Sin observaciones]' }}</div>
+        </div>
+
+        <!-- Firmas -->
+        <div class="firmas-section">
+            <div class="firma-bloque">
+                <div>Firma del Evaluado</div>
+                <div class="firma-linea"></div>
+                <div class="firma-nombre">{{ usuario_evaluado.nombre }}</div>
+            </div>
+            <div class="firma-bloque">
+                <div>Firma del Evaluador</div>
+                <div class="firma-linea"></div>
+                <div class="firma-nombre">{{ usuario_evaluador.nombre }}</div>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+</body>
+</html>

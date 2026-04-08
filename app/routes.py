@@ -1038,6 +1038,95 @@ def descargar_resultados_excel():
         return redirect(url_for('main.resultados_evaluaciones'))
 
 
+@main.route('/api/evaluaciones_disponibles', methods=['GET'])
+@login_required
+def api_evaluaciones_disponibles():
+    """API que retorna todas las evaluaciones disponibles para búsqueda"""
+    try:
+        evaluaciones = EvaluacionDesempeno.query.all()
+        evaluaciones_list = []
+        
+        for eval in evaluaciones:
+            usuario = User.query.get(eval.user_id)
+            if usuario:
+                evaluaciones_list.append({
+                    'eval_id': eval.id,
+                    'user_id': eval.user_id,
+                    'nombre': usuario.nombre,
+                    'nomina': usuario.username,
+                    'puesto': usuario.puesto,
+                    'turno': usuario.turno or 'N/A',
+                    'fecha': eval.fecha.strftime('%d/%m/%Y') if eval.fecha else 'N/A'
+                })
+        
+        return jsonify({'evaluaciones': evaluaciones_list})
+    except Exception as e:
+        logging.error(f"Error en API evaluaciones: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
+@main.route('/api/evaluacion/<int:eval_id>', methods=['GET'])
+@login_required
+def api_evaluacion_detalle(eval_id):
+    """API que retorna los datos de una evaluación específica"""
+    try:
+        evaluacion = EvaluacionDesempeno.query.get(eval_id)
+        if not evaluacion:
+            return jsonify({'error': 'Evaluación no encontrada'}), 404
+        
+        usuario_evaluado = User.query.get(evaluacion.user_id)
+        usuario_evaluador = User.query.get(evaluacion.evaluador_id)
+        
+        if not usuario_evaluado:
+            return jsonify({'error': 'Usuario evaluado no encontrado'}), 404
+        
+        # Calcular promedios por tema
+        respuestas = evaluacion.respuestas
+        temas_calificaciones = {}
+        
+        for tema, preguntas_dict in respuestas.items():
+            valores = [int(v) for v in preguntas_dict.values() if v]
+            if valores:
+                promedio = round(sum(valores) / len(valores), 2)
+            else:
+                promedio = 0
+            
+            # Mapear nombres de temas
+            tema_nombres = {
+                'comunicacion': 'Comunicación',
+                'habilidades_blandas': 'Habilidades Blandas',
+                'disciplina': 'Disciplina',
+                'orden_cerrado': 'Orden Cerrado',
+                'conocimientos': 'Conocimientos Bomberiles',
+                'comunicacion_subordinados': 'Comunicación con Subordinados',
+                'liderazgo': 'Liderazgo'
+            }
+            
+            tema_nombre = tema_nombres.get(tema, tema)
+            temas_calificaciones[tema_nombre] = promedio
+        
+        return jsonify({
+            'evaluacion': {
+                'id': evaluacion.id,
+                'fecha': evaluacion.fecha.strftime('%d/%m/%Y') if evaluacion.fecha else 'N/A',
+                'comentario': evaluacion.comentario or '',
+            },
+            'usuario_evaluado': {
+                'nombre': usuario_evaluado.nombre,
+                'puesto': usuario_evaluado.puesto,
+                'turno': usuario_evaluado.turno or 'N/A',
+                'username': usuario_evaluado.username
+            },
+            'usuario_evaluador': {
+                'nombre': usuario_evaluador.nombre if usuario_evaluador else 'N/A',
+            },
+            'temas_calificaciones': temas_calificaciones
+        })
+    except Exception as e:
+        logging.error(f"Error en API evaluacion detalle: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
 @main.route('/submit_form', methods=['POST'])
 @login_required
 def submit_form():

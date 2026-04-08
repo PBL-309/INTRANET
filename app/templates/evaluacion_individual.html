@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación Individual - Búsqueda</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --primary-light: #eff6ff;
+            --secondary: #0891b2;
+            --success: #10b981;
+            --bg: #f0f9ff;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #ecf0f1 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 40px 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-lg);
+            border-top: 6px solid var(--primary);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .search-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .search-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-dropdown.active {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 14px;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .dropdown-item.selected {
+            background: var(--primary);
+            color: white;
+        }
+
+        .dropdown-label {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .dropdown-detail {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 2px;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .results-section {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .no-results {
+            text-align: center;
+            color: var(--text-light);
+            padding: 40px 20px;
+        }
+
+        .no-results-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .info-box {
+            background: #f0fdf4;
+            border-left: 4px solid var(--success);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #15803d;
+            font-size: 14px;
+        }
+
+        .error-box {
+            background: #fef2f2;
+            border-left: 4px solid #f87171;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #991b1b;
+            font-size: 14px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{{ url_for('main.resultados_evaluaciones') }}" class="back-link">← Volver a Resultados</a>
+
+        <div class="header">
+            <h1>📋 Evaluación Individual</h1>
+            <p>Busca y visualiza una evaluación de desempeño en formato de certificado imprimible</p>
+        </div>
+
+        <div class="search-card">
+            {% if error %}
+            <div class="error-box">{{ error }}</div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="busqueda">Buscar por Nombre o Nómina</label>
+                <div class="search-input-wrapper">
+                    <input 
+                        type="text" 
+                        id="busqueda" 
+                        placeholder="Ej: Juan Pérez o 12345"
+                        autocomplete="off"
+                    >
+                    <div class="search-dropdown" id="dropdown"></div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                💡 Ingresa el nombre completo o número de nómina del bombero evaluado. Se mostrarán todas sus evaluaciones disponibles.
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" id="verEvaluacion" disabled onclick="abrirEvaluacion()">
+                    Ver Evaluación
+                </button>
+                <button class="btn-secondary" onclick="limpiar()">Limpiar</button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Procesando...</p>
+            </div>
+        </div>
+
+        <div class="results-section" id="resultsSection" style="display: none;">
+            <h2 style="color: var(--primary); margin-bottom: 20px;">Evaluaciones Encontradas</h2>
+            <div id="resultsList"></div>
+        </div>
+    </div>
+
+    <script>
+        let evaluacionesData = [];
+        let evaluacionSeleccionada = null;
+
+        const busquedaInput = document.getElementById('busqueda');
+        const dropdown = document.getElementById('dropdown');
+        const verButton = document.getElementById('verEvaluacion');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsList = document.getElementById('resultsList');
+
+        // Cargar todas las evaluaciones al iniciar
+        async function cargarEvaluaciones() {
+            try {
+                const response = await fetch('/api/evaluaciones_disponibles');
+                const data = await response.json();
+                evaluacionesData = data.evaluaciones || [];
+            } catch (error) {
+                console.error('Error cargando evaluaciones:', error);
+            }
+        }
+
+        busquedaInput.addEventListener('input', function() {
+            const valor = this.value.toLowerCase().trim();
+            
+            if (valor.length < 2) {
+                dropdown.classList.remove('active');
+                return;
+            }
+
+            const items = evaluacionesData.filter(e => 
+                e.nombre.toLowerCase().includes(valor) ||
+                e.nomina.includes(valor) ||
+                e.username.toLowerCase().includes(valor)
+            );
+
+            if (items.length === 0) {
+                dropdown.innerHTML = '<div class="dropdown-item">No se encontraron resultados</div>';
+                dropdown.classList.add('active');
+                return;
+            }
+
+            dropdown.innerHTML = items.map(item => `
+                <div class="dropdown-item" onclick="seleccionar(${item.eval_id}, ${item.user_id}, '${item.nombre}', '${item.nomina}')">
+                    <div class="dropdown-label">${item.nombre}</div>
+                    <div class="dropdown-detail">Nómina: ${item.nomina} | Puesto: ${item.puesto} | Fecha: ${item.fecha}</div>
+                </div>
+            `).join('');
+
+            dropdown.classList.add('active');
+        });
+
+        function seleccionar(evalId, userId, nombre, nomina) {
+            evaluacionSeleccionada = { evalId, userId, nombre, nomina };
+            busquedaInput.value = `${nombre} (${nomina})`;
+            dropdown.classList.remove('active');
+            verButton.disabled = false;
+        }
+
+        function abrirEvaluacion() {
+            if (evaluacionSeleccionada) {
+                window.location.href = `/evaluacion_carta/${evaluacionSeleccionada.evalId}`;
+            }
+        }
+
+        function limpiar() {
+            busquedaInput.value = '';
+            dropdown.classList.remove('active');
+            evaluacionSeleccionada = null;
+            verButton.disabled = true;
+            resultsSection.style.display = 'none';
+        }
+
+        // Cerrar dropdown al hacer click fuera
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.search-input-wrapper')) {
+                dropdown.classList.remove('active');
+            }
+        });
+
+        // Cargar evaluaciones al iniciar
+        cargarEvaluaciones();
+    </script>
+</body>
+</html>
