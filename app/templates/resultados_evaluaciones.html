@@ -7,27 +7,27 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <style>
         :root{
-        --primary:#111827;
-        --primary-soft:#f3f4f6;
-        --secondary:#9a3412;
+        --primary:#0f4c5c;
+        --primary-soft:#dff3f6;
+        --secondary:#e07a5f;
 
-        --success:#15803d;
-        --warning:#b45309;
-        --danger:#b91c1c;
+        --success:#2a9d8f;
+        --warning:#b7791f;
+        --danger:#c53030;
 
-        --bg:#e5e7eb;
-        --card:#ffffff;
+        --bg:#f4efe6;
+        --card:#fffaf3;
 
-        --text:#111827;
-        --text-soft:#4b5563;
+        --text:#1f2a30;
+        --text-soft:#5b6b73;
 
-        --border:#cbd5e1;
+        --border:#d9c8b5;
 
-        --radius:10px;
+        --radius:12px;
 
-        --shadow-sm:none;
-        --shadow-md:none;
-        --shadow-lg:none;
+        --shadow-sm:0 2px 8px rgba(31, 42, 48, 0.08);
+        --shadow-md:0 10px 28px rgba(31, 42, 48, 0.12);
+        --shadow-lg:0 20px 44px rgba(31, 42, 48, 0.16);
         }
 
         * {
@@ -37,7 +37,7 @@
         }
 
         body {
-            font-family: 'Trebuchet MS', 'Segoe UI', Tahoma, sans-serif;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
@@ -45,8 +45,214 @@
         }
 
         .container {
-            max-width: 1500px;
+            max-width: 1520px;
             margin: 0 auto;
+        }
+
+        .results-hero {
+            display: grid;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 18px;
+            margin-bottom: 16px;
+        }
+
+        .hero-pane {
+            background: #0f4c5c;
+            color: #f7fffe;
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .hero-tag {
+            display: inline-block;
+            margin-bottom: 10px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.34);
+            font-size: 11px;
+            letter-spacing: 0.8px;
+            font-weight: 700;
+        }
+
+        .hero-title {
+            font-size: 34px;
+            line-height: 1.18;
+            margin-bottom: 8px;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+        }
+
+        .hero-subtitle {
+            font-size: 15px;
+            line-height: 1.5;
+            color: #d7ecef;
+        }
+
+        .focus-pane {
+            background: #fffaf3;
+            border-radius: 18px;
+            border: 2px solid #e7d7c7;
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .focus-title {
+            font-size: 12px;
+            color: #6b4f3a;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .focus-values {
+            display: grid;
+            gap: 8px;
+        }
+
+        .focus-item {
+            background: #f7ede1;
+            border: 1px solid #e7d7c7;
+            border-left: 4px solid #e07a5f;
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #2f3a40;
+        }
+
+        .control-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 14px;
+        }
+
+        .control-block {
+            background: #fffaf3;
+            border: 1px solid #d9c8b5;
+            border-radius: 14px;
+            padding: 14px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .control-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #5b6b73;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .control-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .option-chip {
+            display: inline-block;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid #b8a28c;
+            background: #ffffff;
+            color: #3b4a52;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all .2s;
+        }
+
+        .option-chip:hover {
+            background: #f5e8dc;
+            border-color: #e07a5f;
+            color: #7b341e;
+        }
+
+        .option-chip.active {
+            background: #0f4c5c;
+            border-color: #0f4c5c;
+            color: #ffffff;
+        }
+
+        .metric-row {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .metric-card {
+            background: #fff;
+            border: 1px solid #d9c8b5;
+            border-radius: 14px;
+            padding: 14px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .metric-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            color: #6b7280;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            line-height: 1.2;
+            font-weight: 800;
+            color: #0f4c5c;
+        }
+
+        .metric-value.small {
+            font-size: 16px;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        .actions-row {
+            margin-top: 8px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .download-btn {
+            display: inline-block;
+            padding: 11px 18px;
+            background: #0f4c5c;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 700;
+            transition: all 0.2s;
+            border: 1px solid #0f4c5c;
+            cursor: pointer;
+            letter-spacing: 0.3px;
+        }
+
+        .download-btn:hover {
+            background: #0c3d4a;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .secondary-action {
+            background: #e07a5f !important;
+            border-color: #e07a5f !important;
+        }
+
+        .secondary-action:hover {
+            background: #c46248 !important;
         }
 
         .header{
@@ -184,67 +390,7 @@
             margin-top: 16px;
         }
 
-        .actions-row {
-            margin-top: 18px;
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .active-summary {
-            margin-top: 10px;
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .summary-chip {
-            font-size: 11px;
-            font-weight: 700;
-            color: #111827;
-            background: #fef3c7;
-            border: 1px solid #f59e0b;
-            border-radius: 6px;
-            padding: 5px 10px;
-        }
-
-        .secondary-action {
-            background: #334155 !important;
-            border-color: #334155 !important;
-        }
-
-        .secondary-action:hover {
-            background: #1f2937 !important;
-        }
-
-        .stat-card{
-            background:#0f172a;
-            border-radius:10px;
-            padding:16px;
-            box-shadow:none;
-            border-top:6px solid #f59e0b;
-            transition:.2s;
-            }
-
-            .stat-card p {
-            color:#cbd5e1;
-            font-size:12px;
-            text-transform:uppercase;
-            letter-spacing:.5px;
-            font-weight:700;
-            }
-
-            .stat-card:hover{
-            transform:translateY(-2px);
-            box-shadow:none;
-            }
-
-            .stat-card .value{
-            font-size:26px;
-            font-weight:800;
-            color:#ffffff;
-            }
+        .stat-card{ display:none; }
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -253,17 +399,17 @@
         }
 
  .chart-card{
-     background:white;
-     border-radius:10px;
+     background:#fffdf8;
+     border-radius:16px;
      padding:24px;
-     box-shadow:none;
+     box-shadow:var(--shadow-sm);
      transition:.2s ease;
-     border:2px solid #d1d5db;
-        }
+     border:1px solid #dbcbb8;
+     }
 
         .chart-card:hover{
-     transform:translateY(-2px);
-     box-shadow:none;
+        transform:translateY(-3px);
+        box-shadow:var(--shadow-md);
         }
         .chart-card h3 {
             font-size: 18px;
@@ -332,27 +478,6 @@
             box-shadow: var(--shadow-lg);
         }
 
-        .download-btn {
-            display: inline-block;
-            padding: 12px 24px;
-            background: #111827;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: 700;
-            transition: all 0.2s;
-            border: 2px solid #111827;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-
-        .download-btn:hover {
-            background: #374151;
-            transform: translateY(-1px);
-            box-shadow: none;
-        }
-
         @media print {
             body, html {
                 margin: 0;
@@ -414,22 +539,26 @@
         }
 
         @media (max-width: 768px) {
-            .header {
-                padding: 20px;
-            }
-
-            .header-top {
-                flex-direction: column;
-                margin-bottom: 12px;
-            }
-
-            .filter-row {
+            .results-hero {
                 grid-template-columns: 1fr;
-                gap: 8px;
             }
 
-            .header h1 {
-                font-size: 22px;
+            .hero-pane,
+            .focus-pane,
+            .header {
+                padding: 18px;
+            }
+
+            .hero-title {
+                font-size: 26px;
+            }
+
+            .control-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .metric-row {
+                grid-template-columns: 1fr;
             }
 
             .charts-grid {
@@ -450,56 +579,62 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="header-top">
-                <div>
-                    <div class="header-kicker">Centro de Control</div>
-                    <h1>Tablero de Resultados Operativos</h1>
-                    <div class="header-subtitle">Panel ejecutivo para revisar avances por rol y turno con acceso directo a reportes individuales.</div>
+            <div class="results-hero">
+                <div class="hero-pane">
+                    <div class="hero-tag">CENTRAL DE RESULTADOS</div>
+                    <div class="hero-title">Reporte Integral de Desempeno</div>
+                    <div class="hero-subtitle">Analiza desempeno por area, cruza turnos y abre evaluaciones individuales desde una sola vista operativa.</div>
                 </div>
-                <div class="header-badge">Corte Diario</div>
+                <div class="focus-pane">
+                    <div class="focus-title">Contexto Activo</div>
+                    <div class="focus-values">
+                        <div class="focus-item">Rol seleccionado: {{ rol_seleccionado }}</div>
+                        <div class="focus-item">Turno seleccionado: {{ turno_seleccionado }}</div>
+                    </div>
+                </div>
             </div>
-            <div class="header-controls">
-                <div class="filter-row">
-                    <span class="filter-label">Seleccion de Rol</span>
-                    <div class="filter-options">
+
+            <div class="control-layout">
+                <section class="control-block">
+                    <div class="control-label">Filtrar por Rol Operativo</div>
+                    <div class="control-options">
                         {% for rol_item in roles_disponibles %}
                             <a href="{{ url_for('main.resultados_evaluaciones', rol=rol_item, turno=turno_seleccionado) }}" 
-                               class="rol-btn {% if rol_item == rol_seleccionado %}active{% endif %}">
+                               class="option-chip {% if rol_item == rol_seleccionado %}active{% endif %}">
                                 {{ rol_item }}
                             </a>
                         {% endfor %}
                     </div>
-                </div>
-                <div class="filter-row">
-                    <span class="filter-label">Seleccion de Turno</span>
-                    <div class="filter-options">
+                </section>
+
+                <section class="control-block">
+                    <div class="control-label">Filtrar por Turno de Guardia</div>
+                    <div class="control-options">
                         {% for turno_item in turnos_disponibles %}
                             <a href="{{ url_for('main.resultados_evaluaciones', rol=rol_seleccionado, turno=turno_item) }}" 
-                               class="rol-btn {% if turno_item == turno_seleccionado %}active{% endif %}">
+                               class="option-chip {% if turno_item == turno_seleccionado %}active{% endif %}">
                                 {{ turno_item }}
                             </a>
                         {% endfor %}
                     </div>
+                </section>
+            </div>
+
+            <div class="metric-row">
+                <div class="metric-card">
+                    <div class="metric-label">Total de evaluaciones</div>
+                    <div class="metric-value">{{ total_evaluaciones }}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Rol en revision</div>
+                    <div class="metric-value small">{{ rol_seleccionado }}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Turno en revision</div>
+                    <div class="metric-value small">{{ turno_seleccionado }}</div>
                 </div>
             </div>
-            <div class="active-summary">
-                <span class="summary-chip">Rol: {{ rol_seleccionado }}</span>
-                <span class="summary-chip">Turno: {{ turno_seleccionado }}</span>
-            </div>
-            <div class="stats-info">
-                <div class="stat-card">
-                    <p>Total de Evaluaciones</p>
-                    <div class="value">{{ total_evaluaciones }}</div>
-                </div>
-                <div class="stat-card">
-                    <p>Rol Seleccionado</p>
-                    <div class="value" style="font-size: 14px; font-weight: 600;">{{ rol_seleccionado }}</div>
-                </div>
-                <div class="stat-card">
-                    <p>Turno Seleccionado</p>
-                    <div class="value" style="font-size: 14px; font-weight: 600;">{{ turno_seleccionado }}</div>
-                </div>
-            </div>
+
             {% if total_evaluaciones|int > 0 %}
             <div class="actions-row">
                 <a href="{{ url_for('main.descargar_resultados_excel', rol=rol_seleccionado, turno=turno_seleccionado) }}" 
@@ -507,7 +642,7 @@
                     Exportar Excel
                 </a>
                 <button onclick="abrirModalEvaluacionIndividual()" class="download-btn secondary-action" style="cursor: pointer; border: none;">
-                    Abrir Evaluacion Individual
+                    Visualizar Evaluacion Individual
                 </button>
             </div>
             {% endif %}
