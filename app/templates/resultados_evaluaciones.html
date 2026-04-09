@@ -6,19 +6,30 @@
     <title>Resultados de Evaluaciones del Desempeño</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <style>
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1e40af;
-            --primary-light: #eff6ff;
-            --secondary: #0891b2;
-            --success: #10b981;
-            --bg: #f0f9ff;
-            --card: #ffffff;
-            --text: #1e293b;
-            --text-light: #64748b;
-            --border: #e2e8f0;
-            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+        :root{
+
+        --primary:#1e3a8a;
+        --primary-soft:#eef2ff;
+        --secondary:#0ea5e9;
+
+        --success:#16a34a;
+        --warning:#f59e0b;
+        --danger:#dc2626;
+
+        --bg:#f8fafc;
+        --card:#ffffff;
+
+        --text:#0f172a;
+        --text-soft:#64748b;
+
+        --border:#e2e8f0;
+
+        --radius:14px;
+
+        --shadow-sm:0 2px 6px rgba(0,0,0,.05);
+        --shadow-md:0 10px 25px rgba(0,0,0,.08);
+        --shadow-lg:0 25px 60px rgba(0,0,0,.15);
+
         }
 
         * {
@@ -40,21 +51,33 @@
             margin: 0 auto;
         }
 
-        .header {
-            background: var(--card);
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: var(--shadow-lg);
-            border-top: 6px solid var(--primary);
+        .header{
+
+        background:linear-gradient(120deg,#1e3a8a,#0ea5e9);
+
+        color:white;
+
+        border-radius:18px;
+
+        padding:32px;
+
+        box-shadow:var(--shadow-lg);
+
+        margin-bottom:30px;
+
         }
 
-        .header h1 {
-            font-size: 28px;
-            color: var(--primary);
-            margin-bottom: 20px;
-        }
+        .header h1{
 
+        font-size:30px;
+
+        font-weight:700;
+
+        letter-spacing:.5px;
+
+        margin-bottom:18px;
+
+        }
         .header-controls {
             display: flex;
             gap: 20px;
@@ -68,26 +91,38 @@
             flex-wrap: wrap;
         }
 
-        .rol-btn {
-            padding: 10px 20px;
-            border: 2px solid var(--border);
-            background: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-            color: var(--text);
+        .rol-btn{
+
+        padding:10px 22px;
+
+        border-radius:999px;
+
+        border:2px solid var(--border);
+
+        font-weight:600;
+
+        background:white;
+
+        transition:.25s;
+
         }
 
-        .rol-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
+        .rol-btn:hover{
+
+        border-color:var(--primary);
+
+        color:var(--primary);
+
         }
 
-        .rol-btn.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
+        .rol-btn.active{
+
+        background:var(--primary);
+
+        color:white;
+
+        border-color:var(--primary);
+
         }
 
         .stats-info {
@@ -97,25 +132,39 @@
             margin-top: 20px;
         }
 
-        .stat-card {
-            background: var(--primary-light);
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid var(--primary);
-        }
+        .stat-card{
 
-        .stat-card p {
-            font-size: 12px;
-            color: var(--text-light);
-            margin-bottom: 5px;
-        }
+            background:white;
 
-        .stat-card .value {
-            font-size: 24px;
-            font-weight: 800;
-            color: var(--primary);
-        }
+            border-radius:14px;
 
+            padding:18px;
+
+            box-shadow:var(--shadow-sm);
+
+            border-left:6px solid var(--primary);
+
+            transition:.25s;
+
+            }
+
+            .stat-card:hover{
+
+            transform:translateY(-4px);
+
+            box-shadow:var(--shadow-md);
+
+            }
+
+            .stat-card .value{
+
+            font-size:26px;
+
+            font-weight:800;
+
+            color:var(--primary);
+
+            }
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -123,20 +172,29 @@
             margin-bottom: 30px;
         }
 
-        .chart-card {
-            background: var(--card);
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--border);
-            transition: all 0.3s;
+ .chart-card{
+
+        background:white;
+
+        border-radius:18px;
+
+        padding:28px;
+
+        box-shadow:var(--shadow-md);
+
+        transition:.3s ease;
+
+        border:1px solid var(--border);
+
         }
 
-        .chart-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-        }
+        .chart-card:hover{
 
+        transform:translateY(-6px);
+
+        box-shadow:var(--shadow-lg);
+
+        }
         .chart-card h3 {
             font-size: 18px;
             color: var(--primary);
@@ -479,8 +537,16 @@
         {% endfor %}
     </script>
     <div id="modalEvaluacion" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; overflow-y: auto;">
-        <div style="position: relative; max-width: 1200px; margin: 20px auto; background: white; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
-            <div style="background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; padding: 30px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center;">
+<div style="
+position:relative;
+max-width:1100px;
+margin:40px auto;
+background:white;
+border-radius:22px;
+box-shadow:0 40px 90px rgba(0,0,0,.25);
+overflow:hidden;
+">
+            <div style="background:linear-gradient(120deg,#1e3a8a,#0ea5e9); color: white; padding: 30px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center;">
                 <div id="modalTitulo">
                     <h2 style="margin: 0; font-size: 24px;">📄 Evaluación Individual</h2>
                     <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 14px;">Búsqueda y visualización de evaluaciones</p>
@@ -826,18 +892,31 @@
 
             <div class="header">
 
+            <div style="display:flex;justify-content:space-between;align-items:center">
+
             <div>
+
             <div class="title">EVALUACIÓN DE DESEMPEÑO</div>
-            <div class="subtitle">Documento oficial institucional</div>
-            </div>
 
-            <div style="text-align:right;font-size:8pt;color:#6b7280;">
-            Fecha de emisión<br>
-            ${new Date().toLocaleDateString()}
-            </div>
+            <div class="subtitle">
+
+            Sistema institucional de evaluación operativa
 
             </div>
 
+            </div>
+
+            <div style="text-align:right;font-size:9pt;color:#64748b">
+
+            Folio: ${eva.id || '—'}
+
+            <br>
+
+            Fecha: ${new Date().toLocaleDateString()}
+
+            </div>
+
+            </div>
 
             <!-- INFO -->
 
