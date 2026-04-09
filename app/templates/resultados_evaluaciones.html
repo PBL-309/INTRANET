@@ -606,25 +606,31 @@
                             box-sizing: border-box;
                         }
                         
-                        html, body {
-                            width: 21.59cm;
-                            height: 27.94cm;
-                            overflow: hidden;
-                            background: white;
-                        }
-                        
-                        .page-eval {
+                        body, html {
                             width: 21.59cm;
                             height: 27.94cm;
                             margin: 0;
-                            padding: 6mm 6mm 6mm 6mm;
-                            background: white;
-                            font-size: 9pt;
-                            overflow: hidden;
-                            display: flex;
-                            flex-direction: column;
-                            box-shadow: none;
-                            border: none;
+                            padding: 0;
+                        }
+                        
+                        #contenidoEvaluacion {
+                            width: 100%;
+                            height: 100%;
+                        }
+                        
+                        .page-eval {
+                            width: 21.59cm !important;
+                            height: 27.94cm !important;
+                            margin: 0 !important;
+                            padding: 6mm 6mm 6mm 6mm !important;
+                            background: white !important;
+                            font-size: 9pt !important;
+                            overflow: hidden !important;
+                            display: flex !important;
+                            flex-direction: column !important;
+                            box-shadow: none !important;
+                            border: none !important;
+                            page-break-after: avoid !important;
                         }
                     }
                 </style>
@@ -701,6 +707,11 @@
             `;
 
             document.getElementById('contenidoEvaluacion').innerHTML = html;
+            
+            // Esperar a que el DOM se actualice y luego imprimir
+            setTimeout(() => {
+                window.print();
+            }, 500);
         }
 
         function imprimirEvaluacion() {
