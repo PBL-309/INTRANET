@@ -7,21 +7,23 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <style>
         :root{
-        --primary:#0f4c5c;
-        --primary-soft:#dff3f6;
-        --secondary:#e07a5f;
+        --primary:#8B1528;
+        --primary-dark:#5e0d1b;
+        --primary-light:#A41F33;
+        --primary-soft:#f7e8ec;
+        --secondary:#6B7280;
 
-        --success:#2a9d8f;
-        --warning:#b7791f;
-        --danger:#c53030;
+        --success:#046E55;
+        --warning:#DAA520;
+        --danger:#991B1B;
 
-        --bg:#f4efe6;
-        --card:#fffaf3;
+        --bg:#F8F9FA;
+        --card:#FFFFFF;
 
-        --text:#1f2a30;
-        --text-soft:#5b6b73;
+        --text:#212529;
+        --text-soft:#4B5563;
 
-        --border:#d9c8b5;
+        --border:#E5E7EB;
 
         --radius:12px;
 
@@ -57,8 +59,8 @@
         }
 
         .hero-pane {
-            background: #0f4c5c;
-            color: #f7fffe;
+            background: var(--primary-dark);
+            color: #f9f3f4;
             border-radius: 18px;
             padding: 24px;
             box-shadow: var(--shadow-md);
@@ -87,13 +89,13 @@
         .hero-subtitle {
             font-size: 15px;
             line-height: 1.5;
-            color: #d7ecef;
+            color: #e9cfd5;
         }
 
         .focus-pane {
-            background: #fffaf3;
+            background: var(--card);
             border-radius: 18px;
-            border: 2px solid #e7d7c7;
+            border: 2px solid var(--border);
             padding: 20px;
             box-shadow: var(--shadow-sm);
             display: flex;
@@ -103,7 +105,7 @@
 
         .focus-title {
             font-size: 12px;
-            color: #6b4f3a;
+            color: var(--primary);
             text-transform: uppercase;
             letter-spacing: 1px;
             font-weight: 700;
@@ -116,14 +118,14 @@
         }
 
         .focus-item {
-            background: #f7ede1;
-            border: 1px solid #e7d7c7;
-            border-left: 4px solid #e07a5f;
+            background: var(--primary-soft);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary);
             border-radius: 10px;
             padding: 10px 12px;
             font-size: 13px;
             font-weight: 700;
-            color: #2f3a40;
+            color: var(--text);
         }
 
         .control-layout {
@@ -134,8 +136,8 @@
         }
 
         .control-block {
-            background: #fffaf3;
-            border: 1px solid #d9c8b5;
+            background: var(--card);
+            border: 1px solid var(--border);
             border-radius: 14px;
             padding: 14px;
             box-shadow: var(--shadow-sm);
@@ -145,7 +147,7 @@
             font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 0.8px;
-            color: #5b6b73;
+            color: var(--text-soft);
             font-weight: 700;
             margin-bottom: 10px;
         }
@@ -160,9 +162,9 @@
             display: inline-block;
             padding: 8px 12px;
             border-radius: 999px;
-            border: 1px solid #b8a28c;
+            border: 1px solid var(--border);
             background: #ffffff;
-            color: #3b4a52;
+            color: var(--text);
             font-size: 12px;
             font-weight: 700;
             text-decoration: none;
@@ -170,14 +172,14 @@
         }
 
         .option-chip:hover {
-            background: #f5e8dc;
-            border-color: #e07a5f;
-            color: #7b341e;
+            background: var(--primary-soft);
+            border-color: var(--primary-light);
+            color: var(--primary-dark);
         }
 
         .option-chip.active {
-            background: #0f4c5c;
-            border-color: #0f4c5c;
+            background: var(--primary);
+            border-color: var(--primary);
             color: #ffffff;
         }
 
@@ -190,7 +192,7 @@
 
         .metric-card {
             background: #fff;
-            border: 1px solid #d9c8b5;
+            border: 1px solid var(--border);
             border-radius: 14px;
             padding: 14px;
             box-shadow: var(--shadow-sm);
@@ -209,7 +211,7 @@
             font-size: 24px;
             line-height: 1.2;
             font-weight: 800;
-            color: #0f4c5c;
+            color: var(--primary);
         }
 
         .metric-value.small {
@@ -229,38 +231,38 @@
         .download-btn {
             display: inline-block;
             padding: 11px 18px;
-            background: #0f4c5c;
+            background: var(--primary);
             color: #fff;
             text-decoration: none;
             border-radius: 10px;
             font-weight: 700;
             transition: all 0.2s;
-            border: 1px solid #0f4c5c;
+            border: 1px solid var(--primary);
             cursor: pointer;
             letter-spacing: 0.3px;
         }
 
         .download-btn:hover {
-            background: #0c3d4a;
+            background: var(--primary-dark);
             transform: translateY(-1px);
             box-shadow: var(--shadow-sm);
         }
 
         .secondary-action {
-            background: #e07a5f !important;
-            border-color: #e07a5f !important;
+            background: var(--success) !important;
+            border-color: var(--success) !important;
         }
 
         .secondary-action:hover {
-            background: #c46248 !important;
+            background: #045642 !important;
         }
 
         .header{
         background:#ffffff;
-        color:#111827;
+        color:var(--text);
         border-radius:22px;
         padding:24px;
-        border:2px solid #1f2937;
+        border:1px solid var(--border);
         margin-bottom:30px;
         }
 
@@ -271,7 +273,7 @@
             gap: 16px;
             margin-bottom: 16px;
             padding-bottom: 14px;
-            border-bottom: 2px dashed #94a3b8;
+            border-bottom: 1px dashed var(--border);
         }
 
         .header-kicker {
@@ -279,13 +281,13 @@
             font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #9a3412;
+            color: var(--primary);
             margin-bottom: 6px;
             font-weight: 700;
             padding: 4px 10px;
             border-radius: 999px;
-            border: 1px solid #fdba74;
-            background: #ffedd5;
+            border: 1px solid #d8a3ad;
+            background: var(--primary-soft);
         }
 
         .header h1{
@@ -294,18 +296,18 @@
         letter-spacing:.2px;
         margin-bottom:4px;
         line-height: 1.2;
-        color:#111827;
+        color:var(--text);
         }
 
         .header-subtitle {
             font-size: 15px;
-            color: #334155;
+            color: var(--text-soft);
             max-width: 780px;
         }
 
         .header-badge {
-            background: #111827;
-            border: 1px solid #111827;
+            background: var(--primary-dark);
+            border: 1px solid var(--primary-dark);
             color: #f8fafc;
             padding: 8px 12px;
             border-radius: 8px;
@@ -322,8 +324,8 @@
             margin-top: 6px;
             padding: 14px;
             border-radius: 12px;
-            background: #f8fafc;
-            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            border: 1px solid var(--border);
         }
 
         .filter-row {
@@ -334,12 +336,12 @@
             padding: 11px 12px;
             border-radius: 8px;
             background: #ffffff;
-            border: 1px solid #cbd5e1;
-            border-left: 6px solid #334155;
+            border: 1px solid var(--border);
+            border-left: 6px solid var(--primary);
         }
 
         .filter-label {
-            color: #111827;
+            color: var(--text);
             font-size: 12px;
             font-weight: 700;
             letter-spacing: 0.6px;
@@ -360,26 +362,26 @@
         .rol-btn{
         padding:7px 12px;
         border-radius:6px;
-        border:1px solid #64748b;
+        border:1px solid var(--border);
         font-size:12px;
         font-weight:700;
         background:#ffffff;
-        color:#1f2937;
+        color:var(--text);
         transition:.2s;
         text-decoration:none;
         white-space: nowrap;
         }
 
         .rol-btn:hover{
-        border-color:#111827;
-        background:#e2e8f0;
-        color:#111827;
+        border-color:var(--primary-light);
+        background:var(--primary-soft);
+        color:var(--primary-dark);
         }
 
         .rol-btn.active{
-        background:#111827;
+        background:var(--primary);
         color:#ffffff;
-        border-color:#111827;
+        border-color:var(--primary);
         box-shadow:none;
         }
 
@@ -676,23 +678,23 @@
     </div>
     <script>
         const colors = [
-            'rgba(37, 99, 235, 0.8)',
-            'rgba(74, 222, 128, 0.8)',
-            'rgba(251, 146, 60, 0.8)',
-            'rgba(236, 72, 153, 0.8)'
+            'rgba(139, 21, 40, 0.85)',
+            'rgba(4, 110, 85, 0.85)',
+            'rgba(218, 165, 32, 0.85)',
+            'rgba(153, 27, 27, 0.85)'
         ];
         const borderColors = [
-            'rgba(37, 99, 235, 1)',
-            'rgba(74, 222, 128, 1)',
-            'rgba(251, 146, 60, 1)',
-            'rgba(236, 72, 153, 1)'
+            'rgba(139, 21, 40, 1)',
+            'rgba(4, 110, 85, 1)',
+            'rgba(218, 165, 32, 1)',
+            'rgba(153, 27, 27, 1)'
         ];
 
         const backgroundColors = [
-            'rgba(37, 99, 235, 0.1)',
-            'rgba(74, 222, 128, 0.1)',
-            'rgba(251, 146, 60, 0.1)',
-            'rgba(236, 72, 153, 0.1)'
+            'rgba(139, 21, 40, 0.12)',
+            'rgba(4, 110, 85, 0.12)',
+            'rgba(218, 165, 32, 0.12)',
+            'rgba(153, 27, 27, 0.12)'
         ];
         const datos = {
             'comunicacion': {
@@ -775,7 +777,7 @@ border-radius:22px;
 box-shadow:0 40px 90px rgba(0,0,0,.25);
 overflow:hidden;
 ">
-            <div style="background:#111827; color: white; padding: 30px; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #9a3412;">
+            <div style="background:var(--primary-dark); color: white; padding: 30px; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--primary);">
                 <div id="modalTitulo">
                     <h2 style="margin: 0; font-size: 24px;">Evaluacion Individual</h2>
                     <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 14px;">Búsqueda y visualización de evaluaciones</p>
@@ -792,15 +794,15 @@ overflow:hidden;
                                 id="inputBusqueda" 
                                 placeholder="Ej: Juan Pérez o 12345"
                                 autocomplete="off"
-                                style="width: 100%; padding: 12px 15px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px; background: #f8fafc; transition: all 0.3s;"
-                                onfocus="this.style.outline='none'; this.style.borderColor='var(--primary)'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(37, 99, 235, 0.1)';"
-                                onblur="this.style.outline=''; this.style.borderColor='var(--border)'; this.style.background='#f8fafc'; this.style.boxShadow='';"
+                                style="width: 100%; padding: 12px 15px; border: 2px solid var(--border); border-radius: 8px; font-size: 14px; background: var(--bg); transition: all 0.3s;"
+                                onfocus="this.style.outline='none'; this.style.borderColor='var(--primary)'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(139, 21, 40, 0.15)';"
+                                onblur="this.style.outline=''; this.style.borderColor='var(--border)'; this.style.background='var(--bg)'; this.style.boxShadow='';"
                             >
                             <div id="dropdownBusqueda" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; max-height: 300px; overflow-y: auto; z-index: 1001; display: none;"></div>
                         </div>
                     </div>
 
-                    <div style="background: #f0fdf4; border-left: 4px solid var(--success); padding: 15px; border-radius: 8px; margin-bottom: 20px; color: #15803d; font-size: 14px;">
+                    <div style="background: var(--primary-soft); border-left: 4px solid var(--primary); padding: 15px; border-radius: 8px; margin-bottom: 20px; color: var(--primary-dark); font-size: 14px;">
                         💡 Ingresa el nombre completo o número de nómina del bombero que deseas evaluar.
                     </div>
 
@@ -808,7 +810,7 @@ overflow:hidden;
                         <button onclick="abrirEvaluacionSeleccionada()" id="btnVerEvaluacion" disabled style="padding: 12px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: not-allowed; transition: all 0.3s;">
                             Ver Evaluación
                         </button>
-                        <button onclick="limpiarBusqueda()" style="padding: 12px 20px; background: #f1f5f9; color: var(--text); border: 2px solid var(--border); border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.3s;">
+                        <button onclick="limpiarBusqueda()" style="padding: 12px 20px; background: #ffffff; color: var(--text); border: 2px solid var(--border); border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.3s;">
                             Limpiar
                         </button>
                     </div>
@@ -816,7 +818,7 @@ overflow:hidden;
                 <div id="seccionVisualizacion" style="display: none;">
                     <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap;">
                         <button onclick="volverABusqueda()" style="background: none; border: none; color: var(--primary); font-weight: 700; cursor: pointer; font-size: 14px;">← Volver a Búsqueda</button>
-                        <button onclick="imprimirEvaluacion()" style="padding: 10px 18px; background: #111827; color: white; border: none; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: none; text-transform: uppercase;">
+                        <button onclick="imprimirEvaluacion()" style="padding: 10px 18px; background: var(--primary-dark); color: white; border: none; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: none; text-transform: uppercase;">
                             Imprimir Evaluacion
                         </button>
                     </div>
@@ -975,7 +977,7 @@ overflow:hidden;
                 width: 100%;
                 max-width: 196mm;
                 min-height: 258mm;
-                border: 2px solid #111827;
+                border: 2px solid #8B1528;
                 border-radius: 6px;
                 background: #ffffff;
                 padding: 8mm;
@@ -984,7 +986,7 @@ overflow:hidden;
                 grid-template-rows: auto auto auto auto 1fr auto;
                 gap: 7mm;
                 font-family: 'Segoe UI', Tahoma, sans-serif;
-                color: #0f172a;
+                color: #212529;
             }
 
             .print-eval-header {
@@ -992,7 +994,7 @@ overflow:hidden;
                 justify-content: space-between;
                 align-items: flex-start;
                 gap: 10mm;
-                border-bottom: 2px solid #111827;
+                border-bottom: 2px solid #8B1528;
                 padding-bottom: 4mm;
             }
 
@@ -1014,13 +1016,13 @@ overflow:hidden;
                 line-height: 1.2;
                 font-weight: 800;
                 letter-spacing: 0.2px;
-                color: #111827;
+                color: #8B1528;
                 margin-bottom: 1.5mm;
             }
 
             .print-eval-subtitle {
                 font-size: 9.5pt;
-                color: #475569;
+                color: #4B5563;
                 line-height: 1.35;
             }
 
@@ -1029,12 +1031,12 @@ overflow:hidden;
                 text-align: right;
                 font-size: 9.5pt;
                 line-height: 1.5;
-                color: #334155;
+                color: #4B5563;
                 font-weight: 600;
             }
 
             .print-eval-meta strong {
-                color: #0f172a;
+                color: #212529;
             }
 
             .print-eval-grid {
@@ -1080,7 +1082,7 @@ overflow:hidden;
                 text-align: center;
                 color: ${colorPromtexto};
                 background: ${colorPromedio};
-                border: 1px solid #111827;
+                border: 1px solid #8B1528;
             }
 
             .print-eval-score-title {
@@ -1108,7 +1110,7 @@ overflow:hidden;
                 font-weight: 800;
                 letter-spacing: 0.5px;
                 margin-bottom: 2.5mm;
-                color: #1e293b;
+                color: #8B1528;
             }
 
             .result-row {
@@ -1116,8 +1118,8 @@ overflow:hidden;
                 justify-content: space-between;
                 align-items: center;
                 gap: 6mm;
-                background: #f8fafc;
-                border: 1px solid #d1d5db;
+                background: #f8f9fa;
+                border: 1px solid #E5E7EB;
                 border-radius: 6px;
                 padding: 2.5mm 3.5mm;
                 margin-bottom: 2mm;
@@ -1128,7 +1130,7 @@ overflow:hidden;
                 flex: 1;
                 font-size: 10pt;
                 font-weight: 600;
-                color: #0f172a;
+                color: #212529;
             }
 
             .result-score {
@@ -1143,8 +1145,8 @@ overflow:hidden;
             }
 
             .print-eval-obs {
-                border: 1px solid #d1d5db;
-                border-left: 4px solid #111827;
+                border: 1px solid #E5E7EB;
+                border-left: 4px solid #8B1528;
                 border-radius: 6px;
                 padding: 3.5mm;
                 background: #ffffff;
@@ -1154,7 +1156,7 @@ overflow:hidden;
                 margin: 0;
                 font-size: 9.7pt;
                 line-height: 1.5;
-                color: #1f2937;
+                color: #212529;
                 white-space: pre-line;
             }
 
@@ -1172,20 +1174,20 @@ overflow:hidden;
 
             .print-eval-sign-line {
                 height: 11mm;
-                border-bottom: 2px solid #334155;
+                border-bottom: 2px solid #8B1528;
                 margin-bottom: 2mm;
             }
 
             .print-eval-sign-name {
                 font-size: 10pt;
                 font-weight: 700;
-                color: #0f172a;
+                color: #212529;
                 margin-bottom: 0.5mm;
             }
 
             .print-eval-sign-role {
                 font-size: 8.5pt;
-                color: #64748b;
+                color: #4B5563;
                 font-weight: 600;
             }
 
