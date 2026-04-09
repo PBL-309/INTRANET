@@ -644,136 +644,281 @@
             for (const [nombre, calificacion] of Object.entries(temas)) {
                 const color = calificacion >= 4.5 ? '#22c55e' : (calificacion >= 3.5 ? '#f59e0b' : '#ef4444');
                 temasHTML += `
-                    <div style="display: grid; grid-template-columns: 1fr 60px; gap: 6px; align-items: center; padding: 6px 0; border-bottom: 1px solid #e5e7eb;">
-                        <div style="font-size: 10pt; color: #374151; font-weight: 500;">${nombre}</div>
-                        <div style="background: ${color}; color: white; padding: 5px; text-align: center; border-radius: 5px; font-weight: bold; font-size: 11pt;">${calificacion.toFixed(2)}</div>
+                    <div class="result-row">
+                        <div style="font-size:10pt;">${nombre}</div>
+                        <div class="result-score" style="background:${color};">${calificacion.toFixed(2)}</div>
                     </div>
                 `;
             }
 
             const html = `
-                <style>
-                    @page {
-                        size: 21.59cm 27.94cm;
-                        margin: 0;
-                        padding: 0;
-                    }
-                    
-                    @media print {
-                        * {
-                            margin: 0;
-                            padding: 0;
-                            box-sizing: border-box;
-                        }
-                        
-                        body, html {
-                            width: 21.59cm;
-                            height: 27.94cm;
-                            margin: 0;
-                            padding: 0;
-                        }
-                        
-                        #contenidoEvaluacion {
-                            width: 100%;
-                            height: 100%;
-                        }
-                        
-                        .page-eval {
-                            width: 21.59cm !important;
-                            height: 27.94cm !important;
-                            margin: 0 !important;
-                            padding: 6mm 6mm 6mm 6mm !important;
-                            background: white !important;
-                            font-size: 10pt !important;
-                            overflow: hidden !important;
-                            display: flex !important;
-                            flex-direction: column !important;
-                            box-shadow: none !important;
-                            border: none !important;
-                            page-break-after: avoid !important;
-                        }
-                        
-                        .btn-print-modal {
-                            display: none !important;
-                        }
-                    }
-                </style>
+            <style>
 
-                <div class="btn-print-modal" style="margin-bottom: 15px; display: flex; gap: 10px; justify-content: center;">
-                    <button onclick="imprimirEvaluacion()" style="padding: 11px 24px; background: #1f2937; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; transition: all 0.3s;">🖨️ Imprimir Evaluación</button>
-                </div>
+            @page{
+            size:21.59cm 27.94cm;
+            margin:0;
+            }
 
-                <div class="page-eval" style="background: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;">
-                    
-                    <!-- HEADER -->
-                    <div style="text-align: center; margin-bottom: 8px; padding-bottom: 7px; border-bottom: 2px solid #1f2937; flex-shrink: 0;">
-                        <h1 style="font-size: 14pt; color: #1f2937; margin: 0; font-weight: bold;">EVALUACIÓN DE DESEMPEÑO</h1>
-                        <p style="font-size: 8pt; color: #6b7280; margin: 2px 0 0 0;">Documento Oficial</p>
-                    </div>
+            body{
+            font-family:'Segoe UI',system-ui;
+            background:#fff;
+            }
 
-                    <!-- INFO CARDS ROW 1 -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 8px; flex-shrink: 0;">
-                        <div style="background: #f3f4f6; padding: 7px; border-radius: 5px; border-left: 3px solid #1f2937;">
-                            <div style="font-size: 8pt; color: #6b7280; font-weight: 600; margin-bottom: 2px;">EVALUADO</div>
-                            <div style="font-size: 10pt; color: #1f2937; font-weight: 600; line-height: 1.2;">${usuario.nombre}</div>
-                        </div>
-                        <div style="background: #f3f4f6; padding: 7px; border-radius: 5px; border-left: 3px solid #1f2937;">
-                            <div style="font-size: 8pt; color: #6b7280; font-weight: 600; margin-bottom: 2px;">PUESTO</div>
-                            <div style="font-size: 10pt; color: #1f2937; font-weight: 600; line-height: 1.2;">${usuario.puesto}</div>
-                        </div>
-                        <div style="background: #f3f4f6; padding: 7px; border-radius: 5px; border-left: 3px solid #1f2937;">
-                            <div style="font-size: 8pt; color: #6b7280; font-weight: 600; margin-bottom: 2px;">NÓMINA</div>
-                            <div style="font-size: 10pt; color: #1f2937; font-weight: 600; line-height: 1.2;">${usuario.username}</div>
-                        </div>
-                    </div>
+            .page-eval{
+            width:21.59cm;
+            height:27.94cm;
+            padding:10mm;
+            display:flex;
+            flex-direction:column;
+            color:#1f2937;
+            }
 
-                    <!-- INFO CARDS ROW 2 -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 8px; flex-shrink: 0;">
-                        <div style="background: #f3f4f6; padding: 7px; border-radius: 5px; border-left: 3px solid #1f2937;">
-                            <div style="font-size: 8pt; color: #6b7280; font-weight: 600; margin-bottom: 2px;">EVALUADOR</div>
-                            <div style="font-size: 10pt; color: #1f2937; font-weight: 600; line-height: 1.2;">${evaluador.nombre}</div>
-                        </div>
-                        <div style="background: #f3f4f6; padding: 7px; border-radius: 5px; border-left: 3px solid #1f2937; grid-column: 2/4;">
-                            <div style="font-size: 8pt; color: #6b7280; font-weight: 600; margin-bottom: 2px;">TURNO</div>
-                            <div style="font-size: 10pt; color: #1f2937; font-weight: 600; line-height: 1.2;">${usuario.turno}</div>
-                        </div>
-                    </div>
+            /* HEADER */
 
-                    <!-- PROMEDIO DESTACADO -->
-                    <div style="background: ${colorPromedio}; color: ${colorPromtexto}; padding: 9px; border-radius: 7px; text-align: center; margin-bottom: 8px; flex-shrink: 0;">
-                        <div style="font-size: 9pt; font-weight: 600; margin-bottom: 3px;">PROMEDIO GENERAL</div>
-                        <div style="font-size: 20pt; font-weight: bold; line-height: 1; margin-bottom: 2px;">${promedioGeneral}</div>
-                        <div style="font-size: 10pt; font-weight: 600;">${labelCalidad}</div>
-                    </div>
+            .header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            border-bottom:3px solid #111827;
+            padding-bottom:8px;
+            margin-bottom:12px;
+            }
 
-                    <!-- THEMES -->
-                    <div style="margin-bottom: 8px; flex-shrink: 0;">
-                        <h2 style="font-size: 10pt; color: #1f2937; font-weight: bold; margin-bottom: 6px;">RESULTADOS POR TEMA</h2>
-                        ${temasHTML}
-                    </div>
+            .title{
+            font-size:18pt;
+            font-weight:700;
+            letter-spacing:.5px;
+            }
 
-                    <!-- COMENTARIOS -->
-                    <div style="background: #f9fafb; padding: 7px; border-radius: 5px; margin-bottom: 8px; border-left: 3px solid #1f2937; max-height: 60px; overflow: hidden; display: flex; flex-direction: column;">
-                        <div style="font-size: 8pt; color: #6b7280; font-weight: 600; margin-bottom: 3px; flex-shrink: 0;">OBSERVACIONES</div>
-                        <div style="font-size: 9pt; color: #374151; line-height: 1.4; white-space: pre-wrap; word-break: break-word; overflow: hidden; text-overflow: ellipsis;">${eva.comentario || '[Sin observaciones]'}</div>
-                    </div>
+            .subtitle{
+            font-size:9pt;
+            color:#6b7280;
+            }
 
-                    <!-- FIRMAS -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; flex-shrink: 0;">
-                        <div style="text-align: center;">
-                            <div style="border-bottom: 1.5px solid #1f2937; margin-bottom: 5px; min-height: 28px;"></div>
-                            <div style="font-size: 10pt; font-weight: 600; color: #1f2937; line-height: 1.2;">${usuario.nombre}</div>
-                            <div style="font-size: 8pt; color: #6b7280; margin-top: 2px;">Firma del Evaluado</div>
-                        </div>
-                        <div style="text-align: center;">
-                            <div style="border-bottom: 1.5px solid #1f2937; margin-bottom: 5px; min-height: 28px;"></div>
-                            <div style="font-size: 10pt; font-weight: 600; color: #1f2937; line-height: 1.2;">${evaluador.nombre}</div>
-                            <div style="font-size: 8pt; color: #6b7280; margin-top: 2px;">Firma del Evaluador</div>
-                        </div>
-                    </div>
-                </div>
+            /* GRID INFO */
+
+            .info-grid{
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:10px;
+            margin-bottom:14px;
+            }
+
+            .card{
+            background:#f9fafb;
+            padding:10px;
+            border-radius:8px;
+            border-left:4px solid #111827;
+            box-shadow:0 1px 2px rgba(0,0,0,.05);
+            }
+
+            .label{
+            font-size:8pt;
+            color:#6b7280;
+            font-weight:600;
+            }
+
+            .value{
+            font-size:11pt;
+            font-weight:700;
+            }
+
+            /* PROMEDIO */
+
+            .score-box{
+            margin:10px 0 16px;
+            background:${colorPromedio};
+            color:${colorPromtexto};
+            border-radius:12px;
+            padding:14px;
+            text-align:center;
+            box-shadow:0 6px 12px rgba(0,0,0,.08);
+            }
+
+            .score-title{
+            font-size:10pt;
+            letter-spacing:.5px;
+            }
+
+            .score-value{
+            font-size:28pt;
+            font-weight:800;
+            }
+
+            .score-label{
+            font-size:11pt;
+            font-weight:600;
+            }
+
+            /* RESULTADOS */
+
+            .section-title{
+            font-size:11pt;
+            font-weight:700;
+            margin-bottom:6px;
+            }
+
+            .result-row{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            background:#f3f4f6;
+            padding:7px 10px;
+            border-radius:6px;
+            margin-bottom:6px;
+            }
+
+            .result-score{
+            background:#111827;
+            color:#fff;
+            padding:3px 8px;
+            border-radius:6px;
+            font-size:9pt;
+            font-weight:600;
+            }
+
+            /* OBSERVACIONES */
+
+            .obs-box{
+            margin-top:10px;
+            background:#fafafa;
+            padding:10px;
+            border-left:4px solid #111827;
+            border-radius:6px;
+            font-size:9pt;
+            }
+
+            /* FIRMAS */
+
+            .signatures{
+            margin-top:auto;
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:40px;
+            }
+
+            .sign{
+            text-align:center;
+            }
+
+            .sign-line{
+            border-bottom:2px solid #111827;
+            height:35px;
+            margin-bottom:6px;
+            }
+
+            .sign-name{
+            font-size:10pt;
+            font-weight:700;
+            }
+
+            .sign-role{
+            font-size:8pt;
+            color:#6b7280;
+            }
+
+            </style>
+
+
+            <div class="page-eval">
+
+            <!-- HEADER -->
+
+            <div class="header">
+
+            <div>
+            <div class="title">EVALUACIÓN DE DESEMPEÑO</div>
+            <div class="subtitle">Documento oficial institucional</div>
+            </div>
+
+            <div style="text-align:right;font-size:8pt;color:#6b7280;">
+            Fecha de emisión<br>
+            ${new Date().toLocaleDateString()}
+            </div>
+
+            </div>
+
+
+            <!-- INFO -->
+
+            <div class="info-grid">
+
+            <div class="card">
+            <div class="label">EVALUADO</div>
+            <div class="value">${usuario.nombre}</div>
+            </div>
+
+            <div class="card">
+            <div class="label">PUESTO</div>
+            <div class="value">${usuario.puesto}</div>
+            </div>
+
+            <div class="card">
+            <div class="label">NÓMINA</div>
+            <div class="value">${usuario.username}</div>
+            </div>
+
+            <div class="card">
+            <div class="label">EVALUADOR</div>
+            <div class="value">${evaluador.nombre}</div>
+            </div>
+
+            <div class="card" style="grid-column:span 2;">
+            <div class="label">TURNO</div>
+            <div class="value">${usuario.turno}</div>
+            </div>
+
+            </div>
+
+
+            <!-- PROMEDIO -->
+
+            <div class="score-box">
+            <div class="score-title">PROMEDIO GENERAL</div>
+            <div class="score-value">${promedioGeneral}</div>
+            <div class="score-label">${labelCalidad}</div>
+            </div>
+
+
+            <!-- RESULTADOS -->
+
+            <div>
+
+            <div class="section-title">RESULTADOS POR TEMA</div>
+
+            ${temasHTML}
+
+            </div>
+
+
+            <!-- OBSERVACIONES -->
+
+            <div class="obs-box">
+            <strong>OBSERVACIONES:</strong><br>
+            ${eva.comentario || 'Sin observaciones'}
+            </div>
+
+
+            <!-- FIRMAS -->
+
+            <div class="signatures">
+
+            <div class="sign">
+            <div class="sign-line"></div>
+            <div class="sign-name">${usuario.nombre}</div>
+            <div class="sign-role">Firma del evaluado</div>
+            </div>
+
+            <div class="sign">
+            <div class="sign-line"></div>
+            <div class="sign-name">${evaluador.nombre}</div>
+            <div class="sign-role">Firma del evaluador</div>
+            </div>
+
+            </div>
+
+            </div>
             `;
-
             document.getElementById('contenidoEvaluacion').innerHTML = html;
         }
 
