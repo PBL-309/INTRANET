@@ -60,71 +60,119 @@
         margin-bottom:30px;
         }
 
-        .header h1{
-
-        font-size:30px;
-
-        font-weight:700;
-
-        letter-spacing:.5px;
-
-        margin-bottom:18px;
-
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 14px;
         }
+
+        .header-kicker {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #bfdbfe;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .header h1{
+        font-size:30px;
+        font-weight:700;
+        letter-spacing:.5px;
+        margin-bottom:4px;
+        line-height: 1.2;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            color: #dbeafe;
+            max-width: 780px;
+        }
+
+        .header-badge {
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.26);
+            color: #eff6ff;
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
         .header-controls {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 16px;
+            grid-template-columns: 1fr;
+            gap: 10px;
             margin-top: 6px;
-            padding: 16px;
+            padding: 14px;
             border-radius: 14px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.28);
+            background: rgba(15, 23, 42, 0.25);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            backdrop-filter: blur(2px);
         }
 
-        .filter-block {
-            background: #ffffff;
-            border-radius: 12px;
-            border: 1px solid #dbeafe;
-            padding: 12px;
+        .filter-row {
+            display: grid;
+            grid-template-columns: 180px 1fr;
+            align-items: center;
+            gap: 14px;
+            padding: 11px 12px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.18);
         }
 
-        .filter-title {
-            display: block;
-            margin-bottom: 10px;
-            color: #1e3a8a;
-            font-size: 13px;
+        .filter-label {
+            color: #dbeafe;
+            font-size: 11px;
             font-weight: 700;
-            letter-spacing: 0.2px;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            background: rgba(15, 23, 42, 0.35);
+            border: 1px solid rgba(147, 197, 253, 0.35);
+            border-radius: 999px;
+            padding: 6px 10px;
+            text-align: center;
         }
 
-        .rol-selector {
+        .filter-options {
             display: flex;
             gap: 8px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+            align-items: center;
+            overflow-x: auto;
+            padding-bottom: 2px;
+            scrollbar-width: thin;
         }
 
         .rol-btn{
-        padding:8px 14px;
+        padding:7px 12px;
         border-radius:999px;
-        border:1px solid #bfdbfe;
-        font-size:13px;
+        border:1px solid rgba(191, 219, 254, 0.42);
+        font-size:12px;
         font-weight:700;
-        background:#eff6ff;
-        color:#1e3a8a;
+        background:rgba(15, 23, 42, 0.25);
+        color:#e2e8f0;
         transition:.2s;
         text-decoration:none;
+        white-space: nowrap;
         }
 
         .rol-btn:hover{
-        border-color:#1e3a8a;
-        background:#dbeafe;
+        border-color:#bfdbfe;
+        background:rgba(14, 165, 233, 0.28);
+        color:#ffffff;
         }
 
         .rol-btn.active{
-        background:#1e3a8a;
-        color:white;
-        border-color:#1e3a8a;
+        background:#ffffff;
+        color:#1e3a8a;
+        border-color:#ffffff;
+        box-shadow:0 2px 10px rgba(15, 23, 42, 0.25);
         }
 
         .stats-info {
@@ -139,6 +187,24 @@
             display: flex;
             gap: 12px;
             flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .active-summary {
+            margin-top: 10px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .summary-chip {
+            font-size: 11px;
+            font-weight: 700;
+            color: #dbeafe;
+            background: rgba(15, 23, 42, 0.35);
+            border: 1px solid rgba(191, 219, 254, 0.4);
+            border-radius: 999px;
+            padding: 5px 10px;
         }
 
         .secondary-action {
@@ -363,6 +429,16 @@
                 padding: 20px;
             }
 
+            .header-top {
+                flex-direction: column;
+                margin-bottom: 12px;
+            }
+
+            .filter-row {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
             .header h1 {
                 font-size: 22px;
             }
@@ -385,11 +461,18 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 Resultados de Evaluaciones del Desempeño</h1>
+            <div class="header-top">
+                <div>
+                    <div class="header-kicker">Panel de Analisis</div>
+                    <h1>Resultados de Evaluaciones del Desempeno</h1>
+                    <div class="header-subtitle">Consulta por rol y turno, compara desempeno y genera reportes en segundos.</div>
+                </div>
+                <div class="header-badge">Vista Institucional</div>
+            </div>
             <div class="header-controls">
-                <div class="filter-block">
-                    <span class="filter-title">Filtrar por Rol</span>
-                    <div class="rol-selector">
+                <div class="filter-row">
+                    <span class="filter-label">Seleccion de Rol</span>
+                    <div class="filter-options">
                         {% for rol_item in roles_disponibles %}
                             <a href="{{ url_for('main.resultados_evaluaciones', rol=rol_item, turno=turno_seleccionado) }}" 
                                class="rol-btn {% if rol_item == rol_seleccionado %}active{% endif %}">
@@ -398,9 +481,9 @@
                         {% endfor %}
                     </div>
                 </div>
-                <div class="filter-block">
-                    <span class="filter-title">Filtrar por Turno</span>
-                    <div class="rol-selector">
+                <div class="filter-row">
+                    <span class="filter-label">Seleccion de Turno</span>
+                    <div class="filter-options">
                         {% for turno_item in turnos_disponibles %}
                             <a href="{{ url_for('main.resultados_evaluaciones', rol=rol_seleccionado, turno=turno_item) }}" 
                                class="rol-btn {% if turno_item == turno_seleccionado %}active{% endif %}">
@@ -409,6 +492,10 @@
                         {% endfor %}
                     </div>
                 </div>
+            </div>
+            <div class="active-summary">
+                <span class="summary-chip">Rol activo: {{ rol_seleccionado }}</span>
+                <span class="summary-chip">Turno activo: {{ turno_seleccionado }}</span>
             </div>
             <div class="stats-info">
                 <div class="stat-card">
