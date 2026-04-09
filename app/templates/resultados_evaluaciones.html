@@ -7,29 +7,27 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
     <style>
         :root{
+        --primary:#111827;
+        --primary-soft:#f3f4f6;
+        --secondary:#9a3412;
 
-        --primary:#1e3a8a;
-        --primary-soft:#eef2ff;
-        --secondary:#0ea5e9;
+        --success:#15803d;
+        --warning:#b45309;
+        --danger:#b91c1c;
 
-        --success:#16a34a;
-        --warning:#f59e0b;
-        --danger:#dc2626;
-
-        --bg:#f8fafc;
+        --bg:#e5e7eb;
         --card:#ffffff;
 
-        --text:#0f172a;
-        --text-soft:#64748b;
+        --text:#111827;
+        --text-soft:#4b5563;
 
-        --border:#e2e8f0;
+        --border:#cbd5e1;
 
-        --radius:14px;
+        --radius:10px;
 
-        --shadow-sm:0 2px 6px rgba(0,0,0,.05);
-        --shadow-md:0 10px 25px rgba(0,0,0,.08);
-        --shadow-lg:0 25px 60px rgba(0,0,0,.15);
-
+        --shadow-sm:none;
+        --shadow-md:none;
+        --shadow-lg:none;
         }
 
         * {
@@ -39,64 +37,72 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            font-family: 'Trebuchet MS', 'Segoe UI', Tahoma, sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
-            padding: 20px;
+            padding: 24px;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1500px;
             margin: 0 auto;
         }
 
         .header{
-        background:#1e3a8a;
-        color:white;
-        border-radius:18px;
-        padding:28px;
-        box-shadow:var(--shadow-md);
+        background:#ffffff;
+        color:#111827;
+        border-radius:22px;
+        padding:24px;
+        border:2px solid #1f2937;
         margin-bottom:30px;
         }
 
         .header-top {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
+            align-items: center;
             gap: 16px;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
+            padding-bottom: 14px;
+            border-bottom: 2px dashed #94a3b8;
         }
 
         .header-kicker {
-            font-size: 12px;
+            display: inline-block;
+            font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #bfdbfe;
+            color: #9a3412;
             margin-bottom: 6px;
             font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid #fdba74;
+            background: #ffedd5;
         }
 
         .header h1{
-        font-size:30px;
+        font-size:34px;
         font-weight:700;
-        letter-spacing:.5px;
+        letter-spacing:.2px;
         margin-bottom:4px;
         line-height: 1.2;
+        color:#111827;
         }
 
         .header-subtitle {
-            font-size: 14px;
-            color: #dbeafe;
+            font-size: 15px;
+            color: #334155;
             max-width: 780px;
         }
 
         .header-badge {
-            background: rgba(255, 255, 255, 0.14);
-            border: 1px solid rgba(255, 255, 255, 0.26);
-            color: #eff6ff;
-            padding: 7px 12px;
-            border-radius: 999px;
+            background: #111827;
+            border: 1px solid #111827;
+            color: #f8fafc;
+            padding: 8px 12px;
+            border-radius: 8px;
             font-size: 12px;
             font-weight: 700;
             letter-spacing: 0.3px;
@@ -106,37 +112,33 @@
         .header-controls {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 10px;
+            gap: 12px;
             margin-top: 6px;
             padding: 14px;
-            border-radius: 14px;
-            background: rgba(15, 23, 42, 0.25);
-            border: 1px solid rgba(148, 163, 184, 0.35);
-            backdrop-filter: blur(2px);
+            border-radius: 12px;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
         }
 
         .filter-row {
             display: grid;
-            grid-template-columns: 180px 1fr;
+            grid-template-columns: 190px 1fr;
             align-items: center;
             gap: 14px;
             padding: 11px 12px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.07);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 8px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-left: 6px solid #334155;
         }
 
         .filter-label {
-            color: #dbeafe;
-            font-size: 11px;
+            color: #111827;
+            font-size: 12px;
             font-weight: 700;
             letter-spacing: 0.6px;
             text-transform: uppercase;
-            background: rgba(15, 23, 42, 0.35);
-            border: 1px solid rgba(147, 197, 253, 0.35);
-            border-radius: 999px;
-            padding: 6px 10px;
-            text-align: center;
+            text-align: left;
         }
 
         .filter-options {
@@ -151,28 +153,28 @@
 
         .rol-btn{
         padding:7px 12px;
-        border-radius:999px;
-        border:1px solid rgba(191, 219, 254, 0.42);
+        border-radius:6px;
+        border:1px solid #64748b;
         font-size:12px;
         font-weight:700;
-        background:rgba(15, 23, 42, 0.25);
-        color:#e2e8f0;
+        background:#ffffff;
+        color:#1f2937;
         transition:.2s;
         text-decoration:none;
         white-space: nowrap;
         }
 
         .rol-btn:hover{
-        border-color:#bfdbfe;
-        background:rgba(14, 165, 233, 0.28);
-        color:#ffffff;
+        border-color:#111827;
+        background:#e2e8f0;
+        color:#111827;
         }
 
         .rol-btn.active{
-        background:#ffffff;
-        color:#1e3a8a;
-        border-color:#ffffff;
-        box-shadow:0 2px 10px rgba(15, 23, 42, 0.25);
+        background:#111827;
+        color:#ffffff;
+        border-color:#111827;
+        box-shadow:none;
         }
 
         .stats-info {
@@ -200,54 +202,48 @@
         .summary-chip {
             font-size: 11px;
             font-weight: 700;
-            color: #dbeafe;
-            background: rgba(15, 23, 42, 0.35);
-            border: 1px solid rgba(191, 219, 254, 0.4);
-            border-radius: 999px;
+            color: #111827;
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 6px;
             padding: 5px 10px;
         }
 
         .secondary-action {
-            background: #0f766e !important;
-            border-color: #0f766e !important;
+            background: #334155 !important;
+            border-color: #334155 !important;
         }
 
         .secondary-action:hover {
-            background: #115e59 !important;
+            background: #1f2937 !important;
         }
 
         .stat-card{
+            background:#0f172a;
+            border-radius:10px;
+            padding:16px;
+            box-shadow:none;
+            border-top:6px solid #f59e0b;
+            transition:.2s;
+            }
 
-            background:white;
-
-            border-radius:14px;
-
-            padding:18px;
-
-            box-shadow:var(--shadow-sm);
-
-            border-left:6px solid var(--primary);
-
-            transition:.25s;
-
+            .stat-card p {
+            color:#cbd5e1;
+            font-size:12px;
+            text-transform:uppercase;
+            letter-spacing:.5px;
+            font-weight:700;
             }
 
             .stat-card:hover{
-
-            transform:translateY(-4px);
-
-            box-shadow:var(--shadow-md);
-
+            transform:translateY(-2px);
+            box-shadow:none;
             }
 
             .stat-card .value{
-
             font-size:26px;
-
             font-weight:800;
-
-            color:var(--primary);
-
+            color:#ffffff;
             }
         .charts-grid {
             display: grid;
@@ -257,27 +253,17 @@
         }
 
  .chart-card{
-
-        background:white;
-
-        border-radius:18px;
-
-        padding:28px;
-
-        box-shadow:var(--shadow-md);
-
-        transition:.3s ease;
-
-        border:1px solid var(--border);
-
+     background:white;
+     border-radius:10px;
+     padding:24px;
+     box-shadow:none;
+     transition:.2s ease;
+     border:2px solid #d1d5db;
         }
 
         .chart-card:hover{
-
-        transform:translateY(-6px);
-
-        box-shadow:var(--shadow-lg);
-
+     transform:translateY(-2px);
+     box-shadow:none;
         }
         .chart-card h3 {
             font-size: 18px;
@@ -315,10 +301,11 @@
 
         .empty-state {
             background: var(--card);
-            border-radius: 16px;
+            border-radius: 10px;
             padding: 60px 30px;
             text-align: center;
-            box-shadow: var(--shadow-lg);
+            box-shadow: none;
+            border: 2px dashed #94a3b8;
         }
 
         .empty-state p {
@@ -348,20 +335,22 @@
         .download-btn {
             display: inline-block;
             padding: 12px 24px;
-            background: #10b981;
+            background: #111827;
             color: white;
             text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s;
-            border: 2px solid #10b981;
+            border-radius: 6px;
+            font-weight: 700;
+            transition: all 0.2s;
+            border: 2px solid #111827;
             cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
 
         .download-btn:hover {
-            background: #059669;
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
+            background: #374151;
+            transform: translateY(-1px);
+            box-shadow: none;
         }
 
         @media print {
@@ -463,11 +452,11 @@
         <div class="header">
             <div class="header-top">
                 <div>
-                    <div class="header-kicker">Panel de Analisis</div>
-                    <h1>Resultados de Evaluaciones del Desempeno</h1>
-                    <div class="header-subtitle">Consulta por rol y turno, compara desempeno y genera reportes en segundos.</div>
+                    <div class="header-kicker">Centro de Control</div>
+                    <h1>Tablero de Resultados Operativos</h1>
+                    <div class="header-subtitle">Panel ejecutivo para revisar avances por rol y turno con acceso directo a reportes individuales.</div>
                 </div>
-                <div class="header-badge">Vista Institucional</div>
+                <div class="header-badge">Corte Diario</div>
             </div>
             <div class="header-controls">
                 <div class="filter-row">
@@ -494,8 +483,8 @@
                 </div>
             </div>
             <div class="active-summary">
-                <span class="summary-chip">Rol activo: {{ rol_seleccionado }}</span>
-                <span class="summary-chip">Turno activo: {{ turno_seleccionado }}</span>
+                <span class="summary-chip">Rol: {{ rol_seleccionado }}</span>
+                <span class="summary-chip">Turno: {{ turno_seleccionado }}</span>
             </div>
             <div class="stats-info">
                 <div class="stat-card">
@@ -515,10 +504,10 @@
             <div class="actions-row">
                 <a href="{{ url_for('main.descargar_resultados_excel', rol=rol_seleccionado, turno=turno_seleccionado) }}" 
                    class="download-btn">
-                    📥 Descargar Resultados en Excel
+                    Exportar Excel
                 </a>
                 <button onclick="abrirModalEvaluacionIndividual()" class="download-btn secondary-action" style="cursor: pointer; border: none;">
-                    📄 Ver Evaluación Individual
+                    Abrir Evaluacion Individual
                 </button>
             </div>
             {% endif %}
@@ -651,9 +640,9 @@ border-radius:22px;
 box-shadow:0 40px 90px rgba(0,0,0,.25);
 overflow:hidden;
 ">
-            <div style="background:#1e3a8a; color: white; padding: 30px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center;">
+            <div style="background:#111827; color: white; padding: 30px; border-radius: 8px 8px 0 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #9a3412;">
                 <div id="modalTitulo">
-                    <h2 style="margin: 0; font-size: 24px;">📄 Evaluación Individual</h2>
+                    <h2 style="margin: 0; font-size: 24px;">Evaluacion Individual</h2>
                     <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 14px;">Búsqueda y visualización de evaluaciones</p>
                 </div>
                 <button onclick="cerrarModalEvaluacion()" style="background: rgba(255,255,255,0.3); border: none; color: white; font-size: 24px; cursor: pointer; padding: 5px 10px; border-radius: 5px; transition: background 0.2s;">✕</button>
@@ -692,8 +681,8 @@ overflow:hidden;
                 <div id="seccionVisualizacion" style="display: none;">
                     <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:20px; flex-wrap:wrap;">
                         <button onclick="volverABusqueda()" style="background: none; border: none; color: var(--primary); font-weight: 700; cursor: pointer; font-size: 14px;">← Volver a Búsqueda</button>
-                        <button onclick="imprimirEvaluacion()" style="padding: 10px 18px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: var(--shadow-sm);">
-                            🖨️ Imprimir Evaluación
+                        <button onclick="imprimirEvaluacion()" style="padding: 10px 18px; background: #111827; color: white; border: none; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: none; text-transform: uppercase;">
+                            Imprimir Evaluacion
                         </button>
                     </div>
 
@@ -851,11 +840,11 @@ overflow:hidden;
                 width: 100%;
                 max-width: 196mm;
                 min-height: 258mm;
-                border: 1px solid #dbe5f1;
-                border-radius: 14px;
+                border: 2px solid #111827;
+                border-radius: 6px;
                 background: #ffffff;
                 padding: 8mm;
-                box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+                box-shadow: none;
                 display: grid;
                 grid-template-rows: auto auto auto auto 1fr auto;
                 gap: 7mm;
@@ -868,7 +857,7 @@ overflow:hidden;
                 justify-content: space-between;
                 align-items: flex-start;
                 gap: 10mm;
-                border-bottom: 2px solid #1e3a8a;
+                border-bottom: 2px solid #111827;
                 padding-bottom: 4mm;
             }
 
@@ -890,7 +879,7 @@ overflow:hidden;
                 line-height: 1.2;
                 font-weight: 800;
                 letter-spacing: 0.2px;
-                color: #1e3a8a;
+                color: #111827;
                 margin-bottom: 1.5mm;
             }
 
@@ -920,9 +909,9 @@ overflow:hidden;
             }
 
             .print-eval-card {
-                background: #f8fafc;
-                border: 1px solid #e2e8f0;
-                border-radius: 10px;
+                background: #ffffff;
+                border: 1px solid #d1d5db;
+                border-radius: 6px;
                 padding: 3mm 3.5mm;
                 min-height: 22mm;
                 display: flex;
@@ -951,11 +940,12 @@ overflow:hidden;
             }
 
             .print-eval-score {
-                border-radius: 12px;
+                border-radius: 6px;
                 padding: 4mm;
                 text-align: center;
                 color: ${colorPromtexto};
                 background: ${colorPromedio};
+                border: 1px solid #111827;
             }
 
             .print-eval-score-title {
@@ -992,8 +982,8 @@ overflow:hidden;
                 align-items: center;
                 gap: 6mm;
                 background: #f8fafc;
-                border: 1px solid #e2e8f0;
-                border-radius: 8px;
+                border: 1px solid #d1d5db;
+                border-radius: 6px;
                 padding: 2.5mm 3.5mm;
                 margin-bottom: 2mm;
                 page-break-inside: avoid;
@@ -1010,7 +1000,7 @@ overflow:hidden;
                 min-width: 24mm;
                 text-align: center;
                 color: #fff;
-                border-radius: 999px;
+                border-radius: 6px;
                 padding: 1.5mm 3mm;
                 font-size: 9pt;
                 font-weight: 800;
@@ -1018,11 +1008,11 @@ overflow:hidden;
             }
 
             .print-eval-obs {
-                border: 1px solid #e2e8f0;
-                border-left: 4px solid #1e3a8a;
-                border-radius: 10px;
+                border: 1px solid #d1d5db;
+                border-left: 4px solid #111827;
+                border-radius: 6px;
                 padding: 3.5mm;
-                background: #f8fafc;
+                background: #ffffff;
             }
 
             .print-eval-obs p {
