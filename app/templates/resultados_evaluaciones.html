@@ -644,9 +644,9 @@
             for (const [nombre, calificacion] of Object.entries(temas)) {
                 const color = calificacion >= 4.5 ? '#22c55e' : (calificacion >= 3.5 ? '#f59e0b' : '#ef4444');
                 temasHTML += `
-                    <div style="display: grid; grid-template-columns: 1fr 60px; gap: 6px; align-items: center; padding: 5px 0; border-bottom: 1px solid #e5e7eb;">
-                        <div style="font-size: 9pt; color: #374151; font-weight: 500;">${nombre}</div>
-                        <div style="background: ${color}; color: white; padding: 4px; text-align: center; border-radius: 5px; font-weight: bold; font-size: 10pt;">${calificacion.toFixed(2)}</div>
+                    <div style="display: grid; grid-template-columns: 1fr 60px; gap: 6px; align-items: center; padding: 6px 0; border-bottom: 1px solid #e5e7eb;">
+                        <div style="font-size: 10pt; color: #374151; font-weight: 500;">${nombre}</div>
+                        <div style="background: ${color}; color: white; padding: 5px; text-align: center; border-radius: 5px; font-weight: bold; font-size: 11pt;">${calificacion.toFixed(2)}</div>
                     </div>
                 `;
             }
@@ -684,7 +684,7 @@
                             margin: 0 !important;
                             padding: 6mm 6mm 6mm 6mm !important;
                             background: white !important;
-                            font-size: 9pt !important;
+                            font-size: 10pt !important;
                             overflow: hidden !important;
                             display: flex !important;
                             flex-direction: column !important;
@@ -692,75 +692,83 @@
                             border: none !important;
                             page-break-after: avoid !important;
                         }
+                        
+                        .btn-print-modal {
+                            display: none !important;
+                        }
                     }
                 </style>
+
+                <div class="btn-print-modal" style="margin-bottom: 15px; display: flex; gap: 10px; justify-content: center;">
+                    <button onclick="imprimirEvaluacion()" style="padding: 11px 24px; background: #1f2937; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; transition: all 0.3s;">🖨️ Imprimir Evaluación</button>
+                </div>
 
                 <div class="page-eval" style="background: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;">
                     
                     <!-- HEADER -->
-                    <div style="text-align: center; margin-bottom: 7px; padding-bottom: 6px; border-bottom: 2px solid #1f2937; flex-shrink: 0;">
-                        <h1 style="font-size: 13pt; color: #1f2937; margin: 0; font-weight: bold;">EVALUACIÓN DE DESEMPEÑO</h1>
-                        <p style="font-size: 7pt; color: #6b7280; margin: 2px 0 0 0;">Documento Oficial</p>
+                    <div style="text-align: center; margin-bottom: 8px; padding-bottom: 7px; border-bottom: 2px solid #1f2937; flex-shrink: 0;">
+                        <h1 style="font-size: 14pt; color: #1f2937; margin: 0; font-weight: bold;">EVALUACIÓN DE DESEMPEÑO</h1>
+                        <p style="font-size: 8pt; color: #6b7280; margin: 2px 0 0 0;">Documento Oficial</p>
                     </div>
 
                     <!-- INFO CARDS ROW 1 -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 7px; flex-shrink: 0;">
-                        <div style="background: #f3f4f6; padding: 6px; border-radius: 5px; border-left: 3px solid #1f2937;">
-                            <div style="font-size: 7pt; color: #6b7280; font-weight: 600; margin-bottom: 1px;">EVALUADO</div>
-                            <div style="font-size: 9pt; color: #1f2937; font-weight: 600; line-height: 1.1;">${usuario.nombre}</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 8px; flex-shrink: 0;">
+                        <div style="background: #f3f4f6; padding: 7px; border-radius: 5px; border-left: 3px solid #1f2937;">
+                            <div style="font-size: 8pt; color: #6b7280; font-weight: 600; margin-bottom: 2px;">EVALUADO</div>
+                            <div style="font-size: 10pt; color: #1f2937; font-weight: 600; line-height: 1.2;">${usuario.nombre}</div>
                         </div>
-                        <div style="background: #f3f4f6; padding: 6px; border-radius: 5px; border-left: 3px solid #1f2937;">
-                            <div style="font-size: 7pt; color: #6b7280; font-weight: 600; margin-bottom: 1px;">PUESTO</div>
-                            <div style="font-size: 9pt; color: #1f2937; font-weight: 600; line-height: 1.1;">${usuario.puesto}</div>
+                        <div style="background: #f3f4f6; padding: 7px; border-radius: 5px; border-left: 3px solid #1f2937;">
+                            <div style="font-size: 8pt; color: #6b7280; font-weight: 600; margin-bottom: 2px;">PUESTO</div>
+                            <div style="font-size: 10pt; color: #1f2937; font-weight: 600; line-height: 1.2;">${usuario.puesto}</div>
                         </div>
-                        <div style="background: #f3f4f6; padding: 6px; border-radius: 5px; border-left: 3px solid #1f2937;">
-                            <div style="font-size: 7pt; color: #6b7280; font-weight: 600; margin-bottom: 1px;">NÓMINA</div>
-                            <div style="font-size: 9pt; color: #1f2937; font-weight: 600; line-height: 1.1;">${usuario.username}</div>
+                        <div style="background: #f3f4f6; padding: 7px; border-radius: 5px; border-left: 3px solid #1f2937;">
+                            <div style="font-size: 8pt; color: #6b7280; font-weight: 600; margin-bottom: 2px;">NÓMINA</div>
+                            <div style="font-size: 10pt; color: #1f2937; font-weight: 600; line-height: 1.2;">${usuario.username}</div>
                         </div>
                     </div>
 
                     <!-- INFO CARDS ROW 2 -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 7px; flex-shrink: 0;">
-                        <div style="background: #f3f4f6; padding: 6px; border-radius: 5px; border-left: 3px solid #1f2937;">
-                            <div style="font-size: 7pt; color: #6b7280; font-weight: 600; margin-bottom: 1px;">EVALUADOR</div>
-                            <div style="font-size: 9pt; color: #1f2937; font-weight: 600; line-height: 1.1;">${evaluador.nombre}</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 8px; flex-shrink: 0;">
+                        <div style="background: #f3f4f6; padding: 7px; border-radius: 5px; border-left: 3px solid #1f2937;">
+                            <div style="font-size: 8pt; color: #6b7280; font-weight: 600; margin-bottom: 2px;">EVALUADOR</div>
+                            <div style="font-size: 10pt; color: #1f2937; font-weight: 600; line-height: 1.2;">${evaluador.nombre}</div>
                         </div>
-                        <div style="background: #f3f4f6; padding: 6px; border-radius: 5px; border-left: 3px solid #1f2937; grid-column: 2/4;">
-                            <div style="font-size: 7pt; color: #6b7280; font-weight: 600; margin-bottom: 1px;">TURNO</div>
-                            <div style="font-size: 9pt; color: #1f2937; font-weight: 600; line-height: 1.1;">${usuario.turno}</div>
+                        <div style="background: #f3f4f6; padding: 7px; border-radius: 5px; border-left: 3px solid #1f2937; grid-column: 2/4;">
+                            <div style="font-size: 8pt; color: #6b7280; font-weight: 600; margin-bottom: 2px;">TURNO</div>
+                            <div style="font-size: 10pt; color: #1f2937; font-weight: 600; line-height: 1.2;">${usuario.turno}</div>
                         </div>
                     </div>
 
                     <!-- PROMEDIO DESTACADO -->
-                    <div style="background: ${colorPromedio}; color: ${colorPromtexto}; padding: 8px; border-radius: 7px; text-align: center; margin-bottom: 7px; flex-shrink: 0;">
-                        <div style="font-size: 8pt; font-weight: 600; margin-bottom: 2px;">PROMEDIO GENERAL</div>
-                        <div style="font-size: 18pt; font-weight: bold; line-height: 1; margin-bottom: 1px;">${promedioGeneral}</div>
-                        <div style="font-size: 9pt; font-weight: 600;">${labelCalidad}</div>
+                    <div style="background: ${colorPromedio}; color: ${colorPromtexto}; padding: 9px; border-radius: 7px; text-align: center; margin-bottom: 8px; flex-shrink: 0;">
+                        <div style="font-size: 9pt; font-weight: 600; margin-bottom: 3px;">PROMEDIO GENERAL</div>
+                        <div style="font-size: 20pt; font-weight: bold; line-height: 1; margin-bottom: 2px;">${promedioGeneral}</div>
+                        <div style="font-size: 10pt; font-weight: 600;">${labelCalidad}</div>
                     </div>
 
                     <!-- THEMES -->
-                    <div style="margin-bottom: 7px; flex-shrink: 0;">
-                        <h2 style="font-size: 9pt; color: #1f2937; font-weight: bold; margin-bottom: 5px;">RESULTADOS POR TEMA</h2>
+                    <div style="margin-bottom: 8px; flex-shrink: 0;">
+                        <h2 style="font-size: 10pt; color: #1f2937; font-weight: bold; margin-bottom: 6px;">RESULTADOS POR TEMA</h2>
                         ${temasHTML}
                     </div>
 
                     <!-- COMENTARIOS -->
-                    <div style="background: #f9fafb; padding: 6px; border-radius: 5px; margin-bottom: 7px; border-left: 3px solid #1f2937; flex: 1; min-height: 15px; overflow: hidden; display: flex; flex-direction: column;">
-                        <div style="font-size: 7pt; color: #6b7280; font-weight: 600; margin-bottom: 3px; flex-shrink: 0;">OBSERVACIONES</div>
-                        <div style="font-size: 8pt; color: #374151; line-height: 1.3; white-space: pre-wrap; word-break: break-word; overflow: hidden; text-overflow: ellipsis; flex: 1;">${eva.comentario || '[Sin observaciones]'}</div>
+                    <div style="background: #f9fafb; padding: 7px; border-radius: 5px; margin-bottom: 8px; border-left: 3px solid #1f2937; max-height: 60px; overflow: hidden; display: flex; flex-direction: column;">
+                        <div style="font-size: 8pt; color: #6b7280; font-weight: 600; margin-bottom: 3px; flex-shrink: 0;">OBSERVACIONES</div>
+                        <div style="font-size: 9pt; color: #374151; line-height: 1.4; white-space: pre-wrap; word-break: break-word; overflow: hidden; text-overflow: ellipsis;">${eva.comentario || '[Sin observaciones]'}</div>
                     </div>
 
                     <!-- FIRMAS -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 6px; flex-shrink: 0;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; flex-shrink: 0;">
                         <div style="text-align: center;">
-                            <div style="border-bottom: 1.5px solid #1f2937; margin-bottom: 4px; min-height: 25px;"></div>
-                            <div style="font-size: 9pt; font-weight: 600; color: #1f2937; line-height: 1.1;">${usuario.nombre}</div>
-                            <div style="font-size: 7pt; color: #6b7280; margin-top: 1px;">Firma del Evaluado</div>
+                            <div style="border-bottom: 1.5px solid #1f2937; margin-bottom: 5px; min-height: 28px;"></div>
+                            <div style="font-size: 10pt; font-weight: 600; color: #1f2937; line-height: 1.2;">${usuario.nombre}</div>
+                            <div style="font-size: 8pt; color: #6b7280; margin-top: 2px;">Firma del Evaluado</div>
                         </div>
                         <div style="text-align: center;">
-                            <div style="border-bottom: 1.5px solid #1f2937; margin-bottom: 4px; min-height: 25px;"></div>
-                            <div style="font-size: 9pt; font-weight: 600; color: #1f2937; line-height: 1.1;">${evaluador.nombre}</div>
-                            <div style="font-size: 7pt; color: #6b7280; margin-top: 1px;">Firma del Evaluador</div>
+                            <div style="border-bottom: 1.5px solid #1f2937; margin-bottom: 5px; min-height: 28px;"></div>
+                            <div style="font-size: 10pt; font-weight: 600; color: #1f2937; line-height: 1.2;">${evaluador.nombre}</div>
+                            <div style="font-size: 8pt; color: #6b7280; margin-top: 2px;">Firma del Evaluador</div>
                         </div>
                     </div>
                 </div>
