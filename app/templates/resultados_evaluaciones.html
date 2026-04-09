@@ -40,7 +40,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #ecf0f1 100%);
+            background: var(--bg);
             color: var(--text);
             min-height: 100vh;
             padding: 20px;
@@ -52,19 +52,12 @@
         }
 
         .header{
-
-        background:linear-gradient(120deg,#1e3a8a,#0ea5e9);
-
+        background:#1e3a8a;
         color:white;
-
         border-radius:18px;
-
-        padding:32px;
-
-        box-shadow:var(--shadow-lg);
-
+        padding:28px;
+        box-shadow:var(--shadow-md);
         margin-bottom:30px;
-
         }
 
         .header h1{
@@ -79,57 +72,82 @@
 
         }
         .header-controls {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-top: 6px;
+            padding: 16px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+        }
+
+        .filter-block {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #dbeafe;
+            padding: 12px;
+        }
+
+        .filter-title {
+            display: block;
+            margin-bottom: 10px;
+            color: #1e3a8a;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
         }
 
         .rol-selector {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
         }
 
         .rol-btn{
-
-        padding:10px 22px;
-
+        padding:8px 14px;
         border-radius:999px;
-
-        border:2px solid var(--border);
-
-        font-weight:600;
-
-        background:white;
-
-        transition:.25s;
-
+        border:1px solid #bfdbfe;
+        font-size:13px;
+        font-weight:700;
+        background:#eff6ff;
+        color:#1e3a8a;
+        transition:.2s;
+        text-decoration:none;
         }
 
         .rol-btn:hover{
-
-        border-color:var(--primary);
-
-        color:var(--primary);
-
+        border-color:#1e3a8a;
+        background:#dbeafe;
         }
 
         .rol-btn.active{
-
-        background:var(--primary);
-
+        background:#1e3a8a;
         color:white;
-
-        border-color:var(--primary);
-
+        border-color:#1e3a8a;
         }
 
         .stats-info {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 15px;
-            margin-top: 20px;
+            margin-top: 16px;
+        }
+
+        .actions-row {
+            margin-top: 18px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .secondary-action {
+            background: #0f766e !important;
+            border-color: #0f766e !important;
+        }
+
+        .secondary-action:hover {
+            background: #115e59 !important;
         }
 
         .stat-card{
@@ -369,8 +387,8 @@
         <div class="header">
             <h1>📊 Resultados de Evaluaciones del Desempeño</h1>
             <div class="header-controls">
-                <div>
-                    <strong style="display: block; margin-bottom: 10px; color: var(--text);">Rol:</strong>
+                <div class="filter-block">
+                    <span class="filter-title">Filtrar por Rol</span>
                     <div class="rol-selector">
                         {% for rol_item in roles_disponibles %}
                             <a href="{{ url_for('main.resultados_evaluaciones', rol=rol_item, turno=turno_seleccionado) }}" 
@@ -380,8 +398,8 @@
                         {% endfor %}
                     </div>
                 </div>
-                <div>
-                    <strong style="display: block; margin-bottom: 10px; color: var(--text);">Turno:</strong>
+                <div class="filter-block">
+                    <span class="filter-title">Filtrar por Turno</span>
                     <div class="rol-selector">
                         {% for turno_item in turnos_disponibles %}
                             <a href="{{ url_for('main.resultados_evaluaciones', rol=rol_seleccionado, turno=turno_item) }}" 
@@ -407,12 +425,12 @@
                 </div>
             </div>
             {% if total_evaluaciones|int > 0 %}
-            <div style="margin-top: 20px; display: flex; gap: 15px; flex-wrap: wrap;">
+            <div class="actions-row">
                 <a href="{{ url_for('main.descargar_resultados_excel', rol=rol_seleccionado, turno=turno_seleccionado) }}" 
                    class="download-btn">
                     📥 Descargar Resultados en Excel
                 </a>
-                <button onclick="abrirModalEvaluacionIndividual()" class="download-btn" style="background: #10b981; cursor: pointer; border: none;">
+                <button onclick="abrirModalEvaluacionIndividual()" class="download-btn secondary-action" style="cursor: pointer; border: none;">
                     📄 Ver Evaluación Individual
                 </button>
             </div>
@@ -546,7 +564,7 @@ border-radius:22px;
 box-shadow:0 40px 90px rgba(0,0,0,.25);
 overflow:hidden;
 ">
-            <div style="background:linear-gradient(120deg,#1e3a8a,#0ea5e9); color: white; padding: 30px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center;">
+            <div style="background:#1e3a8a; color: white; padding: 30px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center;">
                 <div id="modalTitulo">
                     <h2 style="margin: 0; font-size: 24px;">📄 Evaluación Individual</h2>
                     <p style="margin: 8px 0 0 0; opacity: 0.9; font-size: 14px;">Búsqueda y visualización de evaluaciones</p>
@@ -850,7 +868,7 @@ overflow:hidden;
                 padding: 4mm;
                 text-align: center;
                 color: ${colorPromtexto};
-                background: linear-gradient(135deg, ${colorPromedio}, rgba(15, 23, 42, 0.35));
+                background: ${colorPromedio};
             }
 
             .print-eval-score-title {
@@ -1010,7 +1028,6 @@ overflow:hidden;
                             </div>
                         </div>
                         <div class="print-eval-meta">
-                            <div><strong>Folio:</strong> ${eva.id || 'N/A'}</div>
                             <div><strong>Fecha:</strong> ${new Date().toLocaleDateString()}</div>
                         </div>
                     </div>
