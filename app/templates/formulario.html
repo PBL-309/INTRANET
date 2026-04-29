@@ -1,237 +1,687 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Datos de Emergencia</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Contacto de Emergencia</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1976d2;
+            --primary-dark: #0d47a1;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+            --light-bg: #f5f7fa;
+            --border-color: #e0e0e0;
+        }
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-body{
-    background:#f5f6fa;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    min-height:100vh;
-}
+        .form-wrapper {
+            width: 100%;
+            max-width: 700px;
+        }
 
-.form-container{
-    background:white;
-    padding:30px;
-    border-radius:12px;
-    box-shadow:0 8px 20px rgba(0,0,0,.08);
-    max-width:700px;
-    width:100%;
-}
+        .form-container {
+            background: white;
+            padding: 45px;
+            border-radius: 16px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+            animation: slideUp 0.5s ease-out;
+        }
 
-.question{
-    background:#eef6ff;
-    border:1px solid #cfe2ff;
-    padding:20px;
-    border-radius:10px;
-    margin-bottom:25px;
-    font-weight:600;
-    color:#1d3557;
-}
-
-.radio-group{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    margin-top:10px;
-}
-
-.radio-group input{
-    display:none;
-}
-
-.radio-group label{
-    padding:8px 14px;
-    border-radius:20px;
-    border:1px solid #ccc;
-    cursor:pointer;
-    background:#f8f9fa;
-    transition:.25s;
-}
-
-.radio-group label:hover{
-    background:#e2e6ea;
-}
-
-.radio-group input:checked + label{
-    background:#90caf9;
-    border-color:#42a5f5;
-    font-weight:bold;
-}
-
-input[type=text]{
-    margin-top:10px;
-}
-
-.btn-custom{
-    background:#1976d2;
-    color:white;
-    border:none;
-    padding:10px 25px;
-    border-radius:6px;
-    font-weight:bold;
-}
-
-.btn-custom:hover{
-    background:#0d47a1;
-}
-
-</style>
-</head>
-
-
-<body>
-
-<div class="form-container">
-
-<h3 class="text-center mb-4">Registro de Contacto de Emergencia</h3>
-
-<form method="POST" action="{{ url_for('main.guardar_contacto') }}">
-    {{ csrf_token() }}
-
-    <!-- Nombre -->
-    <div class="question">
-    Nombre del contacto de emergencia *
-    <input type="text" name="nombre_contacto"
-    class="form-control" required
-    pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$"
-    title="Solo se permiten letras y espacios"
-    data-letters-only>
-    </div>
-
-
-<!-- Parentesco -->
-<div class="question">
-Parentesco con el contacto *
-
-<div class="radio-group">
-
-<input type="radio" id="padre"
-name="parentesco" value="Padre" required>
-<label for="padre">Padre</label>
-
-<input type="radio" id="madre"
-name="parentesco" value="Madre">
-<label for="madre">Madre</label>
-
-<input type="radio" id="esposo"
-name="parentesco" value="Esposo(a)">
-<label for="esposo">Esposo(a)</label>
-
-<input type="radio" id="hermano"
-name="parentesco" value="Hermano(a)">
-<label for="hermano">Hermano(a)</label>
-
-<input type="radio" id="otro"
-name="parentesco" value="Otro">
-<label for="otro">Otro</label>
-
-</div>
-
-<input type="text"
-name="otro_parentesco"
-id="otro_parentesco"
-class="form-control mt-2"
-placeholder="Especificar si seleccionó 'Otro'"
-pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$"
-title="Solo se permiten letras y espacios"
-data-letters-only>
-
-</div>
-
-
-<!-- Teléfono -->
-<div class="question">
-Contacto de emergencia (número completo de celular) *
-
-<input type="tel"
-name="telefono_contacto"
-class="form-control"
-maxlength="10"
-inputmode="numeric"
-pattern="^[0-9]{10}$"
-title="Ingrese exactamente 10 dígitos"
-required>
-
-</div>
-
-
-<!-- Calle -->
-<div class="question">
-Calle y número del domicilio del contacto de emergencia *
-
-<input type="text"
-name="calle_numero"
-class="form-control"
-required
-pattern="^[A-Za-z0-9ÁÉÍÓÚáéíóúÑñ\s\.\-#]+$"
-title="Solo letras, números, espacios y . - #">
-
-</div>
-
-
-<!-- Colonia -->
-<div class="question">
-Colonia del domicilio del contacto de emergencia *
-
-<input type="text"
-name="colonia"
-class="form-control"
-required
-pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ0-9\s]+$"
-title="Solo letras, números y espacios">
-
-</div>
-
-
-<div class="text-center mt-4">
-<button type="submit"
-class="btn-custom">
-Guardar información
-</button>
-</div>
-
-</form>
-
-</div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const otroRadio = document.getElementById('otro');
-        const otroInput = document.getElementById('otro_parentesco');
-        const parentescoRadios = document.querySelectorAll('input[name="parentesco"]');
-
-        function toggleOtro() {
-            otroInput.required = otroRadio.checked;
-            if (!otroRadio.checked) {
-                otroInput.value = '';
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
-        parentescoRadios.forEach(function(radio) {
-            radio.addEventListener('change', toggleOtro);
-        });
+        .form-header {
+            text-align: center;
+            margin-bottom: 35px;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 20px;
+        }
 
-        toggleOtro();
+        .form-header h2 {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
 
-        const telefono = document.querySelector('input[name="telefono_contacto"]');
-        telefono.addEventListener('input', function() {
-            this.value = this.value.replace(/\D/g, '').slice(0, 10);
-        });
+        .form-header p {
+            color: #666;
+            font-size: 14px;
+            margin: 0;
+        }
 
-        document.querySelectorAll('input[data-letters-only]').forEach(function(input) {
-            input.addEventListener('input', function() {
+        .form-section {
+            margin-bottom: 28px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .form-label {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+
+        .form-label .required {
+            color: var(--danger-color);
+            margin-left: 4px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .form-label i {
+            margin-right: 8px;
+            color: var(--primary-color);
+        }
+
+        .form-control, .form-select {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background-color: #fafafa;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+            outline: none;
+        }
+
+        .form-control::placeholder {
+            color: #999;
+        }
+
+        .form-control:invalid:not(:placeholder-shown),
+        .form-select:invalid:not(:placeholder-shown) {
+            border-color: var(--danger-color);
+        }
+
+        .form-control:valid:not(:placeholder-shown),
+        .form-select:valid:not(:placeholder-shown) {
+            border-color: var(--success-color);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%234caf50' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px 16px;
+            padding-right: 35px;
+        }
+
+        .invalid-feedback {
+            display: block;
+            color: var(--danger-color);
+            font-size: 13px;
+            margin-top: 6px;
+            font-weight: 500;
+        }
+
+        .radio-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .radio-group input {
+            display: none;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            background: #fafafa;
+            font-weight: 600;
+            color: #333;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-height: 50px;
+        }
+
+        .radio-label:hover {
+            background: #f0f0f0;
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .radio-group input:checked + .radio-label {
+            background: linear-gradient(135deg, var(--primary-color), #0d47a1);
+            color: white;
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+        }
+
+        .hidden-field {
+            display: none;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .hidden-field.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .input-group-text {
+            background: #fafafa;
+            border: 2px solid var(--border-color);
+            color: #666;
+            border-radius: 8px 0 0 8px;
+        }
+
+        .form-control.phone-input {
+            border-radius: 0 8px 8px 0;
+        }
+
+        .input-group .form-control:focus ~ .input-group-text,
+        .input-group .form-control:focus + .input-group-text {
+            border-color: var(--primary-color);
+            background: white;
+        }
+
+        .form-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 35px;
+            padding-top: 25px;
+            border-top: 2px solid var(--border-color);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            grid-column: 1 / -1;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(25, 118, 210, 0.3);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, var(--success-color), #388e3c);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-export:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3);
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: var(--danger-color);
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--danger-color);
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-message {
+            background: #e8f5e9;
+            color: var(--success-color);
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--success-color);
+            display: none;
+        }
+
+        .admin-section {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 3px dashed var(--border-color);
+        }
+
+        .admin-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(25, 118, 210, 0.3);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .required-info {
+            background: #e3f2fd;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #1976d2;
+            font-size: 13px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .required-info i {
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 576px) {
+            .form-container {
+                padding: 25px;
+            }
+
+            .form-header h2 {
+                font-size: 22px;
+            }
+
+            .radio-group {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .form-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-wrapper">
+        <div class="form-container">
+            <div class="form-header">
+                <h2><i class="bi bi-person-check"></i> Contacto de Emergencia</h2>
+                <p>Por favor completa todos los campos de manera exacta</p>
+            </div>
+
+            <div class="required-info">
+                <i class="bi bi-info-circle"></i>
+                <span>Los campos marcados con <span class="required">*</span> son obligatorios</span>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+
+            <form id="emergenciaForm" method="POST" action="{{ url_for('main.guardar_contacto') }}" novalidate>
+                {{ csrf_token() }}
+
+                <!-- Nombre del Contacto -->
+                <div class="form-section">
+                    <label class="form-label" for="nombre_contacto">
+                        <i class="bi bi-person-fill"></i>
+                        Nombre del Contacto de Emergencia
+                        <span class="required">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="nombre_contacto" name="nombre_contacto"
+                        placeholder="Ej: Juan Pérez García"
+                        required minlength="3" maxlength="120">
+                    <div class="invalid-feedback">
+                        Por favor ingresa un nombre válido (solo letras y espacios, mínimo 3 caracteres)
+                    </div>
+                </div>
+
+                <!-- Parentesco -->
+                <div class="form-section">
+                    <label class="form-label">
+                        <i class="bi bi-people-fill"></i>
+                        Parentesco
+                        <span class="required">*</span>
+                    </label>
+                    <div class="radio-group">
+                        <input type="radio" id="padre" name="parentesco" value="Padre" required>
+                        <label for="padre" class="radio-label">Padre</label>
+
+                        <input type="radio" id="madre" name="parentesco" value="Madre">
+                        <label for="madre" class="radio-label">Madre</label>
+
+                        <input type="radio" id="esposo" name="parentesco" value="Esposo(a)">
+                        <label for="esposo" class="radio-label">Esposo(a)</label>
+
+                        <input type="radio" id="hermano" name="parentesco" value="Hermano(a)">
+                        <label for="hermano" class="radio-label">Hermano(a)</label>
+
+                        <input type="radio" id="otro" name="parentesco" value="Otro">
+                        <label for="otro" class="radio-label">Otro</label>
+                    </div>
+                </div>
+
+                <!-- Otro Parentesco -->
+                <div class="form-section hidden-field" id="otroParentescoSection">
+                    <label class="form-label" for="otro_parentesco">
+                        <i class="bi bi-pencil-fill"></i>
+                        Especificar Parentesco
+                        <span class="required">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="otro_parentesco" name="otro_parentesco"
+                        placeholder="Ej: Tío, Primo, Amigo"
+                        maxlength="50">
+                    <div class="invalid-feedback">
+                        Por favor ingresa un parentesco válido (solo letras y espacios)
+                    </div>
+                </div>
+
+                <!-- Teléfono -->
+                <div class="form-section">
+                    <label class="form-label" for="telefono_contacto">
+                        <i class="bi bi-telephone-fill"></i>
+                        Teléfono de Contacto
+                        <span class="required">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">+52</span>
+                        <input type="tel" class="form-control phone-input" id="telefono_contacto"
+                            name="telefono_contacto" placeholder="Ej: 5512345678"
+                            required maxlength="10">
+                    </div>
+                    <div class="invalid-feedback">
+                        Por favor ingresa exactamente 10 dígitos
+                    </div>
+                </div>
+
+                <!-- Calle y Número -->
+                <div class="form-section">
+                    <label class="form-label" for="calle_numero">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        Calle y Número
+                        <span class="required">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="calle_numero" name="calle_numero"
+                        placeholder="Ej: Avenida Principal 123"
+                        required minlength="5" maxlength="150">
+                    <div class="invalid-feedback">
+                        Por favor ingresa una dirección válida (mínimo 5 caracteres)
+                    </div>
+                </div>
+
+                <!-- Colonia -->
+                <div class="form-section">
+                    <label class="form-label" for="colonia">
+                        <i class="bi bi-building"></i>
+                        Colonia
+                        <span class="required">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="colonia" name="colonia"
+                        placeholder="Ej: Centro, Miguel Hidalgo"
+                        required minlength="2" maxlength="150">
+                    <div class="invalid-feedback">
+                        Por favor ingresa una colonia válida (mínimo 2 caracteres)
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit" id="submitBtn">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Guardar Información</span>
+                    </button>
+                </div>
+
+                <!-- Sección Admin (oculta por defecto) -->
+                <div class="admin-section" id="adminSection" style="display: none;">
+                    <div class="admin-title">
+                        <i class="bi bi-shield-exclamation"></i>
+                        Panel Administrativo
+                    </div>
+                    <button type="button" class="btn-export" id="exportBtn">
+                        <i class="bi bi-file-earmark-excel"></i>
+                        <span>Descargar Respuestas (Excel)</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('emergenciaForm');
+            const nombre = document.getElementById('nombre_contacto');
+            const telefono = document.getElementById('telefono_contacto');
+            const otroRadio = document.getElementById('otro');
+            const otroInput = document.getElementById('otro_parentesco');
+            const otroSection = document.getElementById('otroParentescoSection');
+            const parentescoRadios = document.querySelectorAll('input[name="parentesco"]');
+            const submitBtn = document.getElementById('submitBtn');
+            const exportBtn = document.getElementById('exportBtn');
+            const adminSection = document.getElementById('adminSection');
+            const calle = document.getElementById('calle_numero');
+
+            // Mostrar panel admin si es usuario autorizado
+            fetch('{{ url_for("main.check_admin") }}', { method: 'GET' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.is_admin) {
+                        adminSection.style.display = 'block';
+                    }
+                })
+                .catch(e => console.log('No admin check available'));
+
+            // Validar solo letras en nombre
+            nombre.addEventListener('input', function () {
                 this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, '');
             });
-        });
-    });
-</script>
 
+            // Validar solo números en teléfono
+            telefono.addEventListener('input', function () {
+                this.value = this.value.replace(/\D/g, '').slice(0, 10);
+                this.style.textAlign = 'center';
+            });
+
+            // Mostrar/ocultar campo "Otro parentesco"
+            function toggleOtroParentesco() {
+                if (otroRadio.checked) {
+                    otroSection.classList.add('show');
+                    otroInput.required = true;
+                } else {
+                    otroSection.classList.remove('show');
+                    otroInput.required = false;
+                    otroInput.value = '';
+                }
+            }
+
+            parentescoRadios.forEach(radio => {
+                radio.addEventListener('change', toggleOtroParentesco);
+            });
+
+            // Validar letras en otro parentesco
+            otroInput.addEventListener('input', function () {
+                this.value = this.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, '');
+            });
+
+            // Validación del formulario
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                if (!form.checkValidity() === false) {
+                    e.stopPropagation();
+                }
+
+                // Validaciones personalizadas
+                let isValid = true;
+                const errorMsg = document.getElementById('errorMessage');
+                errorMsg.classList.remove('show');
+
+                if (nombre.value.trim().length < 3) {
+                    isValid = false;
+                    errorMsg.textContent = '❌ El nombre debe tener al menos 3 caracteres';
+                    errorMsg.classList.add('show');
+                }
+
+                if (!/^\d{10}$/.test(telefono.value)) {
+                    isValid = false;
+                    errorMsg.textContent = '❌ El teléfono debe tener exactamente 10 dígitos';
+                    errorMsg.classList.add('show');
+                }
+
+                if (!document.querySelector('input[name="parentesco"]:checked')) {
+                    isValid = false;
+                    errorMsg.textContent = '❌ Debes seleccionar un parentesco';
+                    errorMsg.classList.add('show');
+                }
+
+                if (otroRadio.checked && otroInput.value.trim().length < 2) {
+                    isValid = false;
+                    errorMsg.textContent = '❌ Debes especificar el parentesco';
+                    errorMsg.classList.add('show');
+                }
+
+                if (calle.value.trim().length < 5) {
+                    isValid = false;
+                    errorMsg.textContent = '❌ La dirección debe ser más completa';
+                    errorMsg.classList.add('show');
+                }
+
+                if (isValid) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span class="loading-spinner"></span> <span>Guardando...</span>';
+                    
+                    setTimeout(() => {
+                        form.submit();
+                    }, 500);
+                } else {
+                    form.classList.add('was-validated');
+                }
+            });
+
+            // Exportar a Excel
+            exportBtn.addEventListener('click', function () {
+                exportBtn.disabled = true;
+                exportBtn.innerHTML = '<span class="loading-spinner"></span> <span>Descargando...</span>';
+
+                fetch('{{ url_for("main.export_contactos_excel") }}', { method: 'GET' })
+                    .then(r => r.blob())
+                    .then(blob => {
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'Contactos_Emergencia_' + new Date().toISOString().split('T')[0] + '.xlsx';
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+
+                        exportBtn.disabled = false;
+                        exportBtn.innerHTML = '<i class="bi bi-file-earmark-excel"></i> <span>Descargar Respuestas (Excel)</span>';
+                    })
+                    .catch(err => {
+                        alert('Error al descargar: ' + err);
+                        exportBtn.disabled = false;
+                        exportBtn.innerHTML = '<i class="bi bi-file-earmark-excel"></i> <span>Descargar Respuestas (Excel)</span>';
+                    });
+            });
+
+            // Mensaje de éxito si viene de un POST exitoso
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('success') === '1') {
+                const successMsg = document.getElementById('successMessage');
+                successMsg.textContent = '✅ Datos guardados correctamente';
+                successMsg.classList.add('show');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+    </script>
 </body>
+
 </html>

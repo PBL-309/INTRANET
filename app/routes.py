@@ -2188,3 +2188,112 @@ def guardar_contacto():
         db.session.rollback()
         flash(f"Error al guardar el contacto: {str(e)}", "danger")
         return redirect(url_for('main.index'))
+
+
+@main.route('/check_admin')
+def check_admin():
+    """Verifica si el usuario actual es administrador"""
+    is_admin = current_user.is_authenticated and current_user.id == 2
+    return jsonify({"is_admin": is_admin})
+
+
+@main.route('/export_contactos_excel')
+@login_required
+def export_contactos_excel():
+    """Exporta todos los contactos de emergencia a un archivo Excel"""
+    try:
+        # Verificar permisos de admin
+        if current_user.id != 2:
+            return jsonify({"error": "No tienes permisos para descargar este archivo"}), 403
+        
+        # Obtener todos los contactos
+        contactos = ContactoEmergencia.query.all()
+        
+        # Preparar datos para Excel
+        datos = []
+        for contacto in contactos:
+            usuario = User.query.get(contacto.user_id)
+            
+            # Determinar parentesco completo
+            parentesco_completo = contacto.parentesco
+            if contacto.parentesco == "Otro" and contacto.otro_parentesco:
+                parentesco_completo = f"Otro ({contacto.otro_parentesco})"
+            
+            datos.append({
+                'Nombre del Empleado': usuario.nombre if usuario else 'N/A',
+                'Username': contacto.username,
+                'Turno': usuario.turno if usuario else 'N/A',
+                'Puesto': usuario.puesto if usuario else 'N/A',
+                'Nombre del Contacto': contacto.nombre_contacto,
+                'Parentesco': parentesco_completo,
+                'Teléfono': contacto.telefono_contacto,
+                'Calle y Número': contacto.calle_numero,
+                'Colonia': contacto.colonia,
+                'Fecha de Registro': contacto.fecha_registro.strftime('%Y-%m-%d %H:%M:%S') if contacto.fecha_registro else 'N/A'
+            })
+        
+        # Crear DataFrame
+        df = pd.DataFrame(datos)
+        
+        # Crear archivo Excel con formato
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, sheet_name='Contactos', index=False)
+            
+            # Aplicar estilos
+            from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+            
+            workbook = writer.book
+            worksheet = writer.sheets['Contactos']
+            
+            # Estilos
+            header_fill = PatternFill(start_color="2563eb", end_color="2563eb", fill_type="solid")
+            header_font = Font(bold=True, color="FFFFFF", size=12)
+            thin_border = Border(
+                left=Side(style='thin'),
+                right=Side(style='thin'),
+                top=Side(style='thin'),
+                bottom=Side(style='thin')
+            )
+            
+            # Aplicar estilos al encabezado
+            for col_num, value in enumerate(df.columns, 1):
+                cell = worksheet.cell(row=1, column=col_num)
+                cell.font = header_font
+                cell.fill = header_fill
+                cell.border = thin_border
+                cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+            
+            # Aplicar bordes y ajustar ancho de columnas
+            for col_num, col in enumerate(df.columns, 1):
+                col_letter = openpyxl.utils.get_column_letter(col_num)
+                max_length = 0
+                
+                for cell in worksheet[col_letter]:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                        cell.border = thin_border
+                        cell.alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
+                    except:
+                        pass
+                
+                adjusted_width = (max_length + 2)
+                worksheet.column_dimensions[col_letter].width = min(adjusted_width, 50)
+        
+        output.seek(0)
+        
+        # Enviar archivo
+        fecha = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        filename = f"Contactos_Emergencia_{fecha}.xlsx"
+        
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=filename
+        )
+    
+    except Exception as e:
+        logging.error(f"Error al exportar contactos a Excel: {str(e)}")
+        return jsonify({"error": f"Error al descargar: {str(e)}"}), 500
