@@ -360,26 +360,38 @@ def service_worker():
     response.headers['Service-Worker-Allowed'] = '/'
     response.headers['Cache-Control'] = 'no-cache'
     return response
-
 @main.route('/login', methods=['GET', 'POST'])
 def login():
-    if current_user.is_authenticated: 
+
+    if current_user.is_authenticated:
         return redirect(url_for('main.dashboard'))
 
     form = LoginForm()
+
     if form.validate_on_submit():
+
         user = User.query.filter_by(username=form.username.data).first()
-        
+
         if user:
-            # Verificación específica para administrador
+
+            # Validación especial admin
             if user.username == 'admin':
                 if not form.password.data or not user.check_password(form.password.data):
                     flash('Contraseña incorrecta.', 'danger')
                     return render_template('login.html', form=form)
-            
+
             login_user(user)
+
             flash('Inicio de sesión exitoso.', 'success')
+
+            # 🔹 AQUÍ está la solución
+            next_page = request.args.get('next')
+
+            if next_page:
+                return redirect(next_page)
+
             return redirect(url_for('main.dashboard'))
+
         else:
             flash('Usuario incorrecto.', 'danger')
 
