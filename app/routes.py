@@ -1966,7 +1966,7 @@ def submit_formulario():
     except Exception as e:
         db.session.rollback()
         flash(f"Error al enviar el formulario: {e}", "danger")
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.dashboard'))
 @main.route('/add_evento', methods=['POST'])
 @login_required
 def add_evento():
@@ -2182,12 +2182,12 @@ def guardar_contacto():
 
         flash(mensaje, "success")
 
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.dashboard'))
 
     except Exception as e:
         db.session.rollback()
         flash(f"Error al guardar el contacto: {str(e)}", "danger")
-        return redirect(url_for('main.index'))
+        return redirect(url_for('main.dashboard'))
 
 
 @main.route('/check_admin')
