@@ -162,3 +162,23 @@ class AsistenciaFinAnio(db.Model):
     lleva_acompanante = db.Column(db.String(5), nullable=False)
     fecha_registro = db.Column(db.DateTime, default=db.func.current_timestamp())
     user = db.relationship('User', backref='asistencia_evento', uselist=False)
+
+
+class ContactoEmergencia(db.Model):
+    __tablename__ = 'contacto_emergencia'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), unique=True, nullable=False)
+    username = db.Column(db.String(80), nullable=False)
+
+    nombre_contacto = db.Column(db.String(120), nullable=False)
+    parentesco = db.Column(db.String(50), nullable=False)
+    otro_parentesco = db.Column(db.String(50), nullable=True)
+
+    telefono_contacto = db.Column(db.String(15), nullable=False)
+    calle_numero = db.Column(db.String(150), nullable=False)
+    colonia = db.Column(db.String(150), nullable=False)
+
+    fecha_registro = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref=db.backref('contacto_emergencia', uselist=False))

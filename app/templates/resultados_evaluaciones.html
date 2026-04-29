@@ -936,12 +936,11 @@ overflow:hidden;
                 colorPromedio = '#f59e0b';
                 colorPromtexto = 'white';
                 labelCalidad = 'BUENO';
-            } else {
+            }else {
                 colorPromedio = '#ef4444';
                 colorPromtexto = 'white';
                 labelCalidad = 'MEJORAR';
             }
-
             let temasHTML = '';
             for (const [nombre, calificacion] of Object.entries(temas)) {
                 const color = calificacion >= 4.5 ? '#22c55e' : (calificacion >= 3.5 ? '#f59e0b' : '#ef4444');
@@ -1091,7 +1090,6 @@ overflow:hidden;
                 letter-spacing: 0.8px;
                 margin-bottom: 1.5mm;
             }
-
             .print-eval-score-value {
                 font-size: 30pt;
                 line-height: 1;
@@ -1218,7 +1216,6 @@ overflow:hidden;
                     padding: 0 !important;
                     margin: 0 !important;
                 }
-
                 .print-eval-sheet {
                     max-width: 100% !important;
                     min-height: auto !important;

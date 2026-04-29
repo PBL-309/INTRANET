@@ -11,7 +11,7 @@ from io import BytesIO
 import os
 import requests # Necesario para verificar reCAPTCHA v3
 import logging
-from app.models import Aviso, Evento, File, Folder, FormularioRespuesta, PortalWeb, Respuesta, User, VacationRequest, Noticia, RegistroCompetencia, EvaluacionDesempeno, AsistenciaFinAnio
+from app.models import Aviso, ContactoEmergencia,  Evento, File, Folder, FormularioRespuesta, PortalWeb, Respuesta, User, VacationRequest, Noticia, RegistroCompetencia, EvaluacionDesempeno, AsistenciaFinAnio
 from app.forms import LoginForm
 from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
@@ -1386,6 +1386,13 @@ def add_aviso():
 def formulario():
     return render_template('formulario.html')
 
+@main.route('/formulario_datos', methods=['GET', 'POST'])
+@login_required
+def formulario_datos():
+    if request.method == 'POST':
+        return submit_formulario()
+    return render_template('formulario.html')
+
 @main.route('/api/buscar_usuario/<username>')
 @login_required
 def buscar_usuario(username):
@@ -2126,3 +2133,58 @@ def eliminar_portal():
         return jsonify({"success": False, "error": str(e)}), 500
 
 
+@main.route('/guardar_contacto', methods=['POST'])
+@login_required
+def guardar_contacto():
+
+    try:
+        nombre = request.form['nombre_contacto']
+        parentesco = request.form['parentesco']
+        telefono = request.form['telefono_contacto']
+        calle = request.form['calle_numero']
+        colonia = request.form['colonia']
+        otro = request.form.get('otro_parentesco')
+
+        contacto_existente = ContactoEmergencia.query.filter_by(
+            user_id=current_user.id
+        ).first()
+
+        if contacto_existente:
+            # Actualiza si ya existe registro
+            contacto_existente.username = current_user.username
+            contacto_existente.nombre_contacto = nombre
+            contacto_existente.parentesco = parentesco
+            contacto_existente.telefono_contacto = telefono
+            contacto_existente.calle_numero = calle
+            contacto_existente.colonia = colonia
+            contacto_existente.otro_parentesco = otro
+
+            mensaje = "Contacto de emergencia actualizado correctamente"
+
+        else:
+            # Crea nuevo registro
+            nuevo_contacto = ContactoEmergencia(
+                user_id=current_user.id,
+                username=current_user.username,
+                nombre_contacto=nombre,
+                parentesco=parentesco,
+                telefono_contacto=telefono,
+                calle_numero=calle,
+                colonia=colonia,
+                otro_parentesco=otro
+            )
+
+            db.session.add(nuevo_contacto)
+
+            mensaje = "Contacto de emergencia registrado correctamente"
+
+        db.session.commit()
+
+        flash(mensaje, "success")
+
+        return redirect(url_for('main.index'))
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Error al guardar el contacto: {str(e)}", "danger")
+        return redirect(url_for('main.index'))
