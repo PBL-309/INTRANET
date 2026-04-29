@@ -396,16 +396,12 @@
                 <p>Por favor completa todos los campos de manera exacta</p>
             </div>
 
-            <div class="required-info">
-                <i class="bi bi-info-circle"></i>
-                <span>Los campos marcados con <span class="required">*</span> son obligatorios</span>
-            </div>
 
             <div class="error-message" id="errorMessage"></div>
             <div class="success-message" id="successMessage"></div>
 
             <form id="emergenciaForm" method="POST" action="{{ url_for('main.guardar_contacto') }}" novalidate>
-                {{ csrf_token() }}
+
 
                 <!-- Nombre del Contacto -->
                 <div class="form-section">
@@ -418,7 +414,6 @@
                         placeholder="Ej: Juan Pérez García"
                         required minlength="3" maxlength="120">
                     <div class="invalid-feedback">
-                        Por favor ingresa un nombre válido (solo letras y espacios, mínimo 3 caracteres)
                     </div>
                 </div>
 
@@ -458,7 +453,6 @@
                         placeholder="Ej: Tío, Primo, Amigo"
                         maxlength="50">
                     <div class="invalid-feedback">
-                        Por favor ingresa un parentesco válido (solo letras y espacios)
                     </div>
                 </div>
 
@@ -472,11 +466,10 @@
                     <div class="input-group">
                         <span class="input-group-text">+52</span>
                         <input type="tel" class="form-control phone-input" id="telefono_contacto"
-                            name="telefono_contacto" placeholder="Ej: 5512345678"
+                            name="telefono_contacto" 
                             required maxlength="10">
                     </div>
                     <div class="invalid-feedback">
-                        Por favor ingresa exactamente 10 dígitos
                     </div>
                 </div>
 
@@ -488,10 +481,8 @@
                         <span class="required">*</span>
                     </label>
                     <input type="text" class="form-control" id="calle_numero" name="calle_numero"
-                        placeholder="Ej: Avenida Principal 123"
                         required minlength="5" maxlength="150">
                     <div class="invalid-feedback">
-                        Por favor ingresa una dirección válida (mínimo 5 caracteres)
                     </div>
                 </div>
 
@@ -503,10 +494,8 @@
                         <span class="required">*</span>
                     </label>
                     <input type="text" class="form-control" id="colonia" name="colonia"
-                        placeholder="Ej: Centro, Miguel Hidalgo"
                         required minlength="2" maxlength="150">
                     <div class="invalid-feedback">
-                        Por favor ingresa una colonia válida (mínimo 2 caracteres)
                     </div>
                 </div>
 
