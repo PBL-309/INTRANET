@@ -401,6 +401,7 @@
             <div class="success-message" id="successMessage"></div>
 
             <form id="emergenciaForm" method="POST" action="{{ url_for('main.guardar_contacto') }}" novalidate>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
 
                 <!-- Nombre del Contacto -->
