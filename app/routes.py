@@ -1419,7 +1419,7 @@ def listar_usuarios():
     
     # Si el usuario es SUBTENIENTE, filtrar solo BOMBERO ESPECIALIZADO
     elif current_user.puesto == "SUBTENIENTE":
-        usuarios = [u for u in usuarios if u.puesto == "BOMBERO ESPECIALIZADO, BOMBERO HABILITADO "]
+        usuarios = [u for u in usuarios if u.puesto == "BOMBERO ESPECIALIZADO" or u.puesto == "BOMBERO HABILITADO "]
     
     # Si el usuario es TENIENTE, filtrar solo SUBTENIENTE
     elif current_user.puesto == "TENIENTE":
