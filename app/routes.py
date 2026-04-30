@@ -1055,6 +1055,7 @@ def api_evaluaciones_disponibles():
                     'nomina': usuario.username,
                     'puesto': usuario.puesto,
                     'turno': usuario.turno or 'N/A',
+                    'estacion': usuario.estacion or 'N/A',
                     'fecha': eval.fecha.strftime('%d/%m/%Y') if eval.fecha else 'N/A'
                 })
         
