@@ -1234,7 +1234,7 @@ overflow:hidden;
                         <div class="print-eval-brand">
                             <img class="print-eval-logo" src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo institucional">
                             <div>
-                                <div class="print-eval-title">EVALUACION DE DESEMPEÑO 2025</div>
+                                <div class="print-eval-title">EVALUACIÓN DE DESEMPEÑO 2025</div>
                                 <div class="print-eval-subtitle">H. CUERPO DE BOMBEROS DE LEON, GTO.</div>
                             </div>
                         </div>
@@ -1253,7 +1253,7 @@ overflow:hidden;
                             <div class="print-eval-value">${usuario.puesto || 'N/A'}</div>
                         </div>
                         <div class="print-eval-card">
-                            <div class="print-eval-label">NOMINA</div>
+                            <div class="print-eval-label">NÓMINA</div>
                             <div class="print-eval-value">${usuario.username || 'N/A'}</div>
                         </div>
                         <div class="print-eval-card">
@@ -1263,6 +1263,10 @@ overflow:hidden;
                         <div class="print-eval-card span-2">
                             <div class="print-eval-label">TURNO</div>
                             <div class="print-eval-value">${usuario.turno || 'N/A'}</div>
+                        </div>
+                        <div class="print-eval-card">
+                            <div class="print-eval-label">ESTACIÓN</div>
+                            <div class="print-eval-value">${usuario.estacion || 'N/A'}</div>
                         </div>
                     </div>
 
@@ -1299,16 +1303,13 @@ overflow:hidden;
             `;
             document.getElementById('contenidoEvaluacion').innerHTML = html;
         }
-
         function imprimirEvaluacion() {
             window.print();
         }
-
         function volverABusqueda() {
             document.getElementById('seccionBusqueda').style.display = 'block';
             document.getElementById('seccionVisualizacion').style.display = 'none';
         }
-
         function limpiarBusqueda() {
             document.getElementById('inputBusqueda').value = '';
             document.getElementById('dropdownBusqueda').style.display = 'none';
@@ -1319,15 +1320,11 @@ overflow:hidden;
             document.getElementById('seccionBusqueda').style.display = 'block';
             document.getElementById('seccionVisualizacion').style.display = 'none';
         }
-
-        // Cerrar modal al hacer click fuera
         document.getElementById('modalEvaluacion').addEventListener('click', function(event) {
             if (event.target === this) {
                 cerrarModalEvaluacion();
             }
         });
-
-        // Cerrar dropdown al hacer click fuera
         document.addEventListener('click', function(event) {
             if (!event.target.closest('#inputBusqueda') && !event.target.closest('#dropdownBusqueda')) {
                 document.getElementById('dropdownBusqueda').style.display = 'none';
