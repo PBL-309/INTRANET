@@ -1407,25 +1407,31 @@ def buscar_usuario(username):
             "image_file": usuario.image_file or "default.jpg"
         })
     return jsonify({"success": False, "error": "Usuario no encontrado"}), 404
-
 @main.route('/api/listar_usuarios')
 @login_required
 def listar_usuarios():
-    usuarios = User.query.filter(User.id != current_user.id).all()
-    
-    # Si el usuario es COORDINADOR OPERATIVO, filtrar solo TENIENTE
-    if current_user.puesto == "COORDINADOR OPERATIVO":
-        usuarios = [u for u in usuarios if u.puesto == "TENIENTE"]
-    
-    # Si el usuario es SUBTENIENTE, filtrar solo BOMBERO ESPECIALIZADO
-    elif current_user.puesto == "SUBTENIENTE":
-        usuarios = [u for u in usuarios if u.puesto == "BOMBERO ESPECIALIZADO" or u.puesto == "BOMBERO HABILITADO "]
-    
-    # Si el usuario es TENIENTE, filtrar solo SUBTENIENTE
-    elif current_user.puesto == "TENIENTE":
-        usuarios = [u for u in usuarios if u.puesto == "SUBTENIENTE"]
-    
-    lista = [{"username": u.username, "nombre": u.nombre, "turno": u.turno or ""} for u in usuarios]
+    filtros = {
+        "COORDINADOR OPERATIVO": ["TENIENTE"],
+        "SUBTENIENTE": ["BOMBERO ESPECIALIZADO", "BOMBERO HABILITADO"],
+        "TENIENTE": ["SUBTENIENTE"],
+    }
+
+    query = User.query.filter(User.id != current_user.id)
+
+    if current_user.puesto in filtros:
+        query = query.filter(User.puesto.in_(filtros[current_user.puesto]))
+
+    usuarios = query.all()
+
+    lista = [
+        {
+            "username": u.username,
+            "nombre": u.nombre,
+            "turno": u.turno or ""
+        }
+        for u in usuarios
+    ]
+
     return jsonify({"success": True, "usuarios": lista})
 
 @main.route('/api/listado_fotos')
