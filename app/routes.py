@@ -1116,6 +1116,7 @@ def api_evaluacion_detalle(eval_id):
                 'nombre': usuario_evaluado.nombre,
                 'puesto': usuario_evaluado.puesto,
                 'turno': usuario_evaluado.turno or 'N/A',
+                'estacion': usuario_evaluado.estacion or 'N/A',
                 'username': usuario_evaluado.username
             },
             'usuario_evaluador': {
