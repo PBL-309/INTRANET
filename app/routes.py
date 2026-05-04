@@ -739,6 +739,7 @@ def descargar_resultados_excel():
                     'nombre': usuario.nombre,
                     'puesto': usuario.puesto,
                     'turno': usuario.turno or 'N/A',
+                    'estacion': usuario.estacion or 'N/A',
                     'categorias': {cat: [] for cat in categorias.keys()}
                 }
             
@@ -748,6 +749,7 @@ def descargar_resultados_excel():
                 'nombre_evaluador': evaluador.nombre if evaluador else 'N/A',
                 'puesto': usuario.puesto,
                 'turno': usuario.turno or 'N/A',
+                'estacion': usuario.estacion or 'N/A',
                 'fecha': evaluacion.fecha,
                 'calificacion_general': 0,  # Se calculará después
                 'comentario': evaluacion.comentario or '',
@@ -1404,6 +1406,7 @@ def buscar_usuario(username):
             "nombre": usuario.nombre,
             "puesto": usuario.puesto,
             "turno": usuario.turno or "",
+            'estacion': usuario.estacion,
             "nomina": usuario.username,
             "image_file": usuario.image_file or "default.jpg"
         })
