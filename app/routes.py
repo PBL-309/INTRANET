@@ -891,9 +891,9 @@ def descargar_resultados_excel():
             user_data = datos_usuarios[user_id]
             
             ws_detallado[f'A{row}'] = user_data['username']
-            ws_detallado[f'A{row}'] = user_data['nombre']
-            ws_detallado[f'B{row}'] = user_data['puesto']
-            ws_detallado[f'C{row}'] = user_data['turno']
+            ws_detallado[f'B{row}'] = user_data['nombre']
+            ws_detallado[f'C{row}'] = user_data['puesto']
+            ws_detallado[f'D{row}'] = user_data['turno']
             
             # Estilos para datos básicos
             for col in ['A', 'B', 'C', 'D']:
