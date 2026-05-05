@@ -711,7 +711,6 @@ def descargar_resultados_excel():
         # Procesar datos de evaluaciones - DATOS AGREGADOS y DETALLADOS
         datos_categorias_agregados = {cat: [] for cat in categorias.keys()}
         datos_usuarios = {}  # {usuario_id: {categoria: [valores]}}
-        lista_evaluaciones_detalladas = []  # Para guardar todas las evaluaciones con detalles
         
         for evaluacion in evaluaciones:
             if not evaluacion or not evaluacion.respuestas:
@@ -741,21 +740,13 @@ def descargar_resultados_excel():
                     'puesto': usuario.puesto,
                     'turno': usuario.turno or 'N/A',
                     'estacion': usuario.estacion or 'N/A',
+                    'comentarios': [],
                     'categorias': {cat: [] for cat in categorias.keys()}
                 }
             
-            # Crear diccionario para esta evaluación detallada
-            eval_detallada = {
-                'nombre_evaluado': usuario.nombre,
-                'nombre_evaluador': evaluador.nombre if evaluador else 'N/A',
-                'puesto': usuario.puesto,
-                'turno': usuario.turno or 'N/A',
-                'estacion': usuario.estacion or 'N/A',
-                'fecha': evaluacion.fecha,
-                'calificacion_general': 0,  # Se calculará después
-                'comentario': evaluacion.comentario or '',
-                'categorias': {}
-            }
+            comentario_evaluacion = evaluacion.comentario.strip() if evaluacion.comentario else ''
+            if comentario_evaluacion:
+                datos_usuarios[evaluacion.user_id]['comentarios'].append(comentario_evaluacion)
             
             # Procesar cada categoría
             promedios_categorias = []
@@ -780,16 +771,13 @@ def descargar_resultados_excel():
                     promedios_categorias.append(promedio)
                     datos_categorias_agregados[categoria].append(promedio)
                     datos_usuarios[evaluacion.user_id]['categorias'][categoria].append(promedio)
-                    eval_detallada['categorias'][categoria] = round(promedio, 2)
             
             # Calcular calificación general como promedio de todos los promedios
             if promedios_categorias:
                 calificacion_general = sum(promedios_categorias) / len(promedios_categorias)
-                eval_detallada['calificacion_general'] = round(calificacion_general, 2)
-            
-            lista_evaluaciones_detalladas.append(eval_detallada)
+                # No se utiliza al nivel usuario directo, pero sí permite conservar el cálculo si se necesita.
         
-        # Crear Excel con tres hojas
+        # Crear Excel con dos hojas
         wb = openpyxl.Workbook()
         
         # Estilos
@@ -860,22 +848,24 @@ def descargar_resultados_excel():
         # Encabezados
         ws_detallado['A1'] = "EVALUACIONES DETALLADAS POR USUARIO"
         ws_detallado['A1'].font = Font(bold=True, size=14, color="1e293b")
-        ws_detallado.merge_cells('A1:E1')
         
         row = 3
         ws_detallado[f'A{row}'] = "Nómina"
         ws_detallado[f'B{row}'] = "Nombre del Evaluado"
         ws_detallado[f'C{row}'] = "Puesto"
-        ws_detallado[f'D{row}'] = "Turno"   
+        ws_detallado[f'D{row}'] = "Turno"
+        ws_detallado[f'E{row}'] = "Comentarios"
         
         # Agregar columnas para cada categoría
-        col_idx = 5
+        col_idx = 6
         categoria_cols = {}
         for categoria, titulo in categorias.items():
             col_letter = openpyxl.utils.get_column_letter(col_idx)
             ws_detallado[f'{col_letter}{row}'] = titulo
             categoria_cols[categoria] = col_letter
             col_idx += 1
+        last_header_col = openpyxl.utils.get_column_letter(col_idx - 1)
+        ws_detallado.merge_cells(f'A1:{last_header_col}1')
         
         # Estilos para encabezado
         for col in range(1, col_idx):
@@ -894,11 +884,13 @@ def descargar_resultados_excel():
             ws_detallado[f'B{row}'] = user_data['nombre']
             ws_detallado[f'C{row}'] = user_data['puesto']
             ws_detallado[f'D{row}'] = user_data['turno']
+            comentarios_usuario = user_data['comentarios']
+            ws_detallado[f'E{row}'] = '\n---\n'.join(comentarios_usuario) if comentarios_usuario else 'Sin comentarios'
             
             # Estilos para datos básicos
-            for col in ['A', 'B', 'C', 'D']:
+            for col in ['A', 'B', 'C', 'D', 'E']:
                 ws_detallado[f'{col}{row}'].border = thin_border
-                ws_detallado[f'{col}{row}'].alignment = Alignment(horizontal='left', vertical='center')
+                ws_detallado[f'{col}{row}'].alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
             
             # Llenar promedios por categoría
             for categoria, col_letter in categoria_cols.items():
@@ -929,98 +921,9 @@ def descargar_resultados_excel():
         ws_detallado.column_dimensions['B'].width = 30  # Nombre
         ws_detallado.column_dimensions['C'].width = 20
         ws_detallado.column_dimensions['D'].width = 12
+        ws_detallado.column_dimensions['E'].width = 40
         for categoria, col_letter in categoria_cols.items():
             ws_detallado.column_dimensions[col_letter].width = 18
-        
-        # ===== HOJA 3: EVALUACIONES COMPLETAS =====
-        ws_completo = wb.create_sheet("Evaluaciones Completas")
-        
-        ws_completo['A1'] = "EVALUACIONES COMPLETAS CON COMENTARIOS"
-        ws_completo['A1'].font = Font(bold=True, size=14, color="1e293b")
-        ws_completo.merge_cells('A1:H1')
-        
-        row = 3
-        
-        # Encabezados
-        headers = ['Nombre del Evaluado', 'Nombre del Evaluador', 'Puesto', 'Turno', 'Fecha', 'Calificación Final', 'Comentarios']
-        for col_idx, header in enumerate(headers, start=1):
-            col_letter = openpyxl.utils.get_column_letter(col_idx)
-            ws_completo[f'{col_letter}{row}'] = header
-            ws_completo[f'{col_letter}{row}'].fill = header_fill
-            ws_completo[f'{col_letter}{row}'].font = header_font
-            ws_completo[f'{col_letter}{row}'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
-            ws_completo[f'{col_letter}{row}'].border = thin_border
-        
-        # Agregar columnas para categorías
-        col_idx = len(headers) + 1
-        categoria_cols_completo = {}
-        for categoria, titulo in categorias.items():
-            col_letter = openpyxl.utils.get_column_letter(col_idx)
-            ws_completo[f'{col_letter}{row}'] = titulo
-            ws_completo[f'{col_letter}{row}'].fill = header_fill
-            ws_completo[f'{col_letter}{row}'].font = header_font
-            ws_completo[f'{col_letter}{row}'].alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
-            ws_completo[f'{col_letter}{row}'].border = thin_border
-            categoria_cols_completo[categoria] = col_letter
-            col_idx += 1
-        
-        # Llenar datos de evaluaciones completas
-        row += 1
-        for eval_data in lista_evaluaciones_detalladas:
-            ws_completo[f'A{row}'] = eval_data['nombre_evaluado']
-            ws_completo[f'B{row}'] = eval_data['nombre_evaluador']
-            ws_completo[f'C{row}'] = eval_data['puesto']
-            ws_completo[f'D{row}'] = eval_data['turno']
-            ws_completo[f'E{row}'] = eval_data['fecha']
-            ws_completo[f'F{row}'] = eval_data['calificacion_general']
-            ws_completo[f'G{row}'] = eval_data['comentario']
-            
-            # Aplicar estilos
-            for col_letter in ['A', 'B', 'C', 'D', 'E', 'F', 'G']:
-                ws_completo[f'{col_letter}{row}'].border = thin_border
-                ws_completo[f'{col_letter}{row}'].alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
-            
-            # Aplicar color a la Calificación Final (columna F)
-            calificacion_final = eval_data['calificacion_general']
-            if isinstance(calificacion_final, (int, float)):
-                if calificacion_final >= 4.5:
-                    fill_color = excellent_fill
-                elif calificacion_final >= 3.5:
-                    fill_color = good_fill
-                else:
-                    fill_color = poor_fill
-                ws_completo[f'F{row}'].fill = fill_color
-            
-            # Agregar calificaciones por categoría
-            for categoria, col_letter in categoria_cols_completo.items():
-                calificacion = eval_data['categorias'].get(categoria, 'N/A')
-                ws_completo[f'{col_letter}{row}'] = calificacion
-                
-                # Aplicar color si hay calificación
-                if isinstance(calificacion, (int, float)):
-                    if calificacion >= 4.5:
-                        fill_color = excellent_fill
-                    elif calificacion >= 3.5:
-                        fill_color = good_fill
-                    else:
-                        fill_color = poor_fill
-                    ws_completo[f'{col_letter}{row}'].fill = fill_color
-                
-                ws_completo[f'{col_letter}{row}'].border = thin_border
-                ws_completo[f'{col_letter}{row}'].alignment = Alignment(horizontal='center', vertical='center')
-            
-            row += 1
-        
-        # Ajustar anchos de columnas
-        ws_completo.column_dimensions['A'].width = 25
-        ws_completo.column_dimensions['B'].width = 25
-        ws_completo.column_dimensions['C'].width = 20
-        ws_completo.column_dimensions['D'].width = 12
-        ws_completo.column_dimensions['E'].width = 12
-        ws_completo.column_dimensions['F'].width = 18
-        ws_completo.column_dimensions['G'].width = 35
-        for categoria, col_letter in categoria_cols_completo.items():
-            ws_completo.column_dimensions[col_letter].width = 15
         
         # Guardar en BytesIO
         output = BytesIO()
