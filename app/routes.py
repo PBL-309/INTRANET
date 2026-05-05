@@ -737,6 +737,7 @@ def descargar_resultados_excel():
             if evaluacion.user_id not in datos_usuarios:
                 datos_usuarios[evaluacion.user_id] = {
                     'nombre': usuario.nombre,
+                    'username': usuario.username,
                     'puesto': usuario.puesto,
                     'turno': usuario.turno or 'N/A',
                     'estacion': usuario.estacion or 'N/A',
@@ -862,12 +863,13 @@ def descargar_resultados_excel():
         ws_detallado.merge_cells('A1:E1')
         
         row = 3
-        ws_detallado[f'A{row}'] = "Nombre del Evaluado"
-        ws_detallado[f'B{row}'] = "Puesto"
-        ws_detallado[f'C{row}'] = "Turno"
+        ws_detallado[f'A{row}'] = "Nómina"
+        ws_detallado[f'B{row}'] = "Nombre del Evaluado"
+        ws_detallado[f'C{row}'] = "Puesto"
+        ws_detallado[f'D{row}'] = "Turno"   
         
         # Agregar columnas para cada categoría
-        col_idx = 4
+        col_idx = 5
         categoria_cols = {}
         for categoria, titulo in categorias.items():
             col_letter = openpyxl.utils.get_column_letter(col_idx)
@@ -888,12 +890,13 @@ def descargar_resultados_excel():
         for user_id in sorted(datos_usuarios.keys()):
             user_data = datos_usuarios[user_id]
             
+            ws_detallado[f'A{row}'] = user_data['username']
             ws_detallado[f'A{row}'] = user_data['nombre']
             ws_detallado[f'B{row}'] = user_data['puesto']
             ws_detallado[f'C{row}'] = user_data['turno']
             
             # Estilos para datos básicos
-            for col in ['A', 'B', 'C']:
+            for col in ['A', 'B', 'C', 'D']:
                 ws_detallado[f'{col}{row}'].border = thin_border
                 ws_detallado[f'{col}{row}'].alignment = Alignment(horizontal='left', vertical='center')
             
@@ -922,9 +925,10 @@ def descargar_resultados_excel():
             row += 1
         
         # Ajustar anchos de columnas
-        ws_detallado.column_dimensions['A'].width = 30
-        ws_detallado.column_dimensions['B'].width = 20
-        ws_detallado.column_dimensions['C'].width = 12
+        ws_detallado.column_dimensions['A'].width = 18  # Nómina
+        ws_detallado.column_dimensions['B'].width = 30  # Nombre
+        ws_detallado.column_dimensions['C'].width = 20
+        ws_detallado.column_dimensions['D'].width = 12
         for categoria, col_letter in categoria_cols.items():
             ws_detallado.column_dimensions[col_letter].width = 18
         
@@ -1461,7 +1465,6 @@ def listado_fotos():
     
     firma = "|".join(sorted(firma_partes))
     return jsonify({"success": True, "usuarios": usuarios_info, "firma": firma})
-
 
 def _face_cache_file_path():
     os.makedirs(current_app.instance_path, exist_ok=True)
