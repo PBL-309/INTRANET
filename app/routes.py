@@ -1652,7 +1652,10 @@ def verify_facial_captcha():
 @login_required
 def evaluacion():
 
-    if current_user.puesto == "SUBTENIENTE":
+    if current_user.id in [7, 263, 63]:
+        return render_template('evaluacion_personal.html', usuario_actual=current_user)
+
+    elif current_user.puesto == "SUBTENIENTE":
         return render_template('evaluacion_subteniente.html', usuario_actual=current_user)
 
     elif current_user.puesto == "TENIENTE":
