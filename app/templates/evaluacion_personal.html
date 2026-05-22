@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Formulario de Evaluación Personal</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1e40af;
+      --primary-light: #eff6ff;
+      --secondary: #0891b2;
+      --success: #10b981;
+      --bg: #f0f9ff;
+      --card: #ffffff;
+      --text: #1e293b;
+      --text-light: #64748b;
+      --border: #e2e8f0;
+      --border-dark: #cbd5e1;
+      --radius: 16px;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      margin: 0;
+      background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #ecf0f1 100%);
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px;
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .page {
+      background-color: var(--card);
+      max-width: 1100px;
+      width: 100%;
+      padding: 50px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-xl);
+      border-top: 6px solid var(--primary);
+    }
+
+    h2 {
+      text-align: center;
+      margin: 0 0 40px 0;
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    form {
+      margin: 0;
+    }
+
+    .header {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 30px;
+      margin-bottom: 40px;
+      padding-bottom: 30px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .header-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px 24px;
+    }
+
+    .profile-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 28px 24px;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+      border-radius: 14px;
+      border: 2px solid var(--primary);
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+    }
+
+    .profile-pic {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--primary);
+      background-color: #e5e7eb;
+      margin-bottom: 14px;
+      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.25);
+      transition: transform 0.3s ease;
+    }
+
+    .profile-pic:hover {
+      transform: scale(1.05);
+    }
+
+    .profile-name {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 8px;
+      word-wrap: break-word;
+      max-width: 100%;
+      letter-spacing: -0.3px;
+    }
+
+    .profile-role {
+      font-size: 11px;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+      background: var(--primary-light);
+      padding: 4px 12px;
+      border-radius: 20px;
+      display: inline-block;
+    }
+
+    .search-container {
+      position: relative;
+      margin-bottom: 0;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 13px 16px;
+      font-size: 14px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      outline: none;
+      transition: all 0.3s;
+      background: #fafbfc;
+      font-weight: 500;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    }
+
+    .search-input:focus {
+      border-color: var(--primary);
+      background: white;
+      box-shadow: 0 0 0 4px var(--primary-light), 0 4px 12px rgba(37, 99, 235, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .header-field {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .header-input {
+      width: 100%;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      background: #fafbfc;
+      font-size: 14px;
+      padding: 13px 16px;
+      outline: none;
+      transition: all 0.3s;
+      color: var(--text);
+      font-weight: 500;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    }
+
+    .header-input:focus {
+      border-color: var(--primary);
+      background: white;
+      box-shadow: 0 0 0 4px var(--primary-light), 0 4px 12px rgba(37, 99, 235, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .header-input[readonly] {
+      background: #f8fafc;
+      cursor: not-allowed;
+    }
+
+    .dropdown-list {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      background: white;
+      border: 2px solid var(--primary);
+      border-radius: 10px;
+      max-height: 280px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+      box-shadow: var(--shadow-xl);
+    }
+
+    .dropdown-list.show {
+      display: block;
+    }
+
+    .dropdown-item {
+      padding: 14px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      transition: all 0.2s;
+      font-size: 14px;
+      background: white;
+    }
+
+    .dropdown-item:hover {
+      background-color: var(--primary-light);
+      border-left: 4px solid var(--primary);
+      padding-left: 12px;
+    }
+
+    .dropdown-item:last-child {
+      border-bottom: none;
+    }
+
+    .dropdown-item strong {
+      display: block;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .dropdown-item small {
+      display: block;
+      color: var(--text-light);
+      font-size: 12px;
+    }
+
+    .instruction {
+      font-size: 15px;
+      margin: 24px 0 20px 0;
+      line-height: 1.6;
+      color: var(--text);
+      padding: 16px 20px;
+      background: var(--primary-light);
+      border-left: 4px solid var(--primary);
+      border-radius: 6px;
+    }
+
+    .instruction strong {
+      color: var(--primary-dark);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 24px 0;
+      font-size: 14px;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    td,
+    th {
+      border: 1px solid var(--border);
+      text-align: center;
+      padding: 14px 10px;
+      vertical-align: top;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+      line-height: 1.4;
+    }
+
+    th {
+      background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+      font-weight: 600;
+    }
+
+    .section-title {
+      background: linear-gradient(135deg, var(--primary) 0%, #1b4fd1 100%);
+      color: white;
+      font-weight: 800;
+      text-align: left;
+      padding: 16px 20px;
+      border-color: var(--primary);
+      font-size: 15px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .question {
+      text-align: left;
+      font-weight: 600;
+      padding-left: 14px;
+      color: var(--text);
+      font-size: 13px;
+      background-color: #fafbfc;
+    }
+
+    input[type="radio"] {
+      accent-color: var(--primary);
+      cursor: pointer;
+      width: 20px;
+      height: 20px;
+      transition: transform 0.2s;
+    }
+
+    input[type="radio"]:hover {
+      transform: scale(1.15);
+    }
+
+    .radio-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .radio-label span {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 3px;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 40px;
+      padding-top: 30px;
+    }
+
+    .next-btn {
+      background: linear-gradient(135deg, var(--primary) 0%, #1b5fd8 100%);
+      color: #fff;
+      border: none;
+      padding: 14px 48px;
+      font-size: 14px;
+      font-weight: 800;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.4s;
+      box-shadow: 0 10px 28px rgba(37, 99, 235, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .next-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.15);
+      transition: left 0.4s;
+    }
+
+    .next-btn:hover::before {
+      left: 100%;
+    }
+
+    .next-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .next-btn:active {
+      transform: translateY(-1px);
+    }
+
+    .textarea-field {
+      width: 100%;
+      font-size: 14px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-family: inherit;
+      outline: none;
+      resize: vertical;
+      transition: all 0.3s;
+      background: #fafbfc;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+      line-height: 1.6;
+    }
+
+    .textarea-field:focus {
+      border-color: var(--primary);
+      background: white;
+      box-shadow: 0 0 0 4px var(--primary-light), 0 4px 12px rgba(37, 99, 235, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .textarea-observaciones {
+      height: 140px;
+    }
+
+    /* Flash Messages */
+    .alert {
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border-left: 4px solid;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .alert-success {
+      color: #065f46;
+      background-color: #ecfdf5;
+      border-left-color: #10b981;
+    }
+
+    .alert-danger,
+    .alert-error {
+      color: #7f1d1d;
+      background-color: #fef2f2;
+      border-left-color: #ef4444;
+    }
+
+    .alert-info {
+      color: #1e40af;
+      background-color: #eff6ff;
+      border-left-color: #3b82f6;
+    }
+
+    .alert-warning {
+      color: #92400e;
+      background-color: #fffbeb;
+      border-left-color: #f59e0b;
+    }
+
+    @media (max-width: 900px) {
+      .page {
+        padding: 40px 30px;
+      }
+
+      .header {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .header-info {
+        grid-template-columns: 1fr;
+      }
+
+      .profile-card {
+        padding: 24px;
+      }
+
+      .profile-pic {
+        width: 100px;
+        height: 100px;
+      }
+
+      table {
+        font-size: 13px;
+      }
+
+      td,
+      th {
+        padding: 12px 6px;
+      }
+
+      .next-btn {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 20px 12px;
+      }
+
+      .page {
+        padding: 30px 20px;
+        border-top: 4px solid var(--primary);
+      }
+
+      h2 {
+        font-size: 24px;
+        margin-bottom: 30px;
+      }
+
+      .header {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .header-info {
+        grid-template-columns: 1fr;
+      }
+
+      .profile-card {
+        padding: 16px;
+      }
+
+      .profile-pic {
+        width: 100px;
+        height: 100px;
+      }
+
+      .profile-name {
+        font-size: 14px;
+      }
+
+      table {
+        font-size: 12px;
+      }
+
+      td,
+      th {
+        padding: 10px 4px;
+      }
+
+      input[type="radio"] {
+        width: 16px;
+        height: 16px;
+      }
+
+      .next-btn {
+        width: 100%;
+        padding: 14px 30px;
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .page {
+        padding: 20px 16px;
+      }
+
+      h2 {
+        font-size: 20px;
+        margin-bottom: 24px;
+      }
+
+      .header-info {
+        grid-template-columns: 1fr;
+      }
+
+      .profile-pic {
+        width: 80px;
+        height: 80px;
+      }
+
+      .profile-name {
+        font-size: 13px;
+      }
+
+      .profile-role {
+        font-size: 10px;
+      }
+
+      .radio-label {
+        font-size: 11px;
+      }
+
+      .radio-label span {
+        font-size: 9px;
+      }
+
+      .instruction {
+        font-size: 13px;
+        padding: 12px 14px;
+      }
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="page" id="page">
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'error' else 'danger' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <h2>EVALUACIÓN PERSONAL DEL DESEMPEÑO</h2>
+    <form action="{{ url_for('main.submit_evaluacion') }}" method="POST">    	
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <div class="header">
+      <div class="header-info">
+        <div>
+          <label class="header-label">Seleccionar Usuario a Evaluar</label>
+          <div class="search-container">
+            <input type="text" id="buscar_usuario" class="search-input" placeholder="Nómina o nombre..." autocomplete="off" />
+            <div id="dropdown_usuarios" class="dropdown-list"></div>
+          </div>
+          <input type="hidden" id="username_seleccionado" name="nombre" required />
+          <input type="hidden" id="evaluado_id" name="evaluado_id" required />
+        </div>
+        <div class="header-field">
+          <label class="header-label">Nombre del Evaluado</label>
+          <input type="text" id="nombre_evaluado" class="header-input" readonly />
+        </div>
+        <div class="header-field">
+          <label class="header-label">Puesto</label>
+          <input type="text" id="puesto_evaluado" class="header-input" readonly />
+        </div>
+        <div class="header-field">
+          <label class="header-label">Turno</label>
+          <input type="text" id="turno_evaluado" class="header-input" readonly />
+        </div>
+        <div class="header-field">
+          <label class="header-label">Fecha</label>
+          <input type="date" name="fecha" id="fecha_hoy" class="header-input" required />
+        </div>
+        <div class="header-field">
+          <label class="header-label">Evaluador</label>
+          <input type="text" id="nombre_evaluador" class="header-input" readonly />
+        </div>
+        <input type="hidden" id="puesto_evaluador" name="puesto" />
+        <input type="hidden" id="nomina_evaluado_hidden" name="nomina" />
+      </div>
+      <div class="profile-card">
+        <img id="foto_evaluado" src="/static/images/default.jpg" alt="Foto de perfil" class="profile-pic" />
+        <div class="profile-name" id="profile-name-text">Seleccionar usuario</div>
+        <div class="profile-role" id="profile-role-text">---</div>
+      </div>
+    </div>
+
+    <p class="instruction">
+      Instrucción: Califique cada criterio del 1 al 5 de acuerdo a la siguiente escala:
+      <br><strong>1 = Deficiente | 2 = Regular | 3 = Aceptable | 4 = Bueno | 5 = Excelente</strong>
+    </p>
+
+    <!-- ═══════ COMUNICACIÓN ═══════ -->
+    <table>
+      <tr>
+        <td colspan="6" class="section-title">1. COMUNICACIÓN</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td class="radio-label">1<br><span>Deficiente</span></td>
+        <td class="radio-label">2<br><span>Regular</span></td>
+        <td class="radio-label">3<br><span>Aceptable</span></td>
+        <td class="radio-label">4<br><span>Bueno</span></td>
+        <td class="radio-label">5<br><span>Excelente</span></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Claridad verbal</strong><br>Se expresa con precisión y coherencia en situaciones operativas y cotidianas</td>
+        <td><input type="radio" name="comunicacion_claridad" value="1" required /></td>
+        <td><input type="radio" name="comunicacion_claridad" value="2" /></td>
+        <td><input type="radio" name="comunicacion_claridad" value="3" /></td>
+        <td><input type="radio" name="comunicacion_claridad" value="4" /></td>
+        <td><input type="radio" name="comunicacion_claridad" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Escucha activa</strong><br>Atiende instrucciones, sugerencias y retroalimentación sin interrupciones</td>
+        <td><input type="radio" name="comunicacion_escucha" value="1" required /></td>
+        <td><input type="radio" name="comunicacion_escucha" value="2" /></td>
+        <td><input type="radio" name="comunicacion_escucha" value="3" /></td>
+        <td><input type="radio" name="comunicacion_escucha" value="4" /></td>
+        <td><input type="radio" name="comunicacion_escucha" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Comunicación en equipo</strong><br>Comparte información relevante con sus compañeros de forma oportuna</td>
+        <td><input type="radio" name="comunicacion_equipo" value="1" required /></td>
+        <td><input type="radio" name="comunicacion_equipo" value="2" /></td>
+        <td><input type="radio" name="comunicacion_equipo" value="3" /></td>
+        <td><input type="radio" name="comunicacion_equipo" value="4" /></td>
+        <td><input type="radio" name="comunicacion_equipo" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Manejo de conflictos</strong><br>Resuelve desacuerdos con respeto y profesionalismo</td>
+        <td><input type="radio" name="comunicacion_conflictos" value="1" required /></td>
+        <td><input type="radio" name="comunicacion_conflictos" value="2" /></td>
+        <td><input type="radio" name="comunicacion_conflictos" value="3" /></td>
+        <td><input type="radio" name="comunicacion_conflictos" value="4" /></td>
+        <td><input type="radio" name="comunicacion_conflictos" value="5" /></td>
+      </tr>
+    </table>
+
+    <!-- ═══════ HABILIDADES BLANDAS ═══════ -->
+    <table>
+      <tr>
+        <td colspan="6" class="section-title">2. HABILIDADES BLANDAS</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td class="radio-label">1<br><span>Deficiente</span></td>
+        <td class="radio-label">2<br><span>Regular</span></td>
+        <td class="radio-label">3<br><span>Aceptable</span></td>
+        <td class="radio-label">4<br><span>Bueno</span></td>
+        <td class="radio-label">5<br><span>Excelente</span></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Trabajo en equipo</strong><br>Colabora eficazmente en tareas grupales y operaciones</td>
+        <td><input type="radio" name="blandas_trabajo_equipo" value="1" required /></td>
+        <td><input type="radio" name="blandas_trabajo_equipo" value="2" /></td>
+        <td><input type="radio" name="blandas_trabajo_equipo" value="3" /></td>
+        <td><input type="radio" name="blandas_trabajo_equipo" value="4" /></td>
+        <td><input type="radio" name="blandas_trabajo_equipo" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Empatía</strong><br>Muestra sensibilidad ante las necesidades de compañeros y ciudadanos</td>
+        <td><input type="radio" name="blandas_empatia" value="1" required /></td>
+        <td><input type="radio" name="blandas_empatia" value="2" /></td>
+        <td><input type="radio" name="blandas_empatia" value="3" /></td>
+        <td><input type="radio" name="blandas_empatia" value="4" /></td>
+        <td><input type="radio" name="blandas_empatia" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Adaptabilidad</strong><br>Se ajusta con rapidez a cambios operativos o administrativos</td>
+        <td><input type="radio" name="blandas_adaptabilidad" value="1" required /></td>
+        <td><input type="radio" name="blandas_adaptabilidad" value="2" /></td>
+        <td><input type="radio" name="blandas_adaptabilidad" value="3" /></td>
+        <td><input type="radio" name="blandas_adaptabilidad" value="4" /></td>
+        <td><input type="radio" name="blandas_adaptabilidad" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Responsabilidad</strong><br>Cumple con sus funciones sin necesidad de supervisión constante</td>
+        <td><input type="radio" name="blandas_responsabilidad" value="1" required /></td>
+        <td><input type="radio" name="blandas_responsabilidad" value="2" /></td>
+        <td><input type="radio" name="blandas_responsabilidad" value="3" /></td>
+        <td><input type="radio" name="blandas_responsabilidad" value="4" /></td>
+        <td><input type="radio" name="blandas_responsabilidad" value="5" /></td>
+      </tr>
+    </table>
+
+    <!-- ═══════ DISCIPLINA ═══════ -->
+    <table>
+      <tr>
+        <td colspan="6" class="section-title">3. DISCIPLINA</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td class="radio-label">1<br><span>Deficiente</span></td>
+        <td class="radio-label">2<br><span>Regular</span></td>
+        <td class="radio-label">3<br><span>Aceptable</span></td>
+        <td class="radio-label">4<br><span>Bueno</span></td>
+        <td class="radio-label">5<br><span>Excelente</span></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Puntualidad</strong><br>Respeta horarios de entrada, salida y actividades</td>
+        <td><input type="radio" name="disciplina_puntualidad" value="1" required /></td>
+        <td><input type="radio" name="disciplina_puntualidad" value="2" /></td>
+        <td><input type="radio" name="disciplina_puntualidad" value="3" /></td>
+        <td><input type="radio" name="disciplina_puntualidad" value="4" /></td>
+        <td><input type="radio" name="disciplina_puntualidad" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Respeto a normas</strong><br>Acata reglamentos internos y protocolos operativos</td>
+        <td><input type="radio" name="disciplina_normas" value="1" required /></td>
+        <td><input type="radio" name="disciplina_normas" value="2" /></td>
+        <td><input type="radio" name="disciplina_normas" value="3" /></td>
+        <td><input type="radio" name="disciplina_normas" value="4" /></td>
+        <td><input type="radio" name="disciplina_normas" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Presentación personal</strong><br>Mantiene uniforme y equipo en condiciones adecuadas</td>
+        <td><input type="radio" name="disciplina_presentacion" value="1" required /></td>
+        <td><input type="radio" name="disciplina_presentacion" value="2" /></td>
+        <td><input type="radio" name="disciplina_presentacion" value="3" /></td>
+        <td><input type="radio" name="disciplina_presentacion" value="4" /></td>
+        <td><input type="radio" name="disciplina_presentacion" value="5" /></td>
+      </tr>
+      <tr>
+        <td class="question"><strong>Uso adecuado de recursos</strong><br>Cuida instalaciones, vehículos y herramientas asignadas</td>
+        <td><input type="radio" name="disciplina_recursos" value="1" required /></td>
+        <td><input type="radio" name="disciplina_recursos" value="2" /></td>
+        <td><input type="radio" name="disciplina_recursos" value="3" /></td>
+        <td><input type="radio" name="disciplina_recursos" value="4" /></td>
+        <td><input type="radio" name="disciplina_recursos" value="5" /></td>
+      </tr>
+    </table>
+
+    <table>
+      <tr>
+        <td colspan="6" class="section-title">4. OBSERVACIONES GENERALES</td>
+      </tr>
+      <tr>
+        <td colspan="6" class="question">
+          <strong>Comentarios sobre el desempeño, fortalezas y áreas de mejora:</strong><br><br>
+          <textarea class="textarea-field textarea-observaciones" name="observaciones" required></textarea>
+        </td>
+      </tr>
+    </table>
+
+    <div class="button-container">
+      <button class="next-btn" type="submit">Enviar Evaluación</button>
+    </div>
+    </form>
+  </div>
+
+  <script>
+    // Mapeo de permisos: evaluador_id -> [user_ids permitidos]
+    const PERMISOS_EVALUACION = {
+      7: [30, 42, 49],
+      263: [101, 111, 182],
+      63: [148, 180, 185, 264, 301, 303]
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Establecer fecha de hoy
+      const hoy = new Date().toISOString().split('T')[0];
+      document.getElementById('fecha_hoy').value = hoy;
+
+      // Auto-llenar nombre del evaluador
+      document.getElementById('nombre_evaluador').value = '{{ usuario_actual.nombre }}';
+      document.getElementById('puesto_evaluador').value = '{{ usuario_actual.puesto }}';
+
+      // Funcionalidad de búsqueda de usuarios
+      const buscarInput = document.getElementById('buscar_usuario');
+      const dropdownUsuarios = document.getElementById('dropdown_usuarios');
+      const usernameSeleccionado = document.getElementById('username_seleccionado');
+      const evaluadoId = document.getElementById('evaluado_id');
+      const nombreEvaluado = document.getElementById('nombre_evaluado');
+      const puestoEvaluado = document.getElementById('puesto_evaluado');
+      const turnoEvaluado = document.getElementById('turno_evaluado');
+      const nominaEvaluadoHidden = document.getElementById('nomina_evaluado_hidden');
+      const fotoEvaluado = document.getElementById('foto_evaluado');
+      const profileNameText = document.getElementById('profile-name-text');
+      const profileRoleText = document.getElementById('profile-role-text');
+
+      let usuariosDisponibles = [];
+      const evaluadorId = {{ usuario_actual.id }};
+
+      // Cargar lista de usuarios permitidos para este evaluador
+      async function cargarUsuarios() {
+        try {
+          const response = await fetch('/api/listar_usuarios_permitidos');
+          const data = await response.json();
+          if (data.success) {
+            usuariosDisponibles = data.usuarios;
+          }
+        } catch (error) {
+          console.error('Error al cargar usuarios:', error);
+        }
+      }
+
+      // Mostrar dropdown cuando el usuario escribe
+      buscarInput.addEventListener('input', function() {
+        const valor = this.value.toLowerCase().trim();
+        
+        if (valor.length === 0) {
+          dropdownUsuarios.classList.remove('show');
+          return;
+        }
+
+        const filtrados = usuariosDisponibles.filter(u => 
+          u.username.toLowerCase().includes(valor) || u.nombre.toLowerCase().includes(valor)
+        );
+
+        if (filtrados.length > 0) {
+          dropdownUsuarios.innerHTML = filtrados.map(u => `
+            <div class="dropdown-item" data-username="${u.username}">
+              <strong>${u.username}</strong>
+              <small>${u.nombre}</small>
+            </div>
+          `).join('');
+          dropdownUsuarios.classList.add('show');
+        } else {
+          dropdownUsuarios.classList.remove('show');
+        }
+      });
+
+      // Seleccionar usuario del dropdown
+      dropdownUsuarios.addEventListener('click', async function(e) {
+        const item = e.target.closest('.dropdown-item');
+        if (item) {
+          const username = item.dataset.username;
+          buscarInput.value = username;
+          usernameSeleccionado.value = username;
+          dropdownUsuarios.classList.remove('show');
+
+          // Cargar datos del usuario seleccionado
+          try {
+            const response = await fetch(`/api/buscar_usuario/${username}`);
+            const data = await response.json();
+            if (data.success) {
+              evaluadoId.value = data.id;
+              nombreEvaluado.value = data.nombre;
+              puestoEvaluado.value = data.puesto;
+              turnoEvaluado.value = data.turno || '';
+              nominaEvaluadoHidden.value = data.nomina || '';
+              
+              // Cargar foto de perfil desde static/uploads/{username}.jpg
+              profileNameText.textContent = data.nombre || 'Seleccionar usuario';
+              profileRoleText.textContent = data.puesto || '---';
+              
+              fotoEvaluado.src = `/static/uploads/${username}.jpg`;
+              fotoEvaluado.onerror = function() {
+                this.src = '/static/images/default.jpg';
+              };
+            }
+          } catch (error) {
+            console.error('Error al buscar usuario:', error);
+          }
+        }
+      });
+
+      // Cerrar dropdown al hacer clic fuera
+      document.addEventListener('click', function(e) {
+        if (e.target !== buscarInput && !dropdownUsuarios.contains(e.target)) {
+          dropdownUsuarios.classList.remove('show');
+        }
+      });
+
+      // Cargar usuarios al inicio
+      cargarUsuarios();
+
+      // Auto-ocultar mensajes de alerta
+      setTimeout(function() {
+        var alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+          alert.style.transition = 'opacity 0.5s ease-out';
+          alert.style.opacity = '0';
+          setTimeout(function() {
+            alert.remove();
+          }, 500);
+        });
+      }, 4000);
+    });
+  </script>
+</body>
+</html>

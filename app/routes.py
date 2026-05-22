@@ -32,13 +32,12 @@ def filtrar_portales_para_usuario(user_id):
             continue
         portales_filtrados.append(portal)
     return portales_filtrados
-
 main = Blueprint('main', __name__)
 
 @main.route('/consultar_evaluaciones')
 @login_required
 def consultar_evaluaciones():
-    allowed_ids = [304]  # IDs autorizados
+    allowed_ids = [304]  
     if current_user.id not in allowed_ids:
         return """
         <script>
@@ -121,8 +120,6 @@ def consultar_evaluaciones():
             "Pertenencia": 0,
             "Clasificación": 0
         }
-
-        # Calcular promedio general y por rubro
         for rubro, preguntas in respuestas.items():
             valores = [int(v) for v in preguntas.values() if v]
             if valores:
@@ -403,6 +400,21 @@ def submit_evaluacion():
             return redirect(request.referrer)
         
         evaluado_id = int(evaluado_id)
+        
+        # Validar permisos para evaluación personal
+        PERMISOS_EVALUACION = {
+            7: [30, 42, 49],
+            263: [101, 111, 182],
+            63: [148, 180, 185, 264, 301, 303]
+        }
+        
+        evaluador_id = current_user.id
+        usuarios_permitidos = PERMISOS_EVALUACION.get(evaluador_id, [])
+        
+        # Si el evaluador tiene permisos restringidos y el evaluado no está en su lista
+        if evaluador_id in PERMISOS_EVALUACION and evaluado_id not in usuarios_permitidos:
+            flash("No tienes permiso para evaluar a este usuario", "danger")
+            return redirect(request.referrer)
         
         # Verificar si ya existe una evaluación del mismo evaluador al mismo evaluado
         evaluacion_existente = EvaluacionDesempeno.query.filter_by(
@@ -886,8 +898,6 @@ def descargar_resultados_excel():
             ws_detallado[f'D{row}'] = user_data['turno']
             comentarios_usuario = user_data['comentarios']
             ws_detallado[f'E{row}'] = '\n---\n'.join(comentarios_usuario) if comentarios_usuario else 'Sin comentarios'
-            
-            # Estilos para datos básicos
             for col in ['A', 'B', 'C', 'D', 'E']:
                 ws_detallado[f'{col}{row}'].border = thin_border
                 ws_detallado[f'{col}{row}'].alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
@@ -916,21 +926,18 @@ def descargar_resultados_excel():
             
             row += 1
         
-        # Ajustar anchos de columnas
-        ws_detallado.column_dimensions['A'].width = 18  # Nómina
-        ws_detallado.column_dimensions['B'].width = 30  # Nombre
+        ws_detallado.column_dimensions['A'].width = 18  
+        ws_detallado.column_dimensions['B'].width = 30  
         ws_detallado.column_dimensions['C'].width = 20
         ws_detallado.column_dimensions['D'].width = 12
         ws_detallado.column_dimensions['E'].width = 40
         for categoria, col_letter in categoria_cols.items():
             ws_detallado.column_dimensions[col_letter].width = 18
         
-        # Guardar en BytesIO
         output = BytesIO()
         wb.save(output)
         output.seek(0)
         
-        # Enviar archivo
         fecha = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         filename = f"Evaluaciones_{rol_seleccionado.replace(' ', '_')}_{turno_seleccionado}_{fecha}.xlsx"
         
@@ -989,17 +996,13 @@ def api_evaluacion_detalle(eval_id):
         if not usuario_evaluado:
             return jsonify({'error': 'Usuario evaluado no encontrado'}), 404
         
-        # Calcular promedios por tema
         respuestas = evaluacion.respuestas
         temas_calificaciones = {}
         
         for tema, preguntas_dict in respuestas.items():
             valores = [int(v) for v in preguntas_dict.values() if v]
-            # Solo agregar temas que tengan valores
             if valores:
                 promedio = round(sum(valores) / len(valores), 2)
-                
-                # Mapear nombres de temas
                 tema_nombres = {
                     'comunicacion': 'Comunicación',
                     'habilidades_blandas': 'Habilidades Blandas',
@@ -1009,7 +1012,6 @@ def api_evaluacion_detalle(eval_id):
                     'comunicacion_subordinados': 'Comunicación con Subordinados',
                     'liderazgo': 'Liderazgo'
                 }
-                
                 tema_nombre = tema_nombres.get(tema, tema)
                 temas_calificaciones[tema_nombre] = promedio
         
@@ -1346,6 +1348,38 @@ def listar_usuarios():
 
     return jsonify({"success": True, "usuarios": lista})
 
+@main.route('/api/listar_usuarios_permitidos')
+@login_required
+def listar_usuarios_permitidos():
+    """API que retorna usuarios que el evaluador actual tiene permiso de evaluar"""
+    # Mapeo de permisos: evaluador_id -> [user_ids permitidos]
+    PERMISOS_EVALUACION = {
+        7: [30, 42, 49],
+        263: [101, 111, 182],
+        63: [148, 180, 185, 264, 301, 303]
+    }
+    
+    evaluador_id = current_user.id
+    usuarios_permitidos_ids = PERMISOS_EVALUACION.get(evaluador_id, [])
+    
+    if not usuarios_permitidos_ids:
+        return jsonify({"success": True, "usuarios": []})
+    
+    usuarios = User.query.filter(User.id.in_(usuarios_permitidos_ids)).all()
+    
+    lista = [
+        {
+            "id": u.id,
+            "username": u.username,
+            "nombre": u.nombre,
+            "turno": u.turno or "N/A",
+            "puesto": u.puesto or "N/A"
+        }
+        for u in usuarios
+    ]
+    
+    return jsonify({"success": True, "usuarios": lista})
+
 @main.route('/api/listado_fotos')
 def listado_fotos():
     """Retorna lista de usuarios con URLs de fotos para reconocimiento facial."""
@@ -1630,6 +1664,26 @@ def evaluacion():
     else:
         flash('No tienes permiso para acceder a evaluaciones', 'warning')
         return redirect(url_for('main.dashboard'))
+
+@main.route('/evaluacion_personal')
+@login_required
+def evaluacion_personal():
+    """Ruta para evaluación personal con permisos específicos"""
+    # Mapeo de permisos: evaluador_id -> [user_ids permitidos]
+    PERMISOS_EVALUACION = {
+        7: [30, 42, 49],
+        263: [101, 111, 182],
+        63: [148, 180, 185, 264, 301, 303]
+    }
+    
+    evaluador_id = current_user.id
+    
+    # Verificar que el usuario tiene permisos para evaluar
+    if evaluador_id not in PERMISOS_EVALUACION:
+        flash('No tienes permisos para realizar evaluaciones personales', 'warning')
+        return redirect(url_for('main.dashboard'))
+    
+    return render_template('evaluacion_personal.html', usuario_actual=current_user)
 
 @main.route('/findeaño12w')
 @login_required
