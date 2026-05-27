@@ -719,6 +719,72 @@ body{
         width:100%;
     }
 }
+.content{
+    display:grid;
+
+    grid-template-columns:
+        340px
+        minmax(0,1fr);
+
+    gap:28px;
+
+    align-items:start;
+}
+
+/* SIDEBAR IZQUIERDO */
+
+.evaluadores-list{
+    position:sticky;
+    top:20px;
+
+    height:
+        calc(100vh - 40px);
+
+    overflow-y:auto;
+
+    background:rgba(255,255,255,.88);
+
+    backdrop-filter:blur(18px);
+
+    border-radius:28px;
+
+    padding:24px;
+
+    box-shadow:
+        0 10px 35px rgba(0,0,0,.08);
+
+    border:1px solid rgba(255,255,255,.6);
+}
+
+/* PANEL DERECHO */
+
+.panel-evaluado{
+    background:rgba(255,255,255,.9);
+
+    backdrop-filter:blur(16px);
+
+    border-radius:28px;
+
+    padding:32px;
+
+    min-height:80vh;
+
+    border:1px solid rgba(255,255,255,.6);
+
+    box-shadow:
+        0 10px 35px rgba(0,0,0,.08);
+}
+
+/* GRID USUARIOS */
+
+.grid-usuarios{
+    display:grid;
+
+    grid-template-columns:
+        repeat(auto-fill,minmax(280px,1fr));
+
+    gap:18px;
+}
     </style>
 </head>
 <body>
@@ -740,66 +806,65 @@ body{
             {% endif %}
         {% endwith %}
 
-        <div class="content">
-            <!-- Sidebar de evaluadores -->
-            <div class="evaluadores-list">
-                <h3>Evaluadores</h3>
-                <div class="busqueda-evaluador">
-                    <input type="text" id="buscarEvaluador" placeholder="🔍 Buscar evaluador..." onkeyup="filtrarEvaluadores()">
-                </div>
-                <div id="listaEvaluadores">
-                {% for evaluador in evaluadores %}
-                    <div class="evaluador-item" data-nombre="{{ evaluador.nombre }}" data-username="{{ evaluador.username }}" data-puesto="{{ evaluador.puesto }}" onclick="seleccionarEvaluador({{ evaluador.id }}, '{{ evaluador.nombre }}', '{{ evaluador.puesto }}', '{{ evaluador.username }}')">
-                        <div><strong>{{ evaluador.nombre }}</strong></div>
-                        <div style="font-size: 11px; opacity: 0.8;">ID: {{ evaluador.id }} | @{{ evaluador.username }}</div>
-                        <div style="font-size: 11px; opacity: 0.8;">{{ evaluador.puesto }}</div>
-                    </div>
-                {% endfor %}
-                </div>
-                <div id="mensajeNoEvaluadores" class="empty-state" style="display:none; margin-top:10px;">No se encontraron evaluadores.</div>
+ <div class="content">
 
-            <!-- Panel de asignación -->
-            <div class="panel-evaluado">
-                <div id="panelVacio" class="empty-state">
-                    <div class="empty-state-icon">👤</div>
-                    <p>Selecciona un evaluador para empezar</p>
-                </div>
+    <!-- IZQUIERDA -->
+    <div class="evaluadores-list">
+        <h3>Evaluadores</h3>
 
-                <div id="panelLleno" style="display: none;">
-                    <h2 id="tituloEvaluador"></h2>
+        <div class="busqueda-evaluador">
+            <input type="text"
+                   id="buscarEvaluador"
+                   placeholder="🔍 Buscar evaluador..."
+                   onkeyup="filtrarEvaluadores()">
+        </div>
 
-                    <div class="info-evaluador">
-                        <p><strong>ID:</strong> <span id="infoId"></span></p>
-                        <p><strong>Username:</strong> <span id="infoUsername"></span></p>
-                        <p><strong>Nombre:</strong> <span id="infoNombre"></span></p>
-                        <p><strong>Puesto:</strong> <span id="infoPuesto"></span></p>
-                        <p><strong>Total asignados:</strong> <span id="totalAsignados">0</span></p>
+        <div id="listaEvaluadores">
+            {% for evaluador in evaluadores %}
+                <div class="evaluador-item"
+                     data-nombre="{{ evaluador.nombre }}"
+                     data-username="{{ evaluador.username }}"
+                     data-puesto="{{ evaluador.puesto }}"
+                     onclick="seleccionarEvaluador({{ evaluador.id }}, '{{ evaluador.nombre }}', '{{ evaluador.puesto }}', '{{ evaluador.username }}')">
+
+                    <div>
+                        <strong>{{ evaluador.nombre }}</strong>
                     </div>
 
-                    <h3 style="color: var(--text); margin-bottom: 15px; font-size: 16px;">Selecciona a quiénes puede evaluar:</h3>
-
-                    <div id="botonesAcciones" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 20px;">
+                    <div style="font-size:11px;opacity:.7;">
+                        ID: {{ evaluador.id }} | @{{ evaluador.username }}
                     </div>
 
-                    <div class="busqueda-usuarios">
-                        <input type="text" id="buscarUsuarios" placeholder="🔍 Buscar usuario..." onkeyup="filtrarUsuarios()">
+                    <div style="font-size:11px;opacity:.7;">
+                        {{ evaluador.puesto }}
                     </div>
 
-                    <form id="formPermisos">
-                        <div class="grid-usuarios" id="gridUsuarios">
-                        </div>
-                        <div id="mensajeNoUsuarios" class="empty-state" style="display:none; margin-top:10px;">No se encontraron usuarios.</div>
-
-                        <div class="button-group">
-                            <button type="button" class="btn btn-primary" onclick="guardarPermisos()">💾 Guardar Cambios</button>
-                            <button type="button" class="btn btn-secondary" onclick="limpiarSeleccion()">🔄 Limpiar</button>
-                        </div>
-                    </form>
                 </div>
-            </div>
+            {% endfor %}
+        </div>
+
+        <div id="mensajeNoEvaluadores"
+             class="empty-state"
+             style="display:none;margin-top:10px;">
+            No se encontraron evaluadores.
         </div>
     </div>
 
+    <!-- DERECHA -->
+    <div class="panel-evaluado">
+
+        <div id="panelVacio" class="empty-state">
+            <div class="empty-state-icon">👤</div>
+            <p>Selecciona un evaluador para empezar</p>
+        </div>
+
+        <div id="panelLleno" style="display:none;">
+            ...
+        </div>
+
+    </div>
+
+</div>
     <script>
         let evaluadorActual = null;
         let permisosActuales = {};
