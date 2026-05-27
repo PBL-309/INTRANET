@@ -73,11 +73,17 @@
 
         .content {
             display: grid;
-            grid-template-columns: 300px 1fr;
+            grid-template-columns: 1fr 300px;
+            grid-template-areas: "main sidebar";
             gap: 30px;
         }
 
+        .panel-evaluado {
+            grid-area: main;
+        }
+
         .evaluadores-list {
+            grid-area: sidebar;
             background: var(--card);
             border-radius: 12px;
             padding: 20px;
@@ -226,6 +232,11 @@
             width: 100%;
             text-align: left;
             white-space: normal;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 50px;
+            padding: 12px 14px;
         }
 
         .usuario-checkbox input[type="checkbox"] {
@@ -406,6 +417,12 @@
         @media (max-width: 768px) {
             .content {
                 grid-template-columns: 1fr;
+                grid-template-areas: none;
+            }
+
+            .panel-evaluado,
+            .evaluadores-list {
+                grid-column: auto;
             }
 
             .grid-usuarios {
