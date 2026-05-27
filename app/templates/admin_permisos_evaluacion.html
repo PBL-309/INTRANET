@@ -808,58 +808,201 @@ body{
 
  <div class="content">
 
-    <!-- IZQUIERDA -->
+    <!-- ========================= -->
+    <!-- SIDEBAR IZQUIERDO -->
+    <!-- ========================= -->
+
     <div class="evaluadores-list">
+
         <h3>Evaluadores</h3>
 
         <div class="busqueda-evaluador">
-            <input type="text"
-                   id="buscarEvaluador"
-                   placeholder="🔍 Buscar evaluador..."
-                   onkeyup="filtrarEvaluadores()">
+            <input
+                type="text"
+                id="buscarEvaluador"
+                placeholder="🔍 Buscar evaluador..."
+                onkeyup="filtrarEvaluadores()"
+            >
         </div>
 
         <div id="listaEvaluadores">
+
             {% for evaluador in evaluadores %}
-                <div class="evaluador-item"
-                     data-nombre="{{ evaluador.nombre }}"
-                     data-username="{{ evaluador.username }}"
-                     data-puesto="{{ evaluador.puesto }}"
-                     onclick="seleccionarEvaluador({{ evaluador.id }}, '{{ evaluador.nombre }}', '{{ evaluador.puesto }}', '{{ evaluador.username }}')">
 
-                    <div>
-                        <strong>{{ evaluador.nombre }}</strong>
+                <div
+                    class="evaluador-item"
+
+                    data-nombre="{{ evaluador.nombre }}"
+                    data-username="{{ evaluador.username }}"
+                    data-puesto="{{ evaluador.puesto }}"
+
+                    onclick="seleccionarEvaluador(
+                        {{ evaluador.id }},
+                        '{{ evaluador.nombre }}',
+                        '{{ evaluador.puesto }}',
+                        '{{ evaluador.username }}'
+                    )"
+                >
+
+                    <div class="evaluador-nombre">
+                        {{ evaluador.nombre }}
                     </div>
 
-                    <div style="font-size:11px;opacity:.7;">
-                        ID: {{ evaluador.id }} | @{{ evaluador.username }}
+                    <div class="evaluador-meta">
+                        ID: {{ evaluador.id }}
+                        ·
+                        @{{ evaluador.username }}
                     </div>
 
-                    <div style="font-size:11px;opacity:.7;">
+                    <div class="evaluador-puesto">
                         {{ evaluador.puesto }}
                     </div>
 
                 </div>
+
             {% endfor %}
+
         </div>
 
-        <div id="mensajeNoEvaluadores"
-             class="empty-state"
-             style="display:none;margin-top:10px;">
+        <div
+            id="mensajeNoEvaluadores"
+            class="empty-state"
+            style="display:none;margin-top:14px;"
+        >
             No se encontraron evaluadores.
         </div>
+
     </div>
 
-    <!-- DERECHA -->
+    <!-- ========================= -->
+    <!-- PANEL DERECHO -->
+    <!-- ========================= -->
+
     <div class="panel-evaluado">
 
+        <!-- VACÍO -->
+
         <div id="panelVacio" class="empty-state">
-            <div class="empty-state-icon">👤</div>
-            <p>Selecciona un evaluador para empezar</p>
+
+            <div class="empty-state-icon">
+                👤
+            </div>
+
+            <p>
+                Selecciona un evaluador para empezar
+            </p>
+
         </div>
 
+        <!-- LLENO -->
+
         <div id="panelLleno" style="display:none;">
-            ...
+
+            <h2 id="tituloEvaluador"></h2>
+
+            <!-- INFO -->
+
+            <div class="info-evaluador">
+
+                <p>
+                    <strong>ID:</strong>
+                    <span id="infoId"></span>
+                </p>
+
+                <p>
+                    <strong>Username:</strong>
+                    <span id="infoUsername"></span>
+                </p>
+
+                <p>
+                    <strong>Nombre:</strong>
+                    <span id="infoNombre"></span>
+                </p>
+
+                <p>
+                    <strong>Puesto:</strong>
+                    <span id="infoPuesto"></span>
+                </p>
+
+                <p>
+                    <strong>Total asignados:</strong>
+                    <span id="totalAsignados">0</span>
+                </p>
+
+            </div>
+
+            <!-- TÍTULO -->
+
+            <h3
+                style="
+                    margin-bottom:18px;
+                    font-size:18px;
+                    font-weight:800;
+                    color:var(--text);
+                "
+            >
+                Usuarios que puede evaluar
+            </h3>
+
+            <!-- BOTONES -->
+
+            <div id="botonesAcciones"></div>
+
+            <!-- SEARCH -->
+
+            <div class="busqueda-usuarios">
+
+                <input
+                    type="text"
+                    id="buscarUsuarios"
+                    placeholder="🔍 Buscar usuario..."
+                    onkeyup="filtrarUsuarios()"
+                >
+
+            </div>
+
+            <!-- FORM -->
+
+            <form id="formPermisos">
+
+                <div
+                    class="grid-usuarios"
+                    id="gridUsuarios"
+                >
+                </div>
+
+                <div
+                    id="mensajeNoUsuarios"
+                    class="empty-state"
+                    style="display:none;margin-top:10px;"
+                >
+                    No se encontraron usuarios.
+                </div>
+
+                <!-- BOTONES FOOTER -->
+
+                <div class="button-group">
+
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        onclick="guardarPermisos()"
+                    >
+                        💾 Guardar Cambios
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        onclick="limpiarSeleccion()"
+                    >
+                        🔄 Limpiar
+                    </button>
+
+                </div>
+
+            </form>
+
         </div>
 
     </div>
