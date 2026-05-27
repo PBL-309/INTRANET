@@ -100,8 +100,9 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
+            line-height: 1.4;
         }
 
         .evaluador-item:hover {
@@ -361,9 +362,10 @@
             <div class="evaluadores-list">
                 <h3>Evaluadores</h3>
                 {% for evaluador in evaluadores %}
-                    <div class="evaluador-item" onclick="seleccionarEvaluador({{ evaluador.id }}, '{{ evaluador.nombre }}', '{{ evaluador.puesto }}')">
-                        {{ evaluador.nombre }}
-                        <div style="font-size: 11px; opacity: 0.8; margin-top: 4px;">{{ evaluador.puesto }}</div>
+                    <div class="evaluador-item" onclick="seleccionarEvaluador({{ evaluador.id }}, '{{ evaluador.nombre }}', '{{ evaluador.puesto }}', '{{ evaluador.username }}')">
+                        <div><strong>{{ evaluador.nombre }}</strong></div>
+                        <div style="font-size: 11px; opacity: 0.8;">ID: {{ evaluador.id }} | @{{ evaluador.username }}</div>
+                        <div style="font-size: 11px; opacity: 0.8;">{{ evaluador.puesto }}</div>
                     </div>
                 {% endfor %}
             </div>
@@ -379,7 +381,9 @@
                     <h2 id="tituloEvaluador"></h2>
 
                     <div class="info-evaluador">
-                        <p><strong>Evaluador:</strong> <span id="infoNombre"></span></p>
+                        <p><strong>ID:</strong> <span id="infoId"></span></p>
+                        <p><strong>Username:</strong> <span id="infoUsername"></span></p>
+                        <p><strong>Nombre:</strong> <span id="infoNombre"></span></p>
                         <p><strong>Puesto:</strong> <span id="infoPuesto"></span></p>
                         <p><strong>Total asignados:</strong> <span id="totalAsignados">0</span></p>
                     </div>
@@ -404,8 +408,8 @@
         let evaluadorActual = null;
         let permisosActuales = {};
 
-        function seleccionarEvaluador(id, nombre, puesto) {
-            evaluadorActual = { id, nombre, puesto };
+        function seleccionarEvaluador(id, nombre, puesto, username) {
+            evaluadorActual = { id, nombre, puesto, username };
 
             // Actualizar UI del sidebar
             document.querySelectorAll('.evaluador-item').forEach(el => el.classList.remove('activo'));
@@ -417,6 +421,8 @@
 
             // Llenar información
             document.getElementById('tituloEvaluador').textContent = nombre;
+            document.getElementById('infoId').textContent = id;
+            document.getElementById('infoUsername').textContent = username;
             document.getElementById('infoNombre').textContent = nombre;
             document.getElementById('infoPuesto').textContent = puesto;
 
@@ -460,6 +466,7 @@
                             <strong>${usuario.nombre}</strong>
                         </label>
                         <div class="usuario-info">
+                            <div>ID: ${usuario.id} | @${usuario.username}</div>
                             <div>Puesto: ${usuario.puesto}</div>
                             <div>Turno: ${usuario.turno || 'N/A'}</div>
                         </div>
