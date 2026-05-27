@@ -2061,26 +2061,46 @@ def guardar_permisos():
         if not evaluador_id:
             return jsonify({'success': False, 'message': 'Evaluador no especificado'}), 400
         
+        # Convertir a enteros y remover duplicados
+        evaluados_ids = list(set([int(id) for id in evaluados_ids]))
+        
         # Eliminar permisos anteriores
         PermisosEvaluacion.query.filter_by(evaluador_id=evaluador_id).delete()
+        db.session.flush()
         
         # Agregar nuevos permisos
         for evaluado_id in evaluados_ids:
-            permiso = PermisosEvaluacion(
-                evaluador_id=evaluador_id,
-                evaluado_id=evaluado_id
-            )
-            db.session.add(permiso)
+            try:
+                permiso = PermisosEvaluacion(
+                    evaluador_id=evaluador_id,
+                    evaluado_id=evaluado_id
+                )
+                db.session.add(permiso)
+            except Exception as inner_e:
+                db.session.rollback()
+                return jsonify({
+                    'success': False,
+                    'message': f'Error al agregar permiso para usuario {evaluado_id}: {str(inner_e)}'
+                }), 400
         
         db.session.commit()
         
         return jsonify({
             'success': True,
-            'message': f'Se guardaron {len(evaluados_ids)} permisos'
+            'message': f'Se guardaron {len(evaluados_ids)} permisos correctamente'
         })
+    except ValueError as ve:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Error de validación: {str(ve)}'}), 400
     except Exception as e:
         db.session.rollback()
-        return jsonify({'success': False, 'message': str(e)}), 500
+        import traceback
+        error_detail = traceback.format_exc()
+        logging.error(f"Error en guardar_permisos: {error_detail}")
+        return jsonify({
+            'success': False,
+            'message': f'Error al guardar permisos: {str(e)}'
+        }), 500
 
 @main.route('/delete_file/<filename>', methods=['DELETE'])
 @login_required

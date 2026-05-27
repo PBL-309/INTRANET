@@ -546,7 +546,10 @@
         }
 
         async function guardarPermisos() {
-            if (!evaluadorActual) return;
+            if (!evaluadorActual) {
+                alert('Selecciona un evaluador');
+                return;
+            }
 
             const checkboxes = document.querySelectorAll('#gridUsuarios input[type="checkbox"]');
             const permisos = [];
@@ -571,18 +574,20 @@
                 });
 
                 const data = await response.json();
+                
                 if (data.success) {
-                    alert('✓ Permisos guardados exitosamente');
+                    alert('✓ Permisos guardados exitosamente\n\n' + data.message);
                     permisosActuales = {};
                     permisos.forEach(id => {
                         permisosActuales[id] = true;
                     });
                 } else {
-                    alert('✗ Error al guardar permisos: ' + data.message);
+                    alert('✗ Error al guardar permisos:\n\n' + data.message);
+                    console.error('Error response:', data);
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al guardar permisos');
+                alert('✗ Error de conexión al guardar permisos\n\n' + error.message);
             }
         }
 
