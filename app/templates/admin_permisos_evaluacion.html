@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Permisos de Evaluación</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --primary-light: #eff6ff;
+            --secondary: #0891b2;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg: #f0f9ff;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 50%, #ecf0f1 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-top: 6px solid var(--primary);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: var(--text-light);
+            font-size: 15px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+        }
+
+        .evaluadores-list {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+
+        .evaluadores-list h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .evaluador-item {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background: var(--primary-light);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .evaluador-item:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary-dark);
+        }
+
+        .evaluador-item.activo {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary-dark);
+        }
+
+        .panel-evaluado {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            min-height: 500px;
+        }
+
+        .panel-evaluado h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .info-evaluador {
+            background: var(--primary-light);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .info-evaluador p {
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+        .info-evaluador strong {
+            color: var(--primary-dark);
+        }
+
+        .grid-usuarios {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .usuario-checkbox {
+            background: var(--primary-light);
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .usuario-checkbox:hover {
+            border-color: var(--primary);
+            background: #e8f4ff;
+        }
+
+        .usuario-checkbox input[type="checkbox"] {
+            accent-color: var(--primary);
+            cursor: pointer;
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+
+        .usuario-checkbox label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .usuario-info {
+            margin-top: 8px;
+            margin-left: 28px;
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .usuario-info div {
+            margin: 2px 0;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid var(--border);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+            font-weight: 600;
+        }
+
+        .alert-success {
+            background: #ecfdf5;
+            color: #065f46;
+            border-left-color: var(--success);
+        }
+
+        .alert-info {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            border-left-color: var(--primary);
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            color: #7f1d1d;
+            border-left-color: var(--danger);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-light);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .spinner {
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .grid-usuarios {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{{ url_for('main.dashboard') }}" class="back-link">← Volver al Dashboard</a>
+
+        <div class="header">
+            <h1>⚙️ Gestión de Permisos de Evaluación</h1>
+            <p>Asigna dinámicamente a qué usuarios puede evaluar cada evaluador</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'error' if category == 'danger' else 'info' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="content">
+            <!-- Sidebar de evaluadores -->
+            <div class="evaluadores-list">
+                <h3>Evaluadores</h3>
+                {% for evaluador in evaluadores %}
+                    <div class="evaluador-item" onclick="seleccionarEvaluador({{ evaluador.id }}, '{{ evaluador.nombre }}', '{{ evaluador.puesto }}')">
+                        {{ evaluador.nombre }}
+                        <div style="font-size: 11px; opacity: 0.8; margin-top: 4px;">{{ evaluador.puesto }}</div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Panel de asignación -->
+            <div class="panel-evaluado">
+                <div id="panelVacio" class="empty-state">
+                    <div class="empty-state-icon">👤</div>
+                    <p>Selecciona un evaluador para empezar</p>
+                </div>
+
+                <div id="panelLleno" style="display: none;">
+                    <h2 id="tituloEvaluador"></h2>
+
+                    <div class="info-evaluador">
+                        <p><strong>Evaluador:</strong> <span id="infoNombre"></span></p>
+                        <p><strong>Puesto:</strong> <span id="infoPuesto"></span></p>
+                        <p><strong>Total asignados:</strong> <span id="totalAsignados">0</span></p>
+                    </div>
+
+                    <h3 style="color: var(--text); margin-bottom: 15px; font-size: 16px;">Selecciona a quiénes puede evaluar:</h3>
+
+                    <form id="formPermisos">
+                        <div class="grid-usuarios" id="gridUsuarios">
+                        </div>
+
+                        <div class="button-group">
+                            <button type="button" class="btn btn-primary" onclick="guardarPermisos()">💾 Guardar Cambios</button>
+                            <button type="button" class="btn btn-secondary" onclick="limpiarSeleccion()">🔄 Limpiar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let evaluadorActual = null;
+        let permisosActuales = {};
+
+        function seleccionarEvaluador(id, nombre, puesto) {
+            evaluadorActual = { id, nombre, puesto };
+
+            // Actualizar UI del sidebar
+            document.querySelectorAll('.evaluador-item').forEach(el => el.classList.remove('activo'));
+            event.target.closest('.evaluador-item').classList.add('activo');
+
+            // Mostrar panel
+            document.getElementById('panelVacio').style.display = 'none';
+            document.getElementById('panelLleno').style.display = 'block';
+
+            // Llenar información
+            document.getElementById('tituloEvaluador').textContent = nombre;
+            document.getElementById('infoNombre').textContent = nombre;
+            document.getElementById('infoPuesto').textContent = puesto;
+
+            // Cargar permisos actuales
+            cargarPermisosEvaluador(id);
+        }
+
+        async function cargarPermisosEvaluador(evaluadorId) {
+            try {
+                const response = await fetch(`/api/permisos_evaluador/${evaluadorId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    permisosActuales = data.permisos || {};
+                    renderizarUsuarios(data.usuarios_disponibles || []);
+                }
+            } catch (error) {
+                console.error('Error cargando permisos:', error);
+            }
+        }
+
+        function renderizarUsuarios(usuarios) {
+            const grid = document.getElementById('gridUsuarios');
+            grid.innerHTML = '';
+
+            let totalChecked = 0;
+
+            usuarios.forEach(usuario => {
+                const isChecked = permisosActuales[usuario.id] === true;
+                if (isChecked) totalChecked++;
+
+                const html = `
+                    <div class="usuario-checkbox">
+                        <label>
+                            <input 
+                                type="checkbox" 
+                                value="${usuario.id}" 
+                                ${isChecked ? 'checked' : ''}
+                                onchange="actualizarTotal()"
+                            />
+                            <strong>${usuario.nombre}</strong>
+                        </label>
+                        <div class="usuario-info">
+                            <div>Puesto: ${usuario.puesto}</div>
+                            <div>Turno: ${usuario.turno || 'N/A'}</div>
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += html;
+            });
+
+            document.getElementById('totalAsignados').textContent = totalChecked;
+        }
+
+        function actualizarTotal() {
+            const checkboxes = document.querySelectorAll('#gridUsuarios input[type="checkbox"]:checked');
+            document.getElementById('totalAsignados').textContent = checkboxes.length;
+        }
+
+        async function guardarPermisos() {
+            if (!evaluadorActual) return;
+
+            const checkboxes = document.querySelectorAll('#gridUsuarios input[type="checkbox"]');
+            const permisos = [];
+
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    permisos.push(parseInt(cb.value));
+                }
+            });
+
+            try {
+                const response = await fetch('/admin/guardar_permisos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({
+                        evaluador_id: evaluadorActual.id,
+                        evaluados_ids: permisos
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('✓ Permisos guardados exitosamente');
+                    permisosActuales = {};
+                    permisos.forEach(id => {
+                        permisosActuales[id] = true;
+                    });
+                } else {
+                    alert('✗ Error al guardar permisos: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al guardar permisos');
+            }
+        }
+
+        function limpiarSeleccion() {
+            document.querySelectorAll('#gridUsuarios input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+            });
+            actualizarTotal();
+        }
+
+        function getCsrfToken() {
+            const token = document.querySelector('meta[name="csrf-token"]');
+            return token ? token.content : '';
+        }
+    </script>
+</body>
+</html>

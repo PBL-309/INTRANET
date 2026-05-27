@@ -328,14 +328,11 @@
     <script>
         let evaluacionesData = [];
         let evaluacionSeleccionada = null;
-
         const busquedaInput = document.getElementById('busqueda');
         const dropdown = document.getElementById('dropdown');
         const verButton = document.getElementById('verEvaluacion');
         const resultsSection = document.getElementById('resultsSection');
         const resultsList = document.getElementById('resultsList');
-
-        // Cargar todas las evaluaciones al iniciar
         async function cargarEvaluaciones() {
             try {
                 const response = await fetch('/api/evaluaciones_disponibles');
@@ -345,7 +342,6 @@
                 console.error('Error cargando evaluaciones:', error);
             }
         }
-
         busquedaInput.addEventListener('input', function() {
             const valor = this.value.toLowerCase().trim();
             
@@ -388,7 +384,6 @@
                 window.location.href = `/evaluacion_carta/${evaluacionSeleccionada.evalId}`;
             }
         }
-
         function limpiar() {
             busquedaInput.value = '';
             dropdown.classList.remove('active');
@@ -396,15 +391,11 @@
             verButton.disabled = true;
             resultsSection.style.display = 'none';
         }
-
-        // Cerrar dropdown al hacer click fuera
         document.addEventListener('click', function(event) {
             if (!event.target.closest('.search-input-wrapper')) {
                 dropdown.classList.remove('active');
             }
         });
-
-        // Cargar evaluaciones al iniciar
         cargarEvaluaciones();
     </script>
 </body>

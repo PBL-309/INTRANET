@@ -165,6 +165,24 @@ class AsistenciaFinAnio(db.Model):
     user = db.relationship('User', backref='asistencia_evento', uselist=False)
 
 
+class PermisosEvaluacion(db.Model):
+    __tablename__ = 'permisos_evaluacion'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    evaluador_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    evaluado_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    creado_en = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relaciones
+    evaluador = db.relationship('User', foreign_keys=[evaluador_id], backref=db.backref('permisos_como_evaluador', lazy=True, cascade='all, delete-orphan'))
+    evaluado = db.relationship('User', foreign_keys=[evaluado_id], backref=db.backref('permisos_como_evaluado', lazy=True))
+    
+    __table_args__ = (db.UniqueConstraint('evaluador_id', 'evaluado_id', name='uq_evaluador_evaluado'),)
+    
+    def __repr__(self):
+        return f'<PermisosEvaluacion {self.evaluador_id} -> {self.evaluado_id}>'
+
+
 class ContactoEmergencia(db.Model):
     __tablename__ = 'contacto_emergencia'
 

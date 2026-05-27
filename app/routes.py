@@ -11,7 +11,7 @@ from io import BytesIO
 import os
 import requests # Necesario para verificar reCAPTCHA v3
 import logging
-from app.models import Aviso, ContactoEmergencia,  Evento, File, Folder, FormularioRespuesta, PortalWeb, Respuesta, User, VacationRequest, Noticia, RegistroCompetencia, EvaluacionDesempeno, AsistenciaFinAnio
+from app.models import Aviso, ContactoEmergencia,  Evento, File, Folder, FormularioRespuesta, PortalWeb, Respuesta, User, VacationRequest, Noticia, RegistroCompetencia, EvaluacionDesempeno, AsistenciaFinAnio, PermisosEvaluacion
 from app.forms import LoginForm
 from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
@@ -401,18 +401,13 @@ def submit_evaluacion():
         
         evaluado_id = int(evaluado_id)
         
-        # Validar permisos para evaluación personal
-        PERMISOS_EVALUACION = {
-            7: [30, 42, 49],
-            263: [101, 111, 182],
-            63: [148, 180, 185, 264, 301, 303]
-        }
+        # Validar permisos - verificar en la BD
+        permiso = PermisosEvaluacion.query.filter_by(
+            evaluador_id=current_user.id,
+            evaluado_id=evaluado_id
+        ).first()
         
-        evaluador_id = current_user.id
-        usuarios_permitidos = PERMISOS_EVALUACION.get(evaluador_id, [])
-        
-        # Si el evaluador tiene permisos restringidos y el evaluado no está en su lista
-        if evaluador_id in PERMISOS_EVALUACION and evaluado_id not in usuarios_permitidos:
+        if not permiso:
             flash("No tienes permiso para evaluar a este usuario", "danger")
             return redirect(request.referrer)
         
@@ -1352,15 +1347,11 @@ def listar_usuarios():
 @login_required
 def listar_usuarios_permitidos():
     """API que retorna usuarios que el evaluador actual tiene permiso de evaluar"""
-    # Mapeo de permisos: evaluador_id -> [user_ids permitidos]
-    PERMISOS_EVALUACION = {
-        7: [30, 42, 49],
-        263: [101, 111, 182],
-        63: [148, 180, 185, 264, 301, 303]
-    }
-    
     evaluador_id = current_user.id
-    usuarios_permitidos_ids = PERMISOS_EVALUACION.get(evaluador_id, [])
+    
+    # Obtener usuarios permitidos desde PermisosEvaluacion
+    permisos = PermisosEvaluacion.query.filter_by(evaluador_id=evaluador_id).all()
+    usuarios_permitidos_ids = [p.evaluado_id for p in permisos]
     
     if not usuarios_permitidos_ids:
         return jsonify({"success": True, "usuarios": []})
@@ -1671,19 +1662,14 @@ def evaluacion():
 @main.route('/evaluacion_personal')
 @login_required
 def evaluacion_personal():
-    """Ruta para evaluación personal con permisos específicos"""
-    # Mapeo de permisos: evaluador_id -> [user_ids permitidos]
-    PERMISOS_EVALUACION = {
-        7: [30, 42, 49],
-        263: [101, 111, 182],
-        63: [148, 180, 185, 264, 301, 303]
-    }
-    
+    """Ruta para evaluación personal con permisos desde BD"""
     evaluador_id = current_user.id
     
     # Verificar que el usuario tiene permisos para evaluar
-    if evaluador_id not in PERMISOS_EVALUACION:
-        flash('No tienes permisos para realizar evaluaciones personales', 'warning')
+    permisos = PermisosEvaluacion.query.filter_by(evaluador_id=evaluador_id).all()
+    
+    if not permisos:
+        flash('No tienes usuarios asignados para evaluar', 'warning')
         return redirect(url_for('main.dashboard'))
     
     return render_template('evaluacion_personal.html', usuario_actual=current_user)
@@ -2008,6 +1994,90 @@ def delete_noticia(id):
             return jsonify({'success': False, 'message': str(e)}), 500
         flash(f'Error al eliminar noticia: {str(e)}', 'error')
     return redirect(url_for('main.admin_noticias'))
+
+@main.route('/admin/permisos_evaluacion')
+@login_required
+def admin_permisos_evaluacion():
+    """Página de admin para gestionar permisos de evaluación"""
+    if current_user.username != 'admin':
+        flash('Solo el admin puede acceder a esta página', 'danger')
+        return redirect(url_for('main.dashboard'))
+    
+    # Obtener todos los usuarios que pueden ser evaluadores
+    evaluadores = User.query.filter(User.username != 'admin').all()
+    
+    return render_template('admin_permisos_evaluacion.html', evaluadores=evaluadores)
+
+@main.route('/api/permisos_evaluador/<int:evaluador_id>')
+@login_required
+def api_permisos_evaluador(evaluador_id):
+    """API que retorna los permisos actuales de un evaluador y usuarios disponibles"""
+    if current_user.username != 'admin':
+        return jsonify({'success': False, 'message': 'No autorizado'}), 403
+    
+    try:
+        # Obtener permisos actuales
+        permisos = PermisosEvaluacion.query.filter_by(evaluador_id=evaluador_id).all()
+        permisos_dict = {p.evaluado_id: True for p in permisos}
+        
+        # Obtener todos los usuarios disponibles para evaluar (excepto el evaluador)
+        usuarios = User.query.filter(User.id != evaluador_id, User.username != 'admin').all()
+        
+        usuarios_list = [
+            {
+                'id': u.id,
+                'nombre': u.nombre,
+                'puesto': u.puesto or 'N/A',
+                'turno': u.turno or 'N/A',
+                'username': u.username
+            }
+            for u in usuarios
+        ]
+        
+        return jsonify({
+            'success': True,
+            'permisos': permisos_dict,
+            'usuarios_disponibles': usuarios_list
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+@main.route('/admin/guardar_permisos', methods=['POST'])
+@login_required
+def guardar_permisos():
+    """Guardar los permisos de evaluación para un usuario"""
+    if current_user.username != 'admin':
+        return jsonify({'success': False, 'message': 'No autorizado'}), 403
+    
+    try:
+        data = request.get_json()
+        evaluador_id = data.get('evaluador_id')
+        evaluados_ids = data.get('evaluados_ids', [])
+        
+        if not evaluador_id:
+            return jsonify({'success': False, 'message': 'Evaluador no especificado'}), 400
+        
+        # Eliminar permisos anteriores
+        PermisosEvaluacion.query.filter_by(evaluador_id=evaluador_id).delete()
+        
+        # Agregar nuevos permisos
+        for evaluado_id in evaluados_ids:
+            permiso = PermisosEvaluacion(
+                evaluador_id=evaluador_id,
+                evaluado_id=evaluado_id
+            )
+            db.session.add(permiso)
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Se guardaron {len(evaluados_ids)} permisos'
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
 @main.route('/delete_file/<filename>', methods=['DELETE'])
 @login_required
 def delete_file(filename):
