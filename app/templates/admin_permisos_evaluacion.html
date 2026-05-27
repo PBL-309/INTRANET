@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Admin - Permisos de Evaluación</title>
     <style>
         * {
@@ -600,7 +601,11 @@
 
         function getCsrfToken() {
             const token = document.querySelector('meta[name="csrf-token"]');
-            return token ? token.content : '';
+            if (token) {
+                return token.getAttribute('content');
+            }
+            console.warn('CSRF token not found');
+            return '';
         }
     </script>
 </body>
