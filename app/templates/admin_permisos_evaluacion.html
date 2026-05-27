@@ -93,6 +93,48 @@
             letter-spacing: 0.5px;
         }
 
+        .busqueda-evaluador {
+            margin-bottom: 15px;
+        }
+
+        .busqueda-evaluador input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        .busqueda-evaluador input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .busqueda-usuarios {
+            margin-bottom: 15px;
+        }
+
+        .busqueda-usuarios input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        .busqueda-usuarios input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .evaluadores-list h3 {
+
         .evaluador-item {
             padding: 12px 15px;
             margin-bottom: 10px;
@@ -386,14 +428,18 @@
             <!-- Sidebar de evaluadores -->
             <div class="evaluadores-list">
                 <h3>Evaluadores</h3>
+                <div class="busqueda-evaluador">
+                    <input type="text" id="buscarEvaluador" placeholder="🔍 Buscar evaluador..." onkeyup="filtrarEvaluadores()">
+                </div>
+                <div id="listaEvaluadores">
                 {% for evaluador in evaluadores %}
-                    <div class="evaluador-item" onclick="seleccionarEvaluador({{ evaluador.id }}, '{{ evaluador.nombre }}', '{{ evaluador.puesto }}', '{{ evaluador.username }}')">
+                    <div class="evaluador-item" data-nombre="{{ evaluador.nombre }}" data-username="{{ evaluador.username }}" onclick="seleccionarEvaluador({{ evaluador.id }}, '{{ evaluador.nombre }}', '{{ evaluador.puesto }}', '{{ evaluador.username }}')">
                         <div><strong>{{ evaluador.nombre }}</strong></div>
                         <div style="font-size: 11px; opacity: 0.8;">ID: {{ evaluador.id }} | @{{ evaluador.username }}</div>
                         <div style="font-size: 11px; opacity: 0.8;">{{ evaluador.puesto }}</div>
                     </div>
                 {% endfor %}
-            </div>
+                </div>
 
             <!-- Panel de asignación -->
             <div class="panel-evaluado">
@@ -416,6 +462,10 @@
                     <h3 style="color: var(--text); margin-bottom: 15px; font-size: 16px;">Selecciona a quiénes puede evaluar:</h3>
 
                     <div id="botonesAcciones" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 20px;">
+                    </div>
+
+                    <div class="busqueda-usuarios">
+                        <input type="text" id="buscarUsuarios" placeholder="🔍 Buscar usuario..." onkeyup="filtrarUsuarios()">
                     </div>
 
                     <form id="formPermisos">
