@@ -206,11 +206,26 @@
             border: 2px solid var(--border);
             transition: all 0.3s;
             cursor: pointer;
+            display: grid;
+            gap: 10px;
         }
 
         .usuario-checkbox:hover {
             border-color: var(--primary);
             background: #e8f4ff;
+        }
+
+        #botonesAcciones {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn-accion {
+            width: 100%;
+            text-align: left;
+            white-space: normal;
         }
 
         .usuario-checkbox input[type="checkbox"] {
@@ -537,7 +552,7 @@
                 if (isChecked) totalChecked++;
 
                 const html = `
-                    <div class="usuario-checkbox">
+                    <div class="usuario-checkbox" data-nombre="${usuario.nombre}" data-username="${usuario.username}" data-puesto="${usuario.puesto}" data-id="${usuario.id}">
                         <label>
                             <input 
                                 type="checkbox" 
@@ -707,7 +722,8 @@
                 const nombre = item.dataset.nombre?.toLowerCase() || '';
                 const username = item.dataset.username?.toLowerCase() || '';
                 const puesto = item.dataset.puesto?.toLowerCase() || '';
-                const texto = `${nombre} ${username} ${puesto}`;
+                const id = item.dataset.id?.toLowerCase() || '';
+                const texto = `${nombre} ${username} ${puesto} ${id}`;
                 const coincide = termino === '' || texto.includes(termino);
                 item.style.display = coincide ? 'block' : 'none';
                 if (coincide) resultados += 1;
