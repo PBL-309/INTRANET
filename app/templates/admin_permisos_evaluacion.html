@@ -234,6 +234,30 @@
             background: #cbd5e1;
         }
 
+        .btn-accion {
+            padding: 10px 12px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-accion:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-accion.activo {
+            background: var(--primary);
+            color: white;
+        }
+
         .alert {
             padding: 15px 20px;
             border-radius: 8px;
@@ -390,6 +414,9 @@
 
                     <h3 style="color: var(--text); margin-bottom: 15px; font-size: 16px;">Selecciona a quiénes puede evaluar:</h3>
 
+                    <div id="botonesAcciones" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 20px;">
+                    </div>
+
                     <form id="formPermisos">
                         <div class="grid-usuarios" id="gridUsuarios">
                         </div>
@@ -460,6 +487,7 @@
                             <input 
                                 type="checkbox" 
                                 value="${usuario.id}" 
+                                data-puesto="${usuario.puesto}"
                                 ${isChecked ? 'checked' : ''}
                                 onchange="actualizarTotal()"
                             />
@@ -476,6 +504,40 @@
             });
 
             document.getElementById('totalAsignados').textContent = totalChecked;
+
+            // Crear botones de acciones rápidas por puesto
+            crearBotonesAcciones(usuarios);
+        }
+
+        function crearBotonesAcciones(usuarios) {
+            // Extraer puestos únicos
+            const puestos = [...new Set(usuarios.map(u => u.puesto))].sort();
+            
+            const contenedor = document.getElementById('botonesAcciones');
+            contenedor.innerHTML = '';
+
+            puestos.forEach(puesto => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn-accion';
+                btn.textContent = `Marcar todos: ${puesto}`;
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    marcarTodosPorPuesto(puesto);
+                };
+                contenedor.appendChild(btn);
+            });
+        }
+
+        function marcarTodosPorPuesto(puesto) {
+            const checkboxes = document.querySelectorAll(`#gridUsuarios input[data-puesto="${puesto}"]`);
+            const todosChecked = Array.from(checkboxes).every(cb => cb.checked);
+            
+            checkboxes.forEach(cb => {
+                cb.checked = !todosChecked;
+            });
+            
+            actualizarTotal();
         }
 
         function actualizarTotal() {
