@@ -561,12 +561,17 @@
                 }
             });
 
+            const csrfToken = getCsrfToken();
+            console.log('CSRF Token:', csrfToken);
+            console.log('Evaluador ID:', evaluadorActual.id);
+            console.log('Permisos:', permisos);
+
             try {
                 const response = await fetch('/admin/guardar_permisos', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': getCsrfToken()
+                        'X-CSRFToken': csrfToken
                     },
                     body: JSON.stringify({
                         evaluador_id: evaluadorActual.id,
@@ -574,20 +579,29 @@
                     })
                 });
 
-                const data = await response.json();
+                console.log('Response Status:', response.status);
+                console.log('Response Headers:', response.headers);
                 
-                if (data.success) {
-                    alert('✓ Permisos guardados exitosamente\n\n' + data.message);
-                    permisosActuales = {};
-                    permisos.forEach(id => {
-                        permisosActuales[id] = true;
-                    });
-                } else {
-                    alert('✗ Error al guardar permisos:\n\n' + data.message);
-                    console.error('Error response:', data);
+                const responseText = await response.text();
+                console.log('Response Text:', responseText);
+                
+                try {
+                    const data = JSON.parse(responseText);
+                    if (data.success) {
+                        alert('✓ Permisos guardados exitosamente\n\n' + data.message);
+                        permisosActuales = {};
+                        permisos.forEach(id => {
+                            permisosActuales[id] = true;
+                        });
+                    } else {
+                        alert('✗ Error al guardar permisos:\n\n' + data.message);
+                    }
+                } catch (parseError) {
+                    console.error('JSON Parse Error:', parseError);
+                    alert('✗ Error: Respuesta inválida del servidor\n\nAbre la consola (F12) para más detalles');
                 }
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Fetch Error:', error);
                 alert('✗ Error de conexión al guardar permisos\n\n' + error.message);
             }
         }
