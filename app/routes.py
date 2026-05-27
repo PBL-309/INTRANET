@@ -2003,8 +2003,12 @@ def admin_permisos_evaluacion():
         flash('Solo el admin puede acceder a esta página', 'danger')
         return redirect(url_for('main.dashboard'))
     
-    # Obtener todos los usuarios que pueden ser evaluadores
-    evaluadores = User.query.filter(User.username != 'admin').all()
+    # Obtener solo evaluadores permitidos (excluyendo BOMBERO ESPECIALIZADO)
+    puestos_evaluadores = ['BOMBERO HABILITADO', 'SUBTENIENTE', 'TENIENTE', 'COORDINADOR']
+    evaluadores = User.query.filter(
+        User.puesto.in_(puestos_evaluadores),
+        User.username != 'admin'
+    ).all()
     
     return render_template('admin_permisos_evaluacion.html', evaluadores=evaluadores)
 
