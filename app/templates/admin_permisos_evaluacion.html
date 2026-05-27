@@ -134,6 +134,8 @@
         }
 
         .evaluadores-list h3 {
+            margin-bottom: 15px;
+        }
 
         .evaluador-item {
             padding: 12px 15px;
@@ -433,13 +435,14 @@
                 </div>
                 <div id="listaEvaluadores">
                 {% for evaluador in evaluadores %}
-                    <div class="evaluador-item" data-nombre="{{ evaluador.nombre }}" data-username="{{ evaluador.username }}" onclick="seleccionarEvaluador({{ evaluador.id }}, '{{ evaluador.nombre }}', '{{ evaluador.puesto }}', '{{ evaluador.username }}')">
+                    <div class="evaluador-item" data-nombre="{{ evaluador.nombre }}" data-username="{{ evaluador.username }}" data-puesto="{{ evaluador.puesto }}" onclick="seleccionarEvaluador({{ evaluador.id }}, '{{ evaluador.nombre }}', '{{ evaluador.puesto }}', '{{ evaluador.username }}')">
                         <div><strong>{{ evaluador.nombre }}</strong></div>
                         <div style="font-size: 11px; opacity: 0.8;">ID: {{ evaluador.id }} | @{{ evaluador.username }}</div>
                         <div style="font-size: 11px; opacity: 0.8;">{{ evaluador.puesto }}</div>
                     </div>
                 {% endfor %}
                 </div>
+                <div id="mensajeNoEvaluadores" class="empty-state" style="display:none; margin-top:10px;">No se encontraron evaluadores.</div>
 
             <!-- Panel de asignación -->
             <div class="panel-evaluado">
@@ -471,6 +474,7 @@
                     <form id="formPermisos">
                         <div class="grid-usuarios" id="gridUsuarios">
                         </div>
+                        <div id="mensajeNoUsuarios" class="empty-state" style="display:none; margin-top:10px;">No se encontraron usuarios.</div>
 
                         <div class="button-group">
                             <button type="button" class="btn btn-primary" onclick="guardarPermisos()">💾 Guardar Cambios</button>
@@ -670,6 +674,49 @@
             }
             console.warn('CSRF token not found');
             return '';
+        }
+
+        function filtrarEvaluadores() {
+            const termino = document.getElementById('buscarEvaluador').value.toLowerCase();
+            const items = document.querySelectorAll('#listaEvaluadores .evaluador-item');
+            let resultados = 0;
+
+            items.forEach(item => {
+                const nombre = item.dataset.nombre?.toLowerCase() || '';
+                const username = item.dataset.username?.toLowerCase() || '';
+                const puesto = item.dataset.puesto?.toLowerCase() || '';
+                const id = item.textContent.match(/ID:\s*(\d+)/)?.[1] || '';
+
+                const coincide = termino === '' || nombre.includes(termino) || username.includes(termino) || puesto.includes(termino) || id.includes(termino);
+                item.style.display = coincide ? 'block' : 'none';
+                if (coincide) resultados += 1;
+            });
+
+            const mensaje = document.getElementById('mensajeNoEvaluadores');
+            if (mensaje) {
+                mensaje.style.display = resultados === 0 ? 'block' : 'none';
+            }
+        }
+
+        function filtrarUsuarios() {
+            const termino = document.getElementById('buscarUsuarios').value.toLowerCase();
+            const items = document.querySelectorAll('#gridUsuarios .usuario-checkbox');
+            let resultados = 0;
+
+            items.forEach(item => {
+                const nombre = item.dataset.nombre?.toLowerCase() || '';
+                const username = item.dataset.username?.toLowerCase() || '';
+                const puesto = item.dataset.puesto?.toLowerCase() || '';
+                const texto = `${nombre} ${username} ${puesto}`;
+                const coincide = termino === '' || texto.includes(termino);
+                item.style.display = coincide ? 'block' : 'none';
+                if (coincide) resultados += 1;
+            });
+
+            const mensaje = document.getElementById('mensajeNoUsuarios');
+            if (mensaje) {
+                mensaje.style.display = resultados === 0 ? 'block' : 'none';
+            }
         }
     </script>
 </body>
