@@ -30,7 +30,7 @@
             font-family: Inter, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
             background:
                 linear-gradient(120deg, rgba(8, 21, 38, 0.88), rgba(193, 18, 31, 0.28)),
-                url("{{ url_for('static', filename='images/COMP3.jpeg') }}") center / cover fixed;
+                url("/static/images/COMP3.jpeg") center / cover fixed;
         }
 
         body::before {
@@ -474,7 +474,7 @@
         <section class="shell" aria-label="Registro Bombero Challenge">
             <aside class="visual-panel" aria-label="Galer&iacute;a del evento">
                 <div class="hero-photo">
-                    <img src="{{ url_for('static', filename='images/COMP1.jpeg') }}" alt="Participante del Bombero Challenge corriendo con equipo y manguera">
+                    <img src="/static/images/COMP1.jpeg" alt="Participante del Bombero Challenge corriendo con equipo y manguera">
                     <div class="brand-row">
                         <div class="pill"><i class="fas fa-fire-flame-curved"></i> Bombero Challenge</div>
                         <div class="number-card">
@@ -490,11 +490,11 @@
 
                 <div class="photo-grid" aria-label="Im&aacute;genes del Bombero Challenge">
                     <div class="photo-tile">
-                        <img src="{{ url_for('static', filename='images/COMP2.jpeg') }}" alt="Bomberos en prueba vertical durante el Bombero Challenge">
+                        <img src="/static/images/COMP2.jpeg" alt="Bomberos en prueba vertical durante el Bombero Challenge">
                         <span>Altura y control</span>
                     </div>
                     <div class="photo-tile">
-                        <img src="{{ url_for('static', filename='images/COMP3.jpeg') }}" alt="Bomberos prepar&aacute;ndose durante una prueba de equipo">
+                        <img src="/static/images/COMP3.jpeg" alt="Bomberos prepar&aacute;ndose durante una prueba de equipo">
                         <span>Equipo y precisi&oacute;n</span>
                     </div>
                 </div>
