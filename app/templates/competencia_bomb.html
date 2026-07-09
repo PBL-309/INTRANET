@@ -35,7 +35,7 @@
             overflow: hidden;
             box-shadow: 0 25px 60px rgba(0,0,0,0.25);
             display: grid;
-            grid-template-columns: 1.25fr 0.8fr;
+            grid-template-columns: 1.5fr 1fr;
         }
         .panel-left {
             padding: 32px 30px 34px;
@@ -44,16 +44,19 @@
         .panel-right {
             position: relative;
             color: white;
-            padding: 32px 28px;
+            padding: 24px 22px;
             overflow: hidden;
-            min-height: 520px;
+            min-height: 420px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: flex-start;
         }
         .visual-stage {
             position: absolute;
-            inset: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 220px;
             overflow: hidden;
             background: #071b2f;
         }
@@ -87,28 +90,29 @@
             z-index: 2;
             display: flex;
             flex-direction: column;
-            height: 100%;
+            margin-top: 220px;
+            gap: 12px;
         }
         .visual-badge {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 12px;
+            padding: 6px 10px;
             border-radius: 999px;
             background: rgba(255, 255, 255, 0.16);
             backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.22);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 700;
-            margin-bottom: 16px;
+            margin-bottom: 8px;
             width: fit-content;
         }
         .visual-caption {
-            font-size: 0.95rem;
-            line-height: 1.6;
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 18px;
-            max-width: 360px;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: rgba(255, 255, 255, 0.88);
+            margin-bottom: 10px;
+            max-width: 100%;
         }
         .badge {
             display: inline-flex;
@@ -188,31 +192,31 @@
         .panel-right .card-title {
             display: flex; align-items: center; gap: 8px;
             font-weight: 700;
-            font-size: 1.05rem;
-            margin-bottom: 16px;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
         }
         .summary-card {
             background: rgba(255,255,255,0.12);
             border: 1px solid rgba(255,255,255,0.16);
-            border-radius: 18px;
-            padding: 16px;
-            margin-bottom: 14px;
+            border-radius: 14px;
+            padding: 12px 13px;
+            margin-bottom: 9px;
             backdrop-filter: blur(6px);
         }
-        .summary-card h3 { margin: 0 0 8px; font-size: 1rem; }
-        .summary-card ul { margin: 0; padding-left: 18px; color: rgba(255,255,255,0.92); line-height: 1.7; }
+        .summary-card h3 { margin: 0 0 6px; font-size: 0.9rem; }
+        .summary-card ul { margin: 0; padding-left: 16px; color: rgba(255,255,255,0.92); line-height: 1.5; font-size: 0.85rem; }
         .steps {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-top: 18px;
+            gap: 7px;
+            margin-top: 10px;
         }
         .step {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             align-items: flex-start;
             color: rgba(255,255,255,0.9);
-            font-size: 0.95rem;
+            font-size: 0.85rem;
         }
         .step i { color: var(--amber); margin-top: 2px; }
 
