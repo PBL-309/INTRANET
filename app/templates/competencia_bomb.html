@@ -7,102 +7,183 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary: #d32f2f;
-            --primary-dark: #b71c1c;
-            --secondary: #1976d2;
-            --success: #2e7d32;
-            --bg: #f4f7fb;
-            --text: #1f2937;
-            --muted: #6b7280;
-            --border: #e5e7eb;
+            --navy: #071b2f;
+            --blue: #0f4c81;
+            --amber: #f59e0b;
+            --amber-dark: #d97706;
+            --green: #10b981;
+            --red: #dc2626;
+            --text: #0f172a;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --surface: #ffffff;
         }
 
         * { box-sizing: border-box; }
         body {
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 45%, #dc2626 100%);
+            background: linear-gradient(135deg, #071b2f 0%, #0f4c81 45%, #1d4ed8 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 24px;
             color: var(--text);
         }
-        .wrapper { max-width: 760px; margin: 0 auto; }
+        .wrapper { max-width: 1120px; margin: 0 auto; }
         .card {
-            background: #fff;
-            border-radius: 24px;
+            background: var(--surface);
+            border-radius: 28px;
             overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+            display: grid;
+            grid-template-columns: 1.25fr 0.8fr;
         }
-        .hero {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        .panel-left {
+            padding: 32px 30px 34px;
+            background: linear-gradient(135deg, #f8fafc 0%, #eef4ff 100%);
+        }
+        .panel-right {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
             color: white;
-            padding: 36px 30px;
-            text-align: center;
+            padding: 32px 28px;
         }
-        .hero i { font-size: 3rem; margin-bottom: 12px; display: inline-block; }
-        .hero h1 { margin: 0 0 8px; font-size: 2rem; }
-        .hero p { margin: 0; opacity: 0.95; }
-        .body { padding: 32px 30px 28px; }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--amber-dark);
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 14px;
+        }
+        .hero h1 {
+            margin: 0 0 8px;
+            font-size: 2rem;
+            color: var(--navy);
+        }
+        .hero p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.6;
+        }
         .alert {
-            display: flex; gap: 12px; align-items: flex-start;
-            background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a;
-            padding: 14px 16px; border-radius: 12px; margin-bottom: 24px;
+            margin-top: 18px;
+            background: white;
+            border: 1px solid #dbeafe;
+            border-left: 4px solid var(--amber);
+            border-radius: 16px;
+            padding: 14px 15px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            color: #1d4ed8;
+            box-shadow: 0 8px 18px rgba(15, 76, 129, 0.08);
         }
         .section-title {
-            display: flex; justify-content: space-between; align-items: center;
-            margin: 24px 0 12px; font-weight: 700; color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin: 22px 0 14px;
+            font-weight: 700;
+            color: var(--navy);
+            font-size: 1rem;
         }
-        .section-title span { display: flex; align-items: center; gap: 8px; }
-        .section-title span i { color: var(--primary); }
-        .grid { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .section-title i { color: var(--amber-dark); }
+        .grid { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .field { display: flex; flex-direction: column; gap: 7px; }
         .field.full { grid-column: 1 / -1; }
-        label { font-weight: 600; font-size: 0.96rem; }
+        label { font-weight: 600; font-size: 0.94rem; color: var(--navy); }
         input, select {
-            border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 1rem;
+            width: 100%;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 12px;
+            padding: 12px 13px;
+            font-size: 1rem;
             transition: border-color .2s ease, box-shadow .2s ease;
         }
         input:focus, select:focus {
-            outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.14);
+            outline: none;
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.12);
         }
-        .hint { font-size: 0.85rem; color: var(--muted); }
-        .actions { margin-top: 24px; }
+        .hint { font-size: 0.83rem; color: var(--muted); }
+        .error { color: #b91c1c; font-size: 0.9rem; min-height: 1rem; }
+        .actions { margin-top: 22px; }
         button {
-            width: 100%; border: none; border-radius: 12px; padding: 14px 16px; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-size: 1rem;
+            width: 100%; border: none; border-radius: 14px; padding: 14px 16px; background: linear-gradient(135deg, var(--amber) 0%, var(--amber-dark) 100%);
+            color: white; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-size: 1rem; box-shadow: 0 10px 24px rgba(245, 158, 11, 0.22);
         }
         button:hover { transform: translateY(-1px); }
         .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.4); border-top-color: white; border-radius: 50%; display: none; animation: spin 1s linear infinite; }
         button.loading .spinner { display: inline-block; }
         button.loading span { display: none; }
-        .error { color: #c62828; font-size: 0.9rem; min-height: 1rem; }
+
+        .panel-right .card-title {
+            display: flex; align-items: center; gap: 8px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 16px;
+        }
+        .summary-card {
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.16);
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 14px;
+            backdrop-filter: blur(6px);
+        }
+        .summary-card h3 { margin: 0 0 8px; font-size: 1rem; }
+        .summary-card ul { margin: 0; padding-left: 18px; color: rgba(255,255,255,0.92); line-height: 1.7; }
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 18px;
+        }
+        .step {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            color: rgba(255,255,255,0.9);
+            font-size: 0.95rem;
+        }
+        .step i { color: var(--amber); margin-top: 2px; }
+
         @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 880px) {
+            .card { grid-template-columns: 1fr; }
+            .panel-right { order: -1; }
+        }
         @media (max-width: 640px) {
+            body { padding: 14px; }
+            .panel-left, .panel-right { padding: 22px 18px; }
             .grid { grid-template-columns: 1fr; }
-            .body { padding: 24px 20px 22px; }
-            .hero { padding: 30px 20px; }
+            .hero h1 { font-size: 1.7rem; }
         }
     </style>
 </head>
 <body>
     <div class="wrapper">
         <div class="card">
-            <div class="hero">
-                <i class="fas fa-trophy"></i>
-                <h1>Bombero Challenge</h1>
-                <p>Registra tu participación y recibe tu número de competidor</p>
-            </div>
-            <div class="body">
+            <div class="panel-left">
+                <div class="badge"><i class="fas fa-trophy"></i> Inscripción abierta</div>
+                <div class="hero">
+                    <h1>Bombero Challenge</h1>
+                    <p>Registra tu participación con tus datos principales y recibe tu número de competidor en breve.</p>
+                </div>
+
                 <div class="alert">
                     <i class="fas fa-info-circle"></i>
-                    <div>
-                        Completa tus datos para confirmar tu inscripción. En breve recibirás un correo con tu número de competidor y la confirmación de participación.
-                    </div>
+                    <div>Completa tus datos para confirmar tu inscripción. El equipo del evento te enviará la confirmación y tu número de competidor por correo.</div>
                 </div>
 
                 <form id="competencia-form" method="POST" action="{{ url_for('main.submit_competencia') }}" novalidate>
                     <div class="section-title">
-                        <span><i class="fas fa-user"></i> Datos del participante</span>
+                        <i class="fas fa-user"></i>
+                        <span>Datos del participante</span>
                     </div>
                     <div class="grid">
                         <div class="field full">
@@ -155,6 +236,29 @@
                         </button>
                     </div>
                 </form>
+            </div>
+
+            <div class="panel-right">
+                <div class="card-title"><i class="fas fa-clipboard-list"></i> Qué recibirás</div>
+                <div class="summary-card">
+                    <h3><i class="fas fa-id-badge"></i> Número de competidor</h3>
+                    <ul>
+                        <li>Se asignará automáticamente al terminar tu registro.</li>
+                        <li>Lo recibirás por correo para presentarlo en el evento.</li>
+                    </ul>
+                </div>
+                <div class="summary-card">
+                    <h3><i class="fas fa-shield-alt"></i> Confirmación oficial</h3>
+                    <ul>
+                        <li>Tu participación quedará registrada en el sistema.</li>
+                        <li>El equipo podrá verificar tu inscripción sin complicaciones.</li>
+                    </ul>
+                </div>
+                <div class="steps">
+                    <div class="step"><i class="fas fa-check-circle"></i><span>Completa tus datos y confirma la inscripción.</span></div>
+                    <div class="step"><i class="fas fa-check-circle"></i><span>Revisa tu correo para encontrar tu número asignado.</span></div>
+                    <div class="step"><i class="fas fa-check-circle"></i><span>Acércate al evento con la confirmación recibida.</span></div>
+                </div>
             </div>
         </div>
     </div>

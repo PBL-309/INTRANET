@@ -7,46 +7,67 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary: #d32f2f;
-            --primary-dark: #b71c1c;
-            --secondary: #1976d2;
-            --success: #2e7d32;
-            --bg: #f4f7fb;
-            --text: #1f2937;
-            --muted: #6b7280;
+            --navy: #071b2f;
+            --blue: #0f4c81;
+            --amber: #f59e0b;
+            --amber-dark: #d97706;
+            --green: #10b981;
+            --text: #0f172a;
+            --muted: #64748b;
         }
         * { box-sizing: border-box; }
         body {
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 45%, #dc2626 100%);
             min-height: 100vh;
             display: flex; align-items: center; justify-content: center; padding: 20px;
+            background: linear-gradient(135deg, #071b2f 0%, #0f4c81 45%, #1d4ed8 100%);
         }
         .card {
-            width: 100%; max-width: 720px; background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            width: 100%; max-width: 780px; background: white; border-radius: 28px; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.25);
         }
         .hero {
-            padding: 38px 30px; text-align: center; color: white; background: linear-gradient(135deg, var(--success) 0%, #1b5e20 100%);
+            padding: 38px 30px 24px; text-align: center; color: white; background: linear-gradient(135deg, var(--amber) 0%, var(--amber-dark) 100%);
         }
         .hero i { font-size: 3.2rem; margin-bottom: 10px; }
         .hero h1 { margin: 0 0 8px; font-size: 2rem; }
-        .hero p { margin: 0; opacity: 0.95; }
-        .body { padding: 30px; }
+        .hero p { margin: 0; opacity: 0.95; line-height: 1.6; }
+        .body { padding: 28px 30px 30px; }
         .info-box {
-            background: #f8fafc; border-left: 4px solid var(--secondary); padding: 16px 18px; border-radius: 12px; margin-bottom: 20px;
+            background: linear-gradient(90deg, #ecfeff 0%, #eff6ff 100%);
+            border: 1px solid #bae6fd;
+            border-left: 5px solid var(--blue);
+            padding: 16px 18px;
+            border-radius: 16px;
+            margin-bottom: 18px;
+            color: #1e3a8a;
         }
-        .info-grid { display: grid; gap: 12px; background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 16px; }
-        .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
+        .info-grid {
+            display: grid; gap: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 18px; padding: 16px;
+        }
+        .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
         .row:last-child { border-bottom: none; padding-bottom: 0; }
-        .label { font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+        .label { font-weight: 700; color: var(--navy); display: flex; align-items: center; gap: 8px; }
         .value { color: var(--muted); text-align: right; }
-        .actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+        .highlight {
+            margin-top: 18px;
+            background: linear-gradient(135deg, rgba(16,185,129,0.14), rgba(14,116,144,0.12));
+            border: 1px solid rgba(16,185,129,0.2);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #065f46;
+            font-weight: 600;
+        }
+        .highlight i { color: var(--green); font-size: 1.15rem; }
+        .actions { display: flex; gap: 12px; margin-top: 22px; flex-wrap: wrap; }
         .btn {
             text-decoration: none; border-radius: 12px; padding: 12px 16px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;
         }
-        .btn-primary { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; }
-        .btn-secondary { background: #f3f4f6; color: var(--text); }
+        .btn-primary { background: linear-gradient(135deg, var(--blue) 0%, var(--navy) 100%); color: white; }
+        .btn-secondary { background: #f1f5f9; color: var(--navy); }
         @media (max-width: 640px) {
             .row { flex-direction: column; align-items: flex-start; }
             .value { text-align: left; }
@@ -60,7 +81,7 @@
         <div class="hero">
             <i class="fas fa-check-circle"></i>
             <h1>¡Inscripción confirmada!</h1>
-            <p>Tu participación en el Bombero Challenge quedó registrada correctamente</p>
+            <p>Tu participación en el Bombero Challenge quedó registrada correctamente y ya está lista para la revisión del evento.</p>
         </div>
         <div class="body">
             <div class="info-box">
@@ -79,6 +100,10 @@
                     <div class="label"><i class="fas fa-hashtag"></i> Número de competidor</div>
                     <div class="value">#{{ numero }}</div>
                 </div>
+            </div>
+            <div class="highlight">
+                <i class="fas fa-bullhorn"></i>
+                <span>Tu registro ya quedó guardado. Mantén tu correo a la mano para recibir la confirmación final del evento.</span>
             </div>
             <div class="actions">
                 <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary"><i class="fas fa-home"></i> Volver al inicio</a>
