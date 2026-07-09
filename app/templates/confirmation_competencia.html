@@ -4,112 +4,262 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscripción confirmada</title>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --navy: #071b2f;
-            --blue: #0f4c81;
-            --amber: #f59e0b;
-            --amber-dark: #d97706;
-            --green: #10b981;
-            --text: #0f172a;
-            --muted: #64748b;
+            --navy: #0b1828;
+            --red: #b91c1c;
+            --orange: #f97316;
+            --gold: #f7b731;
+            --ink: #111827;
+            --muted: #667085;
+            --line: rgba(17, 24, 39, 0.12);
         }
+
         * { box-sizing: border-box; }
+
         body {
             margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
-            display: flex; align-items: center; justify-content: center; padding: 20px;
-            background: linear-gradient(135deg, #071b2f 0%, #0f4c81 45%, #1d4ed8 100%);
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            color: var(--ink);
+            font-family: Inter, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background:
+                linear-gradient(110deg, rgba(8, 13, 22, 0.90), rgba(11, 24, 40, 0.70), rgba(185, 28, 28, 0.30)),
+                url("{{ url_for('static', filename='images/COMP3.jpeg') }}") center / cover fixed;
         }
+
         .card {
-            width: 100%; max-width: 780px; background: white; border-radius: 28px; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+            width: min(920px, 100%);
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.24);
+            border-radius: 26px;
+            background: rgba(255,255,255,0.95);
+            box-shadow: 0 28px 90px rgba(5, 12, 22, 0.38);
+            backdrop-filter: blur(16px);
         }
+
         .hero {
-            padding: 38px 30px 24px; text-align: center; color: white; background: linear-gradient(135deg, var(--amber) 0%, var(--amber-dark) 100%);
+            position: relative;
+            min-height: 280px;
+            padding: clamp(28px, 5vw, 46px);
+            color: white;
+            display: grid;
+            align-content: end;
+            background:
+                linear-gradient(180deg, rgba(11, 24, 40, 0.12), rgba(11, 24, 40, 0.88)),
+                url("{{ url_for('static', filename='images/COMP1.jpeg') }}") center / cover;
         }
-        .hero i { font-size: 3.2rem; margin-bottom: 10px; }
-        .hero h1 { margin: 0 0 8px; font-size: 2rem; }
-        .hero p { margin: 0; opacity: 0.95; line-height: 1.6; }
-        .body { padding: 28px 30px 30px; }
-        .info-box {
-            background: linear-gradient(90deg, #ecfeff 0%, #eff6ff 100%);
-            border: 1px solid #bae6fd;
-            border-left: 5px solid var(--blue);
-            padding: 16px 18px;
-            border-radius: 16px;
-            margin-bottom: 18px;
-            color: #1e3a8a;
-        }
-        .info-grid {
-            display: grid; gap: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 18px; padding: 16px;
-        }
-        .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
-        .row:last-child { border-bottom: none; padding-bottom: 0; }
-        .label { font-weight: 700; color: var(--navy); display: flex; align-items: center; gap: 8px; }
-        .value { color: var(--muted); text-align: right; }
-        .highlight {
-            margin-top: 18px;
-            background: linear-gradient(135deg, rgba(16,185,129,0.14), rgba(14,116,144,0.12));
-            border: 1px solid rgba(16,185,129,0.2);
-            border-radius: 16px;
-            padding: 16px;
-            display: flex;
+
+        .badge {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            display: inline-flex;
             align-items: center;
             gap: 10px;
-            color: #065f46;
-            font-weight: 600;
+            padding: 9px 13px;
+            border: 1px solid rgba(255,255,255,0.24);
+            border-radius: 999px;
+            background: rgba(6, 12, 22, 0.38);
+            backdrop-filter: blur(12px);
+            font-weight: 850;
         }
-        .highlight i { color: var(--green); font-size: 1.15rem; }
-        .actions { display: flex; gap: 12px; margin-top: 22px; flex-wrap: wrap; }
+
+        .badge i { color: var(--gold); }
+
+        .hero h1 {
+            max-width: 620px;
+            margin: 0 0 10px;
+            font-size: clamp(2.2rem, 5vw, 4rem);
+            line-height: 0.98;
+            letter-spacing: 0;
+        }
+
+        .hero p {
+            max-width: 620px;
+            margin: 0;
+            color: rgba(255,255,255,0.86);
+            font-size: 1.04rem;
+            line-height: 1.6;
+        }
+
+        .body {
+            padding: clamp(22px, 4vw, 38px);
+        }
+
+        .competitor-number {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 18px;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 18px;
+            border: 1px solid #fed7aa;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #fff7ed 0%, #fff 72%);
+        }
+
+        .number-mark {
+            width: 76px;
+            height: 76px;
+            display: grid;
+            place-items: center;
+            border-radius: 20px;
+            color: white;
+            background: linear-gradient(135deg, var(--red), var(--orange) 62%, var(--gold));
+            box-shadow: 0 16px 34px rgba(193, 18, 31, 0.25);
+            font-size: 1.7rem;
+            font-weight: 950;
+        }
+
+        .competitor-number span {
+            display: block;
+            color: #7c2d12;
+            font-weight: 850;
+        }
+
+        .competitor-number strong {
+            display: block;
+            color: var(--navy);
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            line-height: 1.05;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .info-item {
+            min-height: 98px;
+            padding: 16px;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: #fff;
+        }
+
+        .info-item.full { grid-column: 1 / -1; }
+
+        .label {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 8px;
+            color: #344054;
+            font-size: 0.88rem;
+            font-weight: 850;
+        }
+
+        .label i { color: var(--red); }
+        .value { color: var(--muted); overflow-wrap: anywhere; }
+
+        .highlight {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            margin-top: 20px;
+            padding: 16px;
+            border: 1px solid rgba(18, 183, 106, 0.22);
+            border-radius: 18px;
+            color: #05603a;
+            background: linear-gradient(135deg, rgba(18, 183, 106, 0.12), rgba(255,255,255,0.92));
+            line-height: 1.55;
+        }
+
+        .highlight i {
+            margin-top: 3px;
+            color: #12b76a;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+
         .btn {
-            text-decoration: none; border-radius: 12px; padding: 12px 16px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;
+            min-height: 46px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            padding: 0 16px;
+            border-radius: 13px;
+            text-decoration: none;
+            font-weight: 850;
         }
-        .btn-primary { background: linear-gradient(135deg, var(--blue) 0%, var(--navy) 100%); color: white; }
-        .btn-secondary { background: #f1f5f9; color: var(--navy); }
+
+        .btn-primary {
+            color: white;
+            background: linear-gradient(135deg, #c1121f 0%, #f97316 58%, #f7b731 100%);
+            box-shadow: 0 14px 30px rgba(193, 18, 31, 0.24);
+        }
+
+        .btn-secondary {
+            color: var(--navy);
+            background: #f2f4f7;
+        }
+
         @media (max-width: 640px) {
-            .row { flex-direction: column; align-items: flex-start; }
-            .value { text-align: left; }
+            body { padding: 12px; }
+            .card { border-radius: 20px; }
+            .hero { min-height: 250px; }
+            .competitor-number { grid-template-columns: 1fr; }
+            .info-grid { grid-template-columns: 1fr; }
+            .info-item.full { grid-column: auto; }
             .actions { flex-direction: column; }
-            .btn { justify-content: center; }
+            .btn { width: 100%; }
         }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="hero">
-            <i class="fas fa-check-circle"></i>
-            <h1>¡Inscripción confirmada!</h1>
-            <p>Tu participación en el Bombero Challenge quedó registrada correctamente y ya está lista para la revisión del evento.</p>
-        </div>
-        <div class="body">
-            <div class="info-box">
-                <strong>Importante:</strong> Revisa tu correo electrónico para encontrar tu número de competidor y la confirmación oficial del evento.
+    <main class="card">
+        <section class="hero">
+            <div class="badge"><i class="fas fa-circle-check"></i> Registro confirmado</div>
+            <h1>¡Inscripción lista!</h1>
+            <p>Tu participación en el Bombero Challenge quedó registrada correctamente. Conserva tu número de competidor para el día del evento.</p>
+        </section>
+
+        <section class="body">
+            <div class="competitor-number">
+                <div class="number-mark">#{{ numero }}</div>
+                <div>
+                    <span>Número de competidor asignado</span>
+                    <strong>Bombero Challenge</strong>
+                </div>
             </div>
+
             <div class="info-grid">
-                <div class="row">
+                <div class="info-item">
                     <div class="label"><i class="fas fa-user"></i> Nombre</div>
                     <div class="value">{{ nombre }}</div>
                 </div>
-                <div class="row">
+                <div class="info-item">
                     <div class="label"><i class="fas fa-envelope"></i> Correo</div>
                     <div class="value">{{ correo }}</div>
                 </div>
-                <div class="row">
-                    <div class="label"><i class="fas fa-hashtag"></i> Número de competidor</div>
-                    <div class="value">#{{ numero }}</div>
+                <div class="info-item full">
+                    <div class="label"><i class="fas fa-shield-halved"></i> Confirmación oficial</div>
+                    <div class="value">Se envió la confirmación a tu correo electrónico. Revisa tu bandeja de entrada y correo no deseado.</div>
                 </div>
             </div>
+
             <div class="highlight">
                 <i class="fas fa-bullhorn"></i>
-                <span>Tu registro ya quedó guardado. Mantén tu correo a la mano para recibir la confirmación final del evento.</span>
+                <span>Tu registro ya quedó guardado en el sistema. Presenta tu número de competidor cuando el equipo del evento lo solicite.</span>
             </div>
+
             <div class="actions">
-                <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary"><i class="fas fa-home"></i> Volver al inicio</a>
-                <a href="https://mail.google.com" target="_blank" class="btn btn-primary"><i class="fas fa-envelope"></i> Ver mi correo</a>
+                <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary"><i class="fas fa-house"></i> Volver al inicio</a>
+                <a href="https://mail.google.com" target="_blank" rel="noopener" class="btn btn-primary"><i class="fas fa-envelope-open-text"></i> Ver mi correo</a>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
 </body>
 </html>

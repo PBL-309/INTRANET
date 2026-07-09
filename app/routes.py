@@ -1877,16 +1877,16 @@ def submit_competencia():
     html = f"""
     <html>
       <body style="font-family: Arial, sans-serif; padding: 20px; text-align: center;">
-        <h2 style="color: #d32f2f;">🎉 Confirmación de Competencia</h2>
+        <h2 style="color: #d32f2f;">Confirmación de Competencia</h2>
         <p>Hola <strong>{nombre}</strong>,</p>
         <p>Gracias por registrarte al <strong>Bombero Challenge</strong>.</p>
         <p><strong>Tu número de competidor es: #{nuevo_num}</strong></p>
-        <p>¡Te esperamos! 👨‍🚒</p>
+        <p>¡Te esperamos!</p>
       </body>
     </html>
     """
 
-    msg = Message(subject="🎫 Confirmación Bombero Challenge",
+    msg = Message(subject="Confirmación Bombero Challenge",
                   sender="cristian.rodriguez@bomberosdeleon.org",
                   recipients=[correo])
 

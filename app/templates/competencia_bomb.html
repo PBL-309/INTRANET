@@ -4,255 +4,551 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro Bombero Challenge</title>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --navy: #071b2f;
-            --blue: #0f4c81;
-            --amber: #f59e0b;
-            --amber-dark: #d97706;
-            --green: #10b981;
-            --red: #dc2626;
-            --text: #0f172a;
-            --muted: #64748b;
-            --border: #e2e8f0;
-            --surface: #ffffff;
+            --ink: #111827;
+            --navy: #0b1828;
+            --steel: #1f384d;
+            --red: #b91c1c;
+            --orange: #f97316;
+            --gold: #f7b731;
+            --cream: #fff9ed;
+            --line: rgba(17, 24, 39, 0.12);
+            --muted: #667085;
+            --surface: rgba(255, 255, 255, 0.94);
+            --shadow: 0 28px 90px rgba(5, 12, 22, 0.36);
         }
 
         * { box-sizing: border-box; }
+
         body {
             margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #071b2f 0%, #0f4c81 45%, #1d4ed8 100%);
             min-height: 100vh;
-            padding: 24px;
-            color: var(--text);
+            color: var(--ink);
+            font-family: Inter, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a111c;
+            overflow-x: hidden;
         }
-        .wrapper { max-width: 1120px; margin: 0 auto; }
-        .card {
-            background: var(--surface);
-            border-radius: 28px;
-            overflow: hidden;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.25);
-            display: grid;
-            grid-template-columns: 1.5fr 1fr;
-        }
-        .panel-left {
-            padding: 32px 30px 34px;
-            background: linear-gradient(135deg, #f8fafc 0%, #eef4ff 100%);
-        }
-        .panel-right {
-            position: relative;
-            color: white;
-            padding: 24px 22px;
-            overflow: hidden;
-            min-height: 420px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-        }
-        .visual-stage {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 220px;
-            overflow: hidden;
-            background: #071b2f;
-        }
-        .visual-stage::after {
-            content: '';
-            position: absolute;
+
+        .page-backdrop,
+        .page-backdrop::before,
+        .page-backdrop::after {
+            position: fixed;
             inset: 0;
-            background: linear-gradient(135deg, rgba(7, 27, 47, 0.92) 0%, rgba(15, 76, 129, 0.75) 45%, rgba(7, 27, 47, 0.88) 100%);
-            z-index: 1;
-        }
-        .visual-slide {
-            position: absolute;
-            inset: 0;
+            z-index: -3;
             background-size: cover;
             background-position: center;
+            animation: backdropPulse 18s infinite;
+        }
+
+        .page-backdrop {
+            background-image: url("{{ url_for('static', filename='images/COMP1.jpeg') }}");
+        }
+
+        .page-backdrop::before,
+        .page-backdrop::after {
+            content: "";
             opacity: 0;
-            transform: scale(1.04);
-            animation: fadeCarousel 15s infinite;
         }
-        .visual-slide.slide-1 { background-image: url("{{ url_for('static', filename='images/COMP1.jpeg') }}"); }
-        .visual-slide.slide-2 {
+
+        .page-backdrop::before {
             background-image: url("{{ url_for('static', filename='images/COMP2.jpeg') }}");
-            animation-delay: 5s;
+            animation-delay: 6s;
         }
-        .visual-slide.slide-3 {
+
+        .page-backdrop::after {
             background-image: url("{{ url_for('static', filename='images/COMP3.jpeg') }}");
-            animation-delay: 10s;
+            animation-delay: 12s;
         }
-        .panel-content {
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background:
+                linear-gradient(110deg, rgba(8, 13, 22, 0.90) 0%, rgba(11, 24, 40, 0.74) 42%, rgba(185, 28, 28, 0.30) 100%),
+                radial-gradient(circle at 88% 18%, rgba(247, 183, 49, 0.28), transparent 34%),
+                linear-gradient(180deg, rgba(8, 13, 22, 0.28), rgba(8, 13, 22, 0.82));
+        }
+
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+            background-size: 44px 44px;
+            mask-image: linear-gradient(90deg, transparent, black 18%, black 84%, transparent);
+        }
+
+        .page {
+            width: min(1220px, calc(100% - 40px));
+            min-height: 100vh;
+            margin: 0 auto;
+            padding: 34px 0;
+            display: grid;
+            align-items: center;
+        }
+
+        .event-shell {
+            display: grid;
+            grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.72fr);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 26px;
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(18px);
+        }
+
+        .form-panel {
+            padding: clamp(24px, 4vw, 46px);
+            background: var(--surface);
+        }
+
+        .side-panel {
             position: relative;
+            min-height: 720px;
+            color: white;
+            overflow: hidden;
+            background: #0b1828;
+        }
+
+        .side-panel::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: url("{{ url_for('static', filename='images/COMP1.jpeg') }}");
+            background-size: cover;
+            background-position: 46% center;
+            transform: scale(1.03);
+        }
+
+        .side-panel::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(180deg, rgba(11, 24, 40, 0.12) 0%, rgba(11, 24, 40, 0.72) 52%, rgba(8, 13, 22, 0.96) 100%),
+                linear-gradient(90deg, rgba(11, 24, 40, 0.35), rgba(185, 28, 28, 0.14));
+        }
+
+        .photo-strip {
+            position: absolute;
+            inset: auto 24px 24px 24px;
             z-index: 2;
-            display: flex;
-            flex-direction: column;
-            margin-top: 220px;
+            display: grid;
             gap: 12px;
         }
-        .visual-badge {
+
+        .event-mark {
+            position: absolute;
+            top: 26px;
+            left: 24px;
+            right: 24px;
+            z-index: 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .brand-lockup {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 6px 10px;
+            gap: 11px;
+            padding: 9px 12px;
+            border: 1px solid rgba(255,255,255,0.24);
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.16);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.22);
-            font-size: 0.85rem;
+            background: rgba(6, 12, 22, 0.38);
+            backdrop-filter: blur(12px);
+            font-weight: 800;
+            letter-spacing: 0.02em;
+        }
+
+        .brand-lockup i { color: var(--gold); }
+
+        .event-number {
+            padding: 10px 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.18);
+            background: rgba(6, 12, 22, 0.36);
+            text-align: right;
+            backdrop-filter: blur(12px);
+        }
+
+        .event-number strong {
+            display: block;
+            font-size: 1.4rem;
+            line-height: 1;
+        }
+
+        .event-number span {
+            color: rgba(255,255,255,0.78);
+            font-size: 0.78rem;
             font-weight: 700;
-            margin-bottom: 8px;
-            width: fit-content;
+            text-transform: uppercase;
         }
-        .visual-caption {
-            font-size: 0.85rem;
-            line-height: 1.4;
-            color: rgba(255, 255, 255, 0.88);
-            margin-bottom: 10px;
-            max-width: 100%;
+
+        .side-copy {
+            position: absolute;
+            left: 24px;
+            right: 24px;
+            bottom: 202px;
+            z-index: 2;
         }
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(245, 158, 11, 0.15);
-            color: var(--amber-dark);
-            padding: 8px 12px;
-            border-radius: 999px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            margin-bottom: 14px;
+
+        .side-copy h2 {
+            max-width: 450px;
+            margin: 0 0 12px;
+            font-size: clamp(2.1rem, 4vw, 3.9rem);
+            line-height: 0.95;
+            letter-spacing: 0;
         }
-        .hero h1 {
-            margin: 0 0 8px;
-            font-size: 2rem;
-            color: var(--navy);
-        }
-        .hero p {
+
+        .side-copy p {
+            max-width: 380px;
             margin: 0;
-            color: var(--muted);
+            color: rgba(255,255,255,0.84);
+            font-size: 1rem;
             line-height: 1.6;
         }
-        .alert {
-            margin-top: 18px;
-            background: white;
-            border: 1px solid #dbeafe;
-            border-left: 4px solid var(--amber);
-            border-radius: 16px;
-            padding: 14px 15px;
-            display: flex;
+
+        .mini-gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-            align-items: flex-start;
-            color: #1d4ed8;
-            box-shadow: 0 8px 18px rgba(15, 76, 129, 0.08);
         }
+
+        .mini-shot {
+            min-height: 92px;
+            border: 1px solid rgba(255,255,255,0.20);
+            border-radius: 16px;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 14px 28px rgba(0,0,0,0.20);
+        }
+
+        .mini-shot:nth-child(1) { background-image: url("{{ url_for('static', filename='images/COMP1.jpeg') }}"); }
+        .mini-shot:nth-child(2) { background-image: url("{{ url_for('static', filename='images/COMP2.jpeg') }}"); }
+        .mini-shot:nth-child(3) { background-image: url("{{ url_for('static', filename='images/COMP3.jpeg') }}"); }
+
+        .side-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 16px;
+            background: rgba(6, 12, 22, 0.44);
+            backdrop-filter: blur(12px);
+            overflow: hidden;
+        }
+
+        .stat {
+            padding: 14px 12px;
+            border-right: 1px solid rgba(255,255,255,0.14);
+        }
+
+        .stat:last-child { border-right: 0; }
+        .stat strong { display: block; color: var(--gold); font-size: 1.08rem; }
+        .stat span { color: rgba(255,255,255,0.78); font-size: 0.78rem; }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 18px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            color: #8a1a12;
+            background: #fff2dc;
+            border: 1px solid #ffd9a8;
+            font-size: 0.86rem;
+            font-weight: 800;
+        }
+
+        .hero h1 {
+            max-width: 660px;
+            margin: 0;
+            color: var(--navy);
+            font-size: clamp(2.45rem, 5vw, 4.85rem);
+            line-height: 0.96;
+            letter-spacing: 0;
+        }
+
+        .hero p {
+            max-width: 690px;
+            margin: 18px 0 0;
+            color: #475467;
+            font-size: 1.06rem;
+            line-height: 1.65;
+        }
+
+        .notice {
+            display: grid;
+            grid-template-columns: 42px 1fr;
+            gap: 13px;
+            margin: 28px 0;
+            padding: 16px;
+            border: 1px solid #fed7aa;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #fff7ed 0%, #fff 70%);
+            color: #7c2d12;
+        }
+
+        .notice i {
+            display: grid;
+            place-items: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 13px;
+            color: white;
+            background: linear-gradient(135deg, var(--red), var(--orange));
+            box-shadow: 0 10px 24px rgba(249, 115, 22, 0.26);
+        }
+
+        .notice strong {
+            display: block;
+            margin-bottom: 3px;
+            color: #431407;
+        }
+
         .section-title {
             display: flex;
             align-items: center;
-            gap: 9px;
-            margin: 22px 0 14px;
-            font-weight: 700;
+            gap: 10px;
+            margin: 0 0 16px;
             color: var(--navy);
+            font-weight: 850;
             font-size: 1rem;
         }
-        .section-title i { color: var(--amber-dark); }
-        .grid { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .field { display: flex; flex-direction: column; gap: 7px; }
+
+        .section-title::after {
+            content: "";
+            height: 1px;
+            flex: 1;
+            background: linear-gradient(90deg, var(--line), transparent);
+        }
+
+        .section-title i { color: var(--red); }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .field {
+            display: grid;
+            gap: 8px;
+        }
+
         .field.full { grid-column: 1 / -1; }
-        label { font-weight: 600; font-size: 0.94rem; color: var(--navy); }
-        input, select {
+
+        label {
+            color: #344054;
+            font-size: 0.92rem;
+            font-weight: 760;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #98a2b3;
+            pointer-events: none;
+        }
+
+        input,
+        select {
             width: 100%;
-            border: 1px solid var(--border);
-            background: white;
-            border-radius: 12px;
-            padding: 12px 13px;
-            font-size: 1rem;
-            transition: border-color .2s ease, box-shadow .2s ease;
+            height: 48px;
+            border: 1px solid #d0d5dd;
+            border-radius: 13px;
+            padding: 0 14px 0 42px;
+            color: #182230;
+            background: rgba(255,255,255,0.92);
+            font: inherit;
+            font-size: 0.98rem;
+            transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
         }
-        input:focus, select:focus {
+
+        select {
+            appearance: none;
+            background-image:
+                linear-gradient(45deg, transparent 50%, #667085 50%),
+                linear-gradient(135deg, #667085 50%, transparent 50%);
+            background-position: calc(100% - 18px) 20px, calc(100% - 12px) 20px;
+            background-size: 6px 6px, 6px 6px;
+            background-repeat: no-repeat;
+            padding-right: 38px;
+        }
+
+        input[readonly] {
+            color: #475467;
+            background: #f8fafc;
+        }
+
+        input:focus,
+        select:focus {
             outline: none;
-            border-color: var(--blue);
-            box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.12);
+            border-color: var(--orange);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.16);
         }
-        .hint { font-size: 0.83rem; color: var(--muted); }
-        .error { color: #b91c1c; font-size: 0.9rem; min-height: 1rem; }
-        .actions { margin-top: 22px; }
+
+        .hint,
+        .error {
+            min-height: 1rem;
+            font-size: 0.82rem;
+            line-height: 1.35;
+        }
+
+        .hint { color: var(--muted); }
+        .error { color: #b42318; }
+
+        .actions {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 18px;
+            margin-top: 28px;
+        }
+
+        .privacy-note {
+            color: #667085;
+            font-size: 0.86rem;
+            line-height: 1.45;
+        }
+
+        .privacy-note i { color: #12b76a; }
+
         button {
-            width: 100%; border: none; border-radius: 14px; padding: 14px 16px; background: linear-gradient(135deg, var(--amber) 0%, var(--amber-dark) 100%);
-            color: white; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-size: 1rem; box-shadow: 0 10px 24px rgba(245, 158, 11, 0.22);
+            min-width: 236px;
+            min-height: 52px;
+            border: 0;
+            border-radius: 14px;
+            padding: 0 20px;
+            color: white;
+            background: linear-gradient(135deg, #c1121f 0%, #f97316 58%, #f7b731 100%);
+            box-shadow: 0 16px 34px rgba(193, 18, 31, 0.28);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 900;
+            font-size: 0.98rem;
+            transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
         }
-        button:hover { transform: translateY(-1px); }
-        .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,.4); border-top-color: white; border-radius: 50%; display: none; animation: spin 1s linear infinite; }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 42px rgba(193, 18, 31, 0.34);
+            filter: saturate(1.08);
+        }
+
+        button:disabled {
+            cursor: wait;
+            opacity: 0.82;
+            transform: none;
+        }
+
+        .spinner {
+            width: 19px;
+            height: 19px;
+            display: none;
+            border: 2px solid rgba(255,255,255,.46);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
         button.loading .spinner { display: inline-block; }
         button.loading span { display: none; }
 
-        .panel-right .card-title {
-            display: flex; align-items: center; gap: 8px;
-            font-weight: 700;
-            font-size: 0.95rem;
-            margin-bottom: 10px;
-        }
-        .summary-card {
-            background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.16);
-            border-radius: 14px;
-            padding: 12px 13px;
-            margin-bottom: 9px;
-            backdrop-filter: blur(6px);
-        }
-        .summary-card h3 { margin: 0 0 6px; font-size: 0.9rem; }
-        .summary-card ul { margin: 0; padding-left: 16px; color: rgba(255,255,255,0.92); line-height: 1.5; font-size: 0.85rem; }
-        .steps {
-            display: flex;
-            flex-direction: column;
-            gap: 7px;
-            margin-top: 10px;
-        }
-        .step {
-            display: flex;
-            gap: 8px;
-            align-items: flex-start;
-            color: rgba(255,255,255,0.9);
-            font-size: 0.85rem;
-        }
-        .step i { color: var(--amber); margin-top: 2px; }
-
         @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes fadeCarousel {
-            0% { opacity: 0; transform: scale(1.04); }
-            8% { opacity: 1; transform: scale(1); }
-            33% { opacity: 1; transform: scale(1); }
-            41% { opacity: 0; transform: scale(1.04); }
-            100% { opacity: 0; transform: scale(1.04); }
+
+        @keyframes backdropPulse {
+            0%, 28% { opacity: 1; transform: scale(1.04); }
+            34%, 94% { opacity: 0; transform: scale(1.08); }
+            100% { opacity: 1; transform: scale(1.04); }
         }
-        @media (max-width: 880px) {
-            .card { grid-template-columns: 1fr; }
-            .panel-right { order: -1; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+            }
         }
-        @media (max-width: 640px) {
-            body { padding: 14px; }
-            .panel-left, .panel-right { padding: 22px 18px; }
+
+        @media (max-width: 980px) {
+            .page {
+                width: min(720px, calc(100% - 28px));
+                align-items: start;
+                padding: 18px 0;
+            }
+
+            .event-shell { grid-template-columns: 1fr; }
+
+            .side-panel {
+                order: -1;
+                min-height: 430px;
+            }
+
+            .side-copy { bottom: 158px; }
+            .side-copy h2 { max-width: 520px; }
+        }
+
+        @media (max-width: 680px) {
+            .page { width: calc(100% - 22px); }
+            .event-shell { border-radius: 20px; }
+            .form-panel { padding: 22px 18px 24px; }
+            .side-panel { min-height: 390px; }
+            .event-mark { top: 18px; left: 18px; right: 18px; }
+            .event-number { display: none; }
+            .side-copy { left: 18px; right: 18px; bottom: 178px; }
+            .photo-strip { left: 18px; right: 18px; bottom: 18px; }
+            .mini-shot { min-height: 74px; border-radius: 12px; }
+            .stat { padding: 10px 9px; }
             .grid { grid-template-columns: 1fr; }
-            .hero h1 { font-size: 1.7rem; }
+            .actions { grid-template-columns: 1fr; }
+            button { width: 100%; min-width: 0; }
         }
     </style>
 </head>
 <body>
-    <div class="wrapper">
-        <div class="card">
-            <div class="panel-left">
-                <div class="badge"><i class="fas fa-trophy"></i> Inscripción abierta</div>
+    <div class="page-backdrop" aria-hidden="true"></div>
+
+    <main class="page">
+        <section class="event-shell" aria-label="Registro Bombero Challenge">
+            <div class="form-panel">
+                <div class="eyebrow"><i class="fas fa-trophy"></i> Inscripción abierta</div>
+
                 <div class="hero">
                     <h1>Bombero Challenge</h1>
-                    <p>Registra tu participación con tus datos principales y recibe tu número de competidor en breve.</p>
+                    <p>Registra tu participación con tus datos principales. Al finalizar recibirás por correo tu confirmación y número de competidor.</p>
                 </div>
 
-                <div class="alert">
-                    <i class="fas fa-info-circle"></i>
-                    <div>Completa tus datos para confirmar tu inscripción. El equipo del evento te enviará la confirmación y tu número de competidor por correo.</div>
+                <div class="notice">
+                    <i class="fas fa-helmet-safety"></i>
+                    <div>
+                        <strong>Tu registro queda protegido en el sistema.</strong>
+                        Completa la información tal como deseas que aparezca en la lista oficial del evento.
+                    </div>
                 </div>
 
                 <form id="competencia-form" method="POST" action="{{ url_for('main.submit_competencia') }}" novalidate>
@@ -260,87 +556,125 @@
                         <i class="fas fa-user"></i>
                         <span>Datos del participante</span>
                     </div>
+
                     <div class="grid">
                         <div class="field full">
                             <label for="nombre">Nombre completo</label>
-                            <input id="nombre" name="nombre" type="text" value="{{ current_user.nombre }}" required>
+                            <div class="input-wrap">
+                                <i class="fas fa-id-card"></i>
+                                <input id="nombre" name="nombre" type="text" value="{{ current_user.nombre }}" autocomplete="name" required>
+                            </div>
                         </div>
+
                         <div class="field">
                             <label for="nomina">Nómina</label>
-                            <input id="nomina" name="nomina" type="text" value="{{ current_user.username }}" required>
+                            <div class="input-wrap">
+                                <i class="fas fa-hashtag"></i>
+                                <input id="nomina" name="nomina" type="text" value="{{ current_user.username }}" autocomplete="off" required>
+                            </div>
                         </div>
+
                         <div class="field">
                             <label for="turno">Turno</label>
-                            <input id="turno" name="turno" type="text" value="{{ current_user.turno or '' }}" readonly required>
+                            <div class="input-wrap">
+                                <i class="fas fa-clock"></i>
+                                <input id="turno" name="turno" type="text" value="{{ current_user.turno or '' }}" readonly required>
+                            </div>
                             <div class="hint">Se toma automáticamente del perfil del usuario.</div>
                         </div>
+
                         <div class="field">
                             <label for="categoria">Categoría</label>
-                            <select id="categoria" name="categoria" required>
-                                <option value="">Selecciona</option>
-                                <option value="Individual">Individual</option>
-                                <option value="Parejas">Parejas</option>
-                                <option value="Equipo">Equipo</option>
-                            </select>
+                            <div class="input-wrap">
+                                <i class="fas fa-medal"></i>
+                                <select id="categoria" name="categoria" required>
+                                    <option value="">Selecciona</option>
+                                    <option value="Individual">Individual</option>
+                                    <option value="Parejas">Parejas</option>
+                                    <option value="Equipo">Equipo</option>
+                                </select>
+                            </div>
                         </div>
+
                         <div class="field">
-                            <label for="ninos">Niños</label>
-                            <input id="ninos" name="ninos" type="number" min="0" value="0" required>
+                            <label for="ninos">Niños acompañantes</label>
+                            <div class="input-wrap">
+                                <i class="fas fa-child-reaching"></i>
+                                <input id="ninos" name="ninos" type="number" min="0" value="0" inputmode="numeric" required>
+                            </div>
                         </div>
+
                         <div class="field">
-                            <label for="adultos">Adultos</label>
-                            <input id="adultos" name="adultos" type="number" min="0" value="0" required>
+                            <label for="adultos">Adultos acompañantes</label>
+                            <div class="input-wrap">
+                                <i class="fas fa-users"></i>
+                                <input id="adultos" name="adultos" type="number" min="0" value="0" inputmode="numeric" required>
+                            </div>
                         </div>
+
                         <div class="field full">
                             <label for="correo">Correo electrónico</label>
-                            <input id="correo" name="correo" type="email" placeholder="tu.correo@ejemplo.com" required>
+                            <div class="input-wrap">
+                                <i class="fas fa-envelope"></i>
+                                <input id="correo" name="correo" type="email" placeholder="tu.correo@ejemplo.com" autocomplete="email" required>
+                            </div>
                             <div class="hint">Tu número de competidor se enviará a este correo.</div>
-                            <div class="error" id="correo-error"></div>
+                            <div class="error" id="correo-error" aria-live="polite"></div>
                         </div>
                     </div>
 
                     <div class="actions">
+                        <div class="privacy-note">
+                            <i class="fas fa-shield-halved"></i>
+                            Revisa que tu correo sea correcto antes de confirmar.
+                        </div>
                         <button type="submit" id="submit-btn">
                             <span><i class="fas fa-paper-plane"></i> Confirmar inscripción</span>
-                            <div class="spinner"></div>
+                            <div class="spinner" aria-hidden="true"></div>
                         </button>
                     </div>
                 </form>
             </div>
 
-            <div class="panel-right">
-                <div class="visual-stage" aria-hidden="true">
-                    <div class="visual-slide slide-1"></div>
-                    <div class="visual-slide slide-2"></div>
-                    <div class="visual-slide slide-3"></div>
-                </div>
-                <div class="panel-content">
-                    <div class="visual-badge"><i class="fas fa-fire"></i> Competencias y rescate</div>
-                    <div class="visual-caption">Una experiencia visual más cercana a la identidad del evento para destacar la participación.</div>
-                    <div class="card-title"><i class="fas fa-clipboard-list"></i> Qué recibirás</div>
-                    <div class="summary-card">
-                        <h3><i class="fas fa-id-badge"></i> Número de competidor</h3>
-                        <ul>
-                            <li>Se asignará automáticamente al terminar tu registro.</li>
-                            <li>Lo recibirás por correo para presentarlo en el evento.</li>
-                        </ul>
-                    </div>
-                    <div class="summary-card">
-                        <h3><i class="fas fa-shield-alt"></i> Confirmación oficial</h3>
-                        <ul>
-                            <li>Tu participación quedará registrada en el sistema.</li>
-                            <li>El equipo podrá verificar tu inscripción sin complicaciones.</li>
-                        </ul>
-                    </div>
-                    <div class="steps">
-                        <div class="step"><i class="fas fa-check-circle"></i><span>Completa tus datos y confirma la inscripción.</span></div>
-                        <div class="step"><i class="fas fa-check-circle"></i><span>Revisa tu correo para encontrar tu número asignado.</span></div>
-                        <div class="step"><i class="fas fa-check-circle"></i><span>Acércate al evento con la confirmación recibida.</span></div>
+            <aside class="side-panel" aria-label="Información del evento">
+                <div class="event-mark">
+                    <div class="brand-lockup"><i class="fas fa-fire-flame-curved"></i> Bombero Challenge</div>
+                    <div class="event-number">
+                        <strong>#</strong>
+                        <span>Asignación automática</span>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
+
+                <div class="side-copy">
+                    <h2>Fuerza, técnica y equipo.</h2>
+                    <p>Una competencia diseñada para reconocer disciplina, preparación y orgullo operativo.</p>
+                </div>
+
+                <div class="photo-strip">
+                    <div class="mini-gallery" aria-hidden="true">
+                        <div class="mini-shot"></div>
+                        <div class="mini-shot"></div>
+                        <div class="mini-shot"></div>
+                    </div>
+
+                    <div class="side-stats">
+                        <div class="stat">
+                            <strong>01</strong>
+                            <span>Registro oficial</span>
+                        </div>
+                        <div class="stat">
+                            <strong>02</strong>
+                            <span>Número por correo</span>
+                        </div>
+                        <div class="stat">
+                            <strong>03</strong>
+                            <span>Listo para competir</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </section>
+    </main>
 
     <script>
         const form = document.getElementById('competencia-form');
@@ -349,14 +683,19 @@
         const submitBtn = document.getElementById('submit-btn');
 
         function validarCorreo() {
-            if (!correo.value) {
+            const value = correo.value.trim();
+
+            if (!value) {
                 correoError.textContent = 'Ingresa un correo electrónico.';
                 return false;
             }
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo.value)) {
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
                 correoError.textContent = 'El correo no tiene un formato válido.';
                 return false;
             }
+
+            correo.value = value;
             correoError.textContent = '';
             return true;
         }
@@ -365,7 +704,17 @@
 
         form.addEventListener('submit', function (e) {
             e.preventDefault();
-            if (!validarCorreo()) return;
+
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            if (!validarCorreo()) {
+                correo.focus();
+                return;
+            }
+
             submitBtn.classList.add('loading');
             submitBtn.disabled = true;
             form.submit();
