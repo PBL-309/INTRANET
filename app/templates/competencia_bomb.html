@@ -43,23 +43,51 @@
         }
         .panel-right {
             position: relative;
-            background:
-                linear-gradient(135deg, rgba(7, 27, 47, 0.9) 0%, rgba(15, 76, 129, 0.76) 100%),
-                url("{{ url_for('static', filename='images/bomb.jpeg') }}") center/cover;
             color: white;
             padding: 32px 28px;
             overflow: hidden;
+            min-height: 520px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
-        .panel-right::before {
+        .visual-stage {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            background: #071b2f;
+        }
+        .visual-stage::after {
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(120deg, rgba(245, 158, 11, 0.22), transparent 40%, rgba(255, 255, 255, 0.08));
-            pointer-events: none;
-        }
-        .panel-right > * {
-            position: relative;
+            background: linear-gradient(135deg, rgba(7, 27, 47, 0.92) 0%, rgba(15, 76, 129, 0.75) 45%, rgba(7, 27, 47, 0.88) 100%);
             z-index: 1;
+        }
+        .visual-slide {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transform: scale(1.04);
+            animation: fadeCarousel 15s infinite;
+        }
+        .visual-slide.slide-1 { background-image: url("{{ url_for('static', filename='images/bomb.jpeg') }}"); }
+        .visual-slide.slide-2 {
+            background-image: url("{{ url_for('static', filename='images/reglas.jpg') }}");
+            animation-delay: 5s;
+        }
+        .visual-slide.slide-3 {
+            background-image: url("{{ url_for('static', filename='images/175d7d52-4725-42cf-8675-ef638d9c4083.jpg') }}");
+            animation-delay: 10s;
+        }
+        .panel-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
         .visual-badge {
             display: inline-flex;
@@ -73,6 +101,7 @@
             font-size: 0.9rem;
             font-weight: 700;
             margin-bottom: 16px;
+            width: fit-content;
         }
         .visual-caption {
             font-size: 0.95rem;
@@ -188,6 +217,13 @@
         .step i { color: var(--amber); margin-top: 2px; }
 
         @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeCarousel {
+            0% { opacity: 0; transform: scale(1.04); }
+            8% { opacity: 1; transform: scale(1); }
+            33% { opacity: 1; transform: scale(1); }
+            41% { opacity: 0; transform: scale(1.04); }
+            100% { opacity: 0; transform: scale(1.04); }
+        }
         @media (max-width: 880px) {
             .card { grid-template-columns: 1fr; }
             .panel-right { order: -1; }
@@ -269,27 +305,34 @@
             </div>
 
             <div class="panel-right">
-                <div class="visual-badge"><i class="fas fa-fire"></i> Competencias y rescate</div>
-                <div class="visual-caption">Una experiencia visual más cercana a la identidad del evento para destacar la participación.</div>
-                <div class="card-title"><i class="fas fa-clipboard-list"></i> Qué recibirás</div>
-                <div class="summary-card">
-                    <h3><i class="fas fa-id-badge"></i> Número de competidor</h3>
-                    <ul>
-                        <li>Se asignará automáticamente al terminar tu registro.</li>
-                        <li>Lo recibirás por correo para presentarlo en el evento.</li>
-                    </ul>
+                <div class="visual-stage" aria-hidden="true">
+                    <div class="visual-slide slide-1"></div>
+                    <div class="visual-slide slide-2"></div>
+                    <div class="visual-slide slide-3"></div>
                 </div>
-                <div class="summary-card">
-                    <h3><i class="fas fa-shield-alt"></i> Confirmación oficial</h3>
-                    <ul>
-                        <li>Tu participación quedará registrada en el sistema.</li>
-                        <li>El equipo podrá verificar tu inscripción sin complicaciones.</li>
-                    </ul>
-                </div>
-                <div class="steps">
-                    <div class="step"><i class="fas fa-check-circle"></i><span>Completa tus datos y confirma la inscripción.</span></div>
-                    <div class="step"><i class="fas fa-check-circle"></i><span>Revisa tu correo para encontrar tu número asignado.</span></div>
-                    <div class="step"><i class="fas fa-check-circle"></i><span>Acércate al evento con la confirmación recibida.</span></div>
+                <div class="panel-content">
+                    <div class="visual-badge"><i class="fas fa-fire"></i> Competencias y rescate</div>
+                    <div class="visual-caption">Una experiencia visual más cercana a la identidad del evento para destacar la participación.</div>
+                    <div class="card-title"><i class="fas fa-clipboard-list"></i> Qué recibirás</div>
+                    <div class="summary-card">
+                        <h3><i class="fas fa-id-badge"></i> Número de competidor</h3>
+                        <ul>
+                            <li>Se asignará automáticamente al terminar tu registro.</li>
+                            <li>Lo recibirás por correo para presentarlo en el evento.</li>
+                        </ul>
+                    </div>
+                    <div class="summary-card">
+                        <h3><i class="fas fa-shield-alt"></i> Confirmación oficial</h3>
+                        <ul>
+                            <li>Tu participación quedará registrada en el sistema.</li>
+                            <li>El equipo podrá verificar tu inscripción sin complicaciones.</li>
+                        </ul>
+                    </div>
+                    <div class="steps">
+                        <div class="step"><i class="fas fa-check-circle"></i><span>Completa tus datos y confirma la inscripción.</span></div>
+                        <div class="step"><i class="fas fa-check-circle"></i><span>Revisa tu correo para encontrar tu número asignado.</span></div>
+                        <div class="step"><i class="fas fa-check-circle"></i><span>Acércate al evento con la confirmación recibida.</span></div>
+                    </div>
                 </div>
             </div>
         </div>
