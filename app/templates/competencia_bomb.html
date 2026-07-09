@@ -42,9 +42,44 @@
             background: linear-gradient(135deg, #f8fafc 0%, #eef4ff 100%);
         }
         .panel-right {
-            background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+            position: relative;
+            background:
+                linear-gradient(135deg, rgba(7, 27, 47, 0.9) 0%, rgba(15, 76, 129, 0.76) 100%),
+                url("{{ url_for('static', filename='images/bomb.jpeg') }}") center/cover;
             color: white;
             padding: 32px 28px;
+            overflow: hidden;
+        }
+        .panel-right::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, rgba(245, 158, 11, 0.22), transparent 40%, rgba(255, 255, 255, 0.08));
+            pointer-events: none;
+        }
+        .panel-right > * {
+            position: relative;
+            z-index: 1;
+        }
+        .visual-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.16);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        .visual-caption {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 18px;
+            max-width: 360px;
         }
         .badge {
             display: inline-flex;
@@ -234,6 +269,8 @@
             </div>
 
             <div class="panel-right">
+                <div class="visual-badge"><i class="fas fa-fire"></i> Competencias y rescate</div>
+                <div class="visual-caption">Una experiencia visual más cercana a la identidad del evento para destacar la participación.</div>
                 <div class="card-title"><i class="fas fa-clipboard-list"></i> Qué recibirás</div>
                 <div class="summary-card">
                     <h3><i class="fas fa-id-badge"></i> Número de competidor</h3>
