@@ -150,12 +150,8 @@ def consultar_evaluaciones():
             "promedio": promedio,
             "promedios_rubro": promedios_rubro
         })
-
-    # ordenar lista
     reverse = (orden == "desc")
     evaluaciones_data.sort(key=lambda x: x["promedio"], reverse=reverse)
-
-    # Calcular promedios generales
     promedios = {
         "Desempeño": [],
         "Jefe Inmediato": [],
@@ -1722,6 +1718,13 @@ def marcar_asistencia():
     else:
         print(f"El usuario ya estaba registrado como asistido para user_id: {user_id}")
         return jsonify({"success": True, "nombre": respuesta.user.nombre, "nuevo_registro": False}), 200
+
+@main.route('/bombero', methods=['GET'])
+@login_required
+def formulario_bombero():
+    """Muestra el formulario de confirmación para el Día del Bombero"""
+    return render_template('formulario_bombero.html')
+
 @main.route('/submit_bombero', methods=['POST'])
 @login_required
 def submit_bombero():

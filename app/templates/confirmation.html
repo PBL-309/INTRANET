@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de Asistencia | Día del Bombero</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #d32f2f;
+            --primary-dark: #b71c1c;
+            --success-color: #388e3c;
+            --info-color: #1976d2;
+            --bg-light: #f5f7fa;
+            --text-dark: #1a1a1a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container-wrapper {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .confirmation-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success-header {
+            background: linear-gradient(135deg, var(--success-color) 0%, #2e7d32 100%);
+            padding: 50px 30px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .success-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+        }
+
+        .success-header::after {
+            content: '';
+            position: absolute;
+            bottom: -40%;
+            left: -40%;
+            width: 250px;
+            height: 250px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+        }
+
+        .success-icon {
+            position: relative;
+            z-index: 1;
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: checkmark 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes checkmark {
+            0% {
+                transform: scale(0) rotate(-45deg);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1) rotate(0);
+                opacity: 1;
+            }
+        }
+
+        .success-header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .success-header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 0;
+        }
+
+        .confirmation-body {
+            padding: 40px 30px;
+        }
+
+        .info-section {
+            background-color: var(--bg-light);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 5px solid var(--info-color);
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+        }
+
+        .info-label i {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .info-value {
+            color: #555;
+            font-weight: 500;
+            text-align: right;
+        }
+
+        .alert-box {
+            background-color: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .alert-box i {
+            color: #ff9800;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-content strong {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-dark);
+        }
+
+        .alert-content p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary-action {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+
+        .btn-primary-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(211, 47, 47, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-secondary-action {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            border: 2px solid #ddd;
+        }
+
+        .btn-secondary-action:hover {
+            background-color: #e8eaed;
+            color: var(--text-dark);
+            text-decoration: none;
+        }
+
+        .success-message {
+            background-color: #e8f5e9;
+            border: 2px solid var(--success-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .success-message i {
+            color: var(--success-color);
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .success-message p {
+            margin: 0;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .qr-container {
+            background-color: white;
+            border: 3px dashed var(--primary-color);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            margin: 25px 0;
+        }
+
+        .qr-label {
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary-color);
+        }
+
+        .next-steps {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 2px solid var(--bg-light);
+        }
+
+        .next-steps h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .next-steps h3 i {
+            color: var(--primary-color);
+        }
+
+        .step-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .step-list li {
+            padding: 12px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .step-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 15px;
+            width: 12px;
+            height: 12px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+        }
+
+        @media (max-width: 576px) {
+            .confirmation-body {
+                padding: 25px 20px;
+            }
+
+            .success-header {
+                padding: 35px 20px;
+            }
+
+            .success-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .info-row {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 12px 0;
+            }
+
+            .info-value {
+                text-align: left;
+                margin-top: 5px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn-action {
+                width: 100%;
+            }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: var(--primary-color);
+            pointer-events: none;
+            animation: confetti-fall 3s ease-in forwards;
+        }
+
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-wrapper">
+        <div class="confirmation-card">
+            <div class="success-header">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h1>¡Confirmación Completa!</h1>
+                <p>Tu asistencia al Día del Bombero ha sido registrada</p>
+            </div>
+
+            <div class="confirmation-body">
+                <div class="success-message">
+                    <i class="fas fa-envelope-open"></i>
+                    <p>Se ha enviado tu pase de entrada a tu correo electrónico</p>
+                </div>
+
+                <div class="alert-box">
+                    <i class="fas fa-bell"></i>
+                    <div class="alert-content">
+                        <strong>⚠️ Importante</strong>
+                        <p>Revisa tu correo electrónico (incluyendo la carpeta de spam) para descargar tu código QR de acceso al evento.</p>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <div class="info-row">
+                        <div class="info-label">
+                            <i class="fas fa-user"></i>
+                            Nombre
+                        </div>
+                        <div class="info-value">{{ nombre }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">
+                            <i class="fas fa-envelope"></i>
+                            Correo de Confirmación
+                        </div>
+                        <div class="info-value">{{ correo }}</div>
+                    </div>
+                </div>
+
+                <div class="next-steps">
+                    <h3>
+                        <i class="fas fa-tasks"></i>
+                        Próximos Pasos
+                    </h3>
+                    <ul class="step-list">
+                        <li>Abre tu correo electrónico y busca el mensaje de confirmación</li>
+                        <li>Descarga el código QR y guárdalo en tu teléfono o imprimirlo</li>
+                        <li>Presenta el código QR al ingresar al evento</li>
+                        <li>¡Disfruta del Día del Bombero!</li>
+                    </ul>
+                </div>
+
+                <div class="action-buttons">
+                    <a href="{{ url_for('main.dashboard') }}" class="btn-action btn-secondary-action">
+                        <i class="fas fa-home"></i>
+                        Volver al Inicio
+                    </a>
+                    <a href="https://mail.google.com" target="_blank" class="btn-action btn-primary-action">
+                        <i class="fas fa-envelope"></i>
+                        Ir a mi Correo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Crear efecto de confeti
+        function createConfetti() {
+            const colors = ['#d32f2f', '#1976d2', '#388e3c', '#ffc107', '#ff5722'];
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    confetti.style.delay = Math.random() * 0.5 + 's';
+                    document.body.appendChild(confetti);
+
+                    setTimeout(() => confetti.remove(), 5000);
+                }, i * 30);
+            }
+        }
+
+        // Ejecutar confeti al cargar
+        window.addEventListener('load', createConfetti);
+    </script>
+</body>
+</html>
