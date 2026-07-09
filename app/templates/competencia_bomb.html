@@ -196,13 +196,8 @@
                         </div>
                         <div class="field">
                             <label for="turno">Turno</label>
-                            <select id="turno" name="turno" required>
-                                <option value="">Selecciona</option>
-                                <option value="A">A</option>
-                                <option value="B">B</option>
-                                <option value="C">C</option>
-                                <option value="GENERAL">GENERAL</option>
-                            </select>
+                            <input id="turno" name="turno" type="text" value="{{ current_user.turno or '' }}" readonly required>
+                            <div class="hint">Se toma automáticamente del perfil del usuario.</div>
                         </div>
                         <div class="field">
                             <label for="categoria">Categoría</label>
