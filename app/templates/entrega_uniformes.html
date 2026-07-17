@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de uniformes</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #071b2f;
+            --blue: #0f4c81;
+            --amber: #f59e0b;
+            --green: #10b981;
+            --red: #dc2626;
+            --surface: #ffffff;
+            --muted: #64748b;
+            --border: #e2e8f0;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #071b2f 0%, #0f4c81 45%, #1d4ed8 100%);
+            color: #0f172a;
+            min-height: 100vh;
+            padding: 24px;
+        }
+        .wrap { max-width: 1200px; margin: 0 auto; }
+        .hero {
+            background: rgba(255,255,255,0.95);
+            border-radius: 24px;
+            padding: 24px 28px;
+            box-shadow: 0 20px 45px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+        .hero h1 { margin: 0 0 8px; color: var(--navy); font-size: 1.9rem; }
+        .hero p { margin: 0; color: var(--muted); line-height: 1.6; }
+        .badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; background: rgba(245,158,11,.14); color: #92400e; font-weight: 700; margin-bottom: 14px; }
+        .grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 20px; }
+        .card { background: var(--surface); border-radius: 22px; padding: 20px; box-shadow: 0 18px 40px rgba(0,0,0,0.16); }
+        .card h2 { margin-top: 0; font-size: 1.1rem; color: var(--navy); }
+        .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+        label { font-weight: 700; color: var(--navy); font-size: 0.95rem; }
+        input, select, textarea, button { width: 100%; border-radius: 12px; border: 1px solid var(--border); padding: 11px 12px; font-size: 0.95rem; }
+        textarea { min-height: 90px; resize: vertical; }
+        button { background: linear-gradient(135deg, var(--amber) 0%, #ea580c 100%); color: white; font-weight: 800; border: none; cursor: pointer; }
+        button:hover { transform: translateY(-1px); }
+        .flash { padding: 12px 14px; border-radius: 12px; margin-bottom: 14px; font-weight: 600; }
+        .flash.success { background: #ecfdf5; color: #166534; }
+        .flash.warning { background: #fff7ed; color: #9a2c00; }
+        .flash.danger { background: #fef2f2; color: #991b1b; }
+        .stats { display: grid; gap: 10px; }
+        .stat { background: linear-gradient(135deg, #f8fafc, #eff6ff); border: 1px solid var(--border); border-radius: 16px; padding: 12px 14px; }
+        .stat strong { display: block; color: var(--navy); font-size: 1.05rem; }
+        .stat span { color: var(--muted); font-size: 0.9rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.92rem; }
+        th, td { padding: 10px; border-bottom: 1px solid var(--border); text-align: left; }
+        th { color: var(--navy); background: #f8fafc; }
+        .pill { display: inline-block; padding: 5px 8px; border-radius: 999px; background: rgba(16,185,129,.14); color: #047857; font-weight: 700; font-size: 0.82rem; }
+        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="hero">
+            <div class="badge"><i class="fas fa-user-shield"></i> Control de entregas de uniformes</div>
+            <h1>Registro rápido y elegante</h1>
+            <p>Elige al usuario, selecciona la prenda, indica la cantidad y guarda la entrega con fecha y hora automáticas.</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="grid">
+            <div class="card">
+                <h2><i class="fas fa-plus-circle"></i> Registrar entrega</h2>
+                <form method="POST">
+                    <div class="field">
+                        <label for="user_id">Usuario</label>
+                        <select id="user_id" name="user_id" required>
+                            <option value="">Selecciona un usuario</option>
+                            {% for usuario in usuarios %}
+                                <option value="{{ usuario.id }}">{{ usuario.nombre }} ({{ usuario.username }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="prenda">Prenda</label>
+                        <select id="prenda" name="prenda" required>
+                            <option value="">Selecciona una prenda</option>
+                            {% for prenda in prendas %}
+                                <option value="{{ prenda }}">{{ prenda }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="cantidad">Cantidad</label>
+                        <input id="cantidad" name="cantidad" type="number" min="1" value="1" required>
+                    </div>
+                    <div class="field">
+                        <label for="observaciones">Observaciones</label>
+                        <textarea id="observaciones" name="observaciones" placeholder="Ej. talla M, entregado por turno, etc."></textarea>
+                    </div>
+                    <button type="submit"><i class="fas fa-save"></i> Guardar entrega</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2><i class="fas fa-chart-line"></i> Resumen rápido</h2>
+                <div class="stats">
+                    <div class="stat">
+                        <strong>{{ total_general }}</strong>
+                        <span>Total de prendas entregadas</span>
+                    </div>
+                    <div class="stat">
+                        <strong>{{ registros|length }}</strong>
+                        <span>Entradas recientes</span>
+                    </div>
+                </div>
+
+                <h3 style="margin: 16px 0 8px; color: var(--navy);">Por usuario</h3>
+                <ul>
+                    {% for usuario, nombre, total in resumen_por_usuario %}
+                        <li><strong>{{ nombre }}</strong> ({{ usuario }}) — <span class="pill">{{ total }} piezas</span></li>
+                    {% else %}
+                        <li>No hay entregas registradas todavía.</li>
+                    {% endfor %}
+                </ul>
+
+                <h3 style="margin: 16px 0 8px; color: var(--navy);">Por prenda</h3>
+                <ul>
+                    {% for prenda, total in resumen_por_prenda %}
+                        <li><strong>{{ prenda }}</strong> — <span class="pill">{{ total }} piezas</span></li>
+                    {% else %}
+                        <li>No hay datos por prenda.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 20px;">
+            <h2><i class="fas fa-list"></i> Últimas entregas</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Prenda</th>
+                        <th>Cantidad</th>
+                        <th>Fecha y hora</th>
+                        <th>Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for registro in registros %}
+                        <tr>
+                            <td>{{ registro.user.nombre if registro.user else registro.username }}</td>
+                            <td>{{ registro.prenda }}</td>
+                            <td>{{ registro.cantidad }}</td>
+                            <td>{{ registro.fecha_entrega.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>{{ registro.observaciones or '-' }}</td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="5">Sin registros aún.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

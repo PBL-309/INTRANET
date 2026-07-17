@@ -11,7 +11,7 @@ from io import BytesIO
 import os
 import requests # Necesario para verificar reCAPTCHA v3
 import logging
-from app.models import Aviso, ContactoEmergencia,  Evento, File, Folder, FormularioRespuesta, PortalWeb, Respuesta, User, VacationRequest, Noticia, RegistroCompetencia, EvaluacionDesempeno, AsistenciaFinAnio, PermisosEvaluacion
+from app.models import Aviso, ContactoEmergencia,  Evento, File, Folder, FormularioRespuesta, PortalWeb, Respuesta, User, VacationRequest, Noticia, RegistroCompetencia, EvaluacionDesempeno, AsistenciaFinAnio, PermisosEvaluacion, EntregaUniforme
 from app.forms import LoginForm
 from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
@@ -33,6 +33,78 @@ def filtrar_portales_para_usuario(user_id):
         portales_filtrados.append(portal)
     return portales_filtrados
 main = Blueprint('main', __name__)
+
+@main.route('/entrega_uniformes', methods=['GET', 'POST'])
+@login_required
+def entrega_uniformes():
+    usuarios = User.query.order_by(User.nombre.asc(), User.username.asc()).all()
+    prendas = ['CHAMARRAS', 'PLAYERA TIPO POLO', 'PLAYERA BLANCA DE VESTIR', 'PANTALOSE', 'PANTS', 'BOTAS']
+
+    if request.method == 'POST':
+        user_id = request.form.get('user_id', type=int)
+        prenda = request.form.get('prenda', '').strip()
+        cantidad = request.form.get('cantidad', type=int)
+        observaciones = request.form.get('observaciones', '').strip()
+
+        if not user_id or not prenda or not cantidad:
+            flash('Completa usuario, prenda y cantidad.', 'warning')
+            return redirect(url_for('main.entrega_uniformes'))
+
+        if cantidad < 1:
+            flash('La cantidad debe ser mayor a cero.', 'warning')
+            return redirect(url_for('main.entrega_uniformes'))
+
+        usuario = User.query.get(user_id)
+        if not usuario:
+            flash('El usuario seleccionado no existe.', 'danger')
+            return redirect(url_for('main.entrega_uniformes'))
+
+        entrega = EntregaUniforme(
+            user_id=usuario.id,
+            username=usuario.username,
+            prenda=prenda,
+            cantidad=cantidad,
+            observaciones=observaciones or None,
+            fecha_entrega=datetime.now()
+        )
+        db.session.add(entrega)
+        db.session.commit()
+        flash(f'✅ Entrega registrada para {usuario.nombre} ({usuario.username}).', 'success')
+        return redirect(url_for('main.entrega_uniformes'))
+
+    registros = EntregaUniforme.query.order_by(EntregaUniforme.fecha_entrega.desc()).limit(20).all()
+    resumen_por_usuario = (
+        db.session.query(
+            User.username,
+            User.nombre,
+            db.func.sum(EntregaUniforme.cantidad).label('total')
+        )
+        .join(EntregaUniforme, EntregaUniforme.user_id == User.id)
+        .group_by(User.id)
+        .order_by(db.desc('total'))
+        .all()
+    )
+    resumen_por_prenda = (
+        db.session.query(
+            EntregaUniforme.prenda,
+            db.func.sum(EntregaUniforme.cantidad).label('total')
+        )
+        .group_by(EntregaUniforme.prenda)
+        .order_by(db.desc('total'))
+        .all()
+    )
+
+    total_general = sum(item[1] for item in resumen_por_prenda)
+
+    return render_template(
+        'entrega_uniformes.html',
+        usuarios=usuarios,
+        prendas=prendas,
+        registros=registros,
+        resumen_por_usuario=resumen_por_usuario,
+        resumen_por_prenda=resumen_por_prenda,
+        total_general=total_general,
+    )
 
 @main.route('/consultar_evaluaciones')
 @login_required

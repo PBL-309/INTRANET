@@ -24,6 +24,19 @@ class User(db.Model, UserMixin):
         return check_password_hash(self.password_hash, password)
 
 
+class EntregaUniforme(db.Model):
+    __tablename__ = 'entrega_uniforme'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    username = db.Column(db.String(80), nullable=False)
+    prenda = db.Column(db.String(80), nullable=False)
+    cantidad = db.Column(db.Integer, nullable=False, default=1)
+    observaciones = db.Column(db.String(250), nullable=True)
+    fecha_entrega = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    user = db.relationship('User', backref='entregas_uniformes')
+
+
 class VacationRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.username'), nullable=False)
