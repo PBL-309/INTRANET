@@ -38,7 +38,7 @@ main = Blueprint('main', __name__)
 @login_required
 def entrega_uniformes():
     usuarios = User.query.order_by(User.nombre.asc(), User.username.asc()).all()
-    prendas = ['CHAMARRAS', 'PLAYERA TIPO POLO', 'PLAYERA BLANCA DE VESTIR', 'PANTALOSE', 'PANTS', 'BOTAS']
+    prendas = ['CHAMARRAS', 'PLAYERA TIPO POLO', 'PLAYERA BLANCA DE VESTIR', 'PANTALONES', 'PANTS', 'BOTAS']
 
     if request.method == 'POST':
         # Soportar selección por user_id (hidden) o por username de texto
