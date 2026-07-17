@@ -64,8 +64,8 @@
     <div class="wrap">
         <div class="hero">
             <div class="badge"><i class="fas fa-user-shield"></i> Control de entregas de uniformes</div>
-            <h1>Registro rápido y elegante</h1>
-            <p>Elige al usuario, selecciona la prenda, indica la cantidad y guarda la entrega con fecha y hora automáticas.</p>
+            <h1>Registro de entregas de uniformes</h1>
+            <p>Elige al colaborador, selecciona la prenda, indica la cantidad y guarda la entrega con fecha y hora automáticas.</p>
         </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -82,7 +82,7 @@
                 <form method="POST">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="field">
-                        <label for="username_input">Usuario (por username)</label>
+                        <label for="username_input">Colaborador (por No. nomina)</label>
                         <input id="username_input" name="username" placeholder="Teclea username para buscar..." autocomplete="off">
                         <input type="hidden" id="user_id" name="user_id">
                         <div id="user_suggestions" style="position:relative; z-index:50;"></div>
