@@ -41,36 +41,74 @@ def entrega_uniformes():
     prendas = ['CHAMARRAS', 'PLAYERA TIPO POLO', 'PLAYERA BLANCA DE VESTIR', 'PANTALOSE', 'PANTS', 'BOTAS']
 
     if request.method == 'POST':
+        # Soportar selección por user_id (hidden) o por username de texto
         user_id = request.form.get('user_id', type=int)
-        prenda = request.form.get('prenda', '').strip()
-        cantidad = request.form.get('cantidad', type=int)
+        username_input = request.form.get('username', '').strip()
         observaciones = request.form.get('observaciones', '').strip()
 
-        if not user_id or not prenda or not cantidad:
-            flash('Completa usuario, prenda y cantidad.', 'warning')
+        # Normalizar listas de prendas / cantidades para permitir múltiples ítems
+        prendas_list = request.form.getlist('prenda[]') or request.form.getlist('prenda')
+        cantidades_list = request.form.getlist('cantidad[]') or request.form.getlist('cantidad')
+
+        # Fallback: si viene un solo par prenda/cantidad como strings
+        if not prendas_list and request.form.get('prenda'):
+            prendas_list = [request.form.get('prenda')]
+        if not cantidades_list and request.form.get('cantidad'):
+            cantidades_list = [request.form.get('cantidad')]
+
+        # Validaciones básicas
+        if not user_id and not username_input:
+            flash('Indica el username del usuario o selecciónalo.', 'warning')
             return redirect(url_for('main.entrega_uniformes'))
 
-        if cantidad < 1:
-            flash('La cantidad debe ser mayor a cero.', 'warning')
-            return redirect(url_for('main.entrega_uniformes'))
+        usuario = None
+        if user_id:
+            usuario = User.query.get(user_id)
+        elif username_input:
+            usuario = User.query.filter_by(username=username_input).first()
 
-        usuario = User.query.get(user_id)
         if not usuario:
-            flash('El usuario seleccionado no existe.', 'danger')
+            flash('El usuario indicado no existe.', 'danger')
             return redirect(url_for('main.entrega_uniformes'))
 
-        entrega = EntregaUniforme(
-            user_id=usuario.id,
-            username=usuario.username,
-            prenda=prenda,
-            cantidad=cantidad,
-            observaciones=observaciones or None,
-            fecha_entrega=datetime.now()
-        )
-        db.session.add(entrega)
-        db.session.commit()
-        flash(f'✅ Entrega registrada para {usuario.nombre} ({usuario.username}).', 'success')
-        return redirect(url_for('main.entrega_uniformes'))
+        # Crear entregas por cada prenda válida
+        created = 0
+        try:
+            for idx, pr in enumerate(prendas_list):
+                pr = (pr or '').strip()
+                if not pr:
+                    continue
+                # obtener cantidad correspondiente, si existe
+                try:
+                    cantidad = int(cantidades_list[idx]) if idx < len(cantidades_list) else 1
+                except Exception:
+                    cantidad = 1
+                if cantidad < 1:
+                    continue
+
+                entrega = EntregaUniforme(
+                    user_id=usuario.id,
+                    username=usuario.username,
+                    prenda=pr,
+                    cantidad=cantidad,
+                    observaciones=observaciones or None,
+                    fecha_entrega=datetime.now()
+                )
+                db.session.add(entrega)
+                created += 1
+
+            if created == 0:
+                flash('No se encontró ninguna prenda válida para registrar.', 'warning')
+                return redirect(url_for('main.entrega_uniformes'))
+
+            db.session.commit()
+            flash(f'✅ Se registraron {created} entrega(s) para {usuario.nombre} ({usuario.username}).', 'success')
+            return redirect(url_for('main.entrega_uniformes'))
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.exception('Error guardando entregas')
+            flash(f'Error al guardar las entregas: {e}', 'danger')
+            return redirect(url_for('main.entrega_uniformes'))
 
     registros = EntregaUniforme.query.order_by(EntregaUniforme.fecha_entrega.desc()).limit(20).all()
     resumen_por_usuario = (
@@ -105,6 +143,18 @@ def entrega_uniformes():
         resumen_por_prenda=resumen_por_prenda,
         total_general=total_general,
     )
+
+
+@main.route('/_search_users')
+@login_required
+def search_users():
+    q = request.args.get('q', '').strip()
+    if not q:
+        return jsonify([])
+    users = User.query.filter(User.username.ilike(f"%{q}%"))
+    users = users.order_by(User.username).limit(12).all()
+    result = [{'id': u.id, 'username': u.username, 'nombre': u.nombre} for u in users]
+    return jsonify(result)
 
 @main.route('/consultar_evaluaciones')
 @login_required

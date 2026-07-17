@@ -81,26 +81,27 @@
                 <h2><i class="fas fa-plus-circle"></i> Registrar entrega</h2>
                 <form method="POST">
                     <div class="field">
-                        <label for="user_id">Usuario</label>
-                        <select id="user_id" name="user_id" required>
-                            <option value="">Selecciona un usuario</option>
-                            {% for usuario in usuarios %}
-                                <option value="{{ usuario.id }}">{{ usuario.nombre }} ({{ usuario.username }})</option>
-                            {% endfor %}
-                        </select>
+                        <label for="username_input">Usuario (por username)</label>
+                        <input id="username_input" name="username" placeholder="Teclea username para buscar..." autocomplete="off">
+                        <input type="hidden" id="user_id" name="user_id">
+                        <div id="user_suggestions" style="position:relative; z-index:50;"></div>
                     </div>
-                    <div class="field">
-                        <label for="prenda">Prenda</label>
-                        <select id="prenda" name="prenda" required>
-                            <option value="">Selecciona una prenda</option>
-                            {% for prenda in prendas %}
-                                <option value="{{ prenda }}">{{ prenda }}</option>
-                            {% endfor %}
-                        </select>
+                    <div id="items_container">
+                        <div class="field item_row">
+                            <label>Prenda</label>
+                            <select name="prenda[]" required>
+                                <option value="">Selecciona una prenda</option>
+                                {% for prenda in prendas %}
+                                    <option value="{{ prenda }}">{{ prenda }}</option>
+                                {% endfor %}
+                            </select>
+                            <label style="margin-top:8px">Cantidad</label>
+                            <input name="cantidad[]" type="number" min="1" value="1" required>
+                        </div>
                     </div>
-                    <div class="field">
-                        <label for="cantidad">Cantidad</label>
-                        <input id="cantidad" name="cantidad" type="number" min="1" value="1" required>
+                    <div style="display:flex; gap:8px; margin-bottom:12px;">
+                        <button type="button" id="add_item" class="" style="flex:1; background:#eef2ff; color:#0f172a; font-weight:700;">Agregar prenda</button>
+                        <button type="button" id="clear_user" class="" style="flex:1; background:#fee2e2; color:#991b1b; font-weight:700;">Limpiar usuario</button>
                     </div>
                     <div class="field">
                         <label for="observaciones">Observaciones</label>
@@ -172,4 +173,65 @@
         </div>
     </div>
 </body>
+<script>
+// Autocomplete simple por username
+const input = document.getElementById('username_input');
+const hiddenId = document.getElementById('user_id');
+const suggestionsBox = document.getElementById('user_suggestions');
+let timeoutId = null;
+input && input.addEventListener('input', (e) => {
+    const q = e.target.value.trim();
+    hiddenId.value = '';
+    if (timeoutId) clearTimeout(timeoutId);
+    if (!q) { suggestionsBox.innerHTML = ''; return; }
+    timeoutId = setTimeout(() => {
+        fetch(`/ _search_users?q=${encodeURIComponent(q)}`.replace('/ _','/_'))
+            .then(r => r.json())
+            .then(data => {
+                if (!data || !data.length) { suggestionsBox.innerHTML = ''; return; }
+                const html = ['<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:6px;">'];
+                data.forEach(u => {
+                    html.push(`<div class="suggestion" data-id="${u.id}" data-username="${u.username}" style="padding:6px;cursor:pointer">${u.username} — ${u.nombre}</div>`);
+                });
+                html.push('</div>');
+                suggestionsBox.innerHTML = html.join('');
+                Array.from(suggestionsBox.querySelectorAll('.suggestion')).forEach(el => {
+                    el.addEventListener('click', () => {
+                        const id = el.getAttribute('data-id');
+                        const username = el.getAttribute('data-username');
+                        hiddenId.value = id;
+                        input.value = username;
+                        suggestionsBox.innerHTML = '';
+                    });
+                });
+            }).catch(()=>{ suggestionsBox.innerHTML = ''; });
+    }, 220);
+});
+
+// Añadir / eliminar filas de prenda
+document.getElementById('add_item').addEventListener('click', ()=>{
+    const container = document.getElementById('items_container');
+    const row = document.querySelector('.item_row');
+    const clone = row.cloneNode(true);
+    // reset values
+    clone.querySelector('select').selectedIndex = 0;
+    clone.querySelector('input[type=number]').value = 1;
+    // añadir botón de eliminar
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.textContent = 'Eliminar';
+    del.style.marginTop = '8px';
+    del.style.background = '#fee2e2';
+    del.style.color = '#991b1b';
+    del.addEventListener('click', ()=> clone.remove());
+    clone.appendChild(del);
+    container.appendChild(clone);
+});
+
+document.getElementById('clear_user').addEventListener('click', ()=>{
+    document.getElementById('username_input').value = '';
+    document.getElementById('user_id').value = '';
+    document.getElementById('user_suggestions').innerHTML = '';
+});
+</script>
 </html>
