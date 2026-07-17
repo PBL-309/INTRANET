@@ -80,6 +80,7 @@
             <div class="card">
                 <h2><i class="fas fa-plus-circle"></i> Registrar entrega</h2>
                 <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="field">
                         <label for="username_input">Usuario (por username)</label>
                         <input id="username_input" name="username" placeholder="Teclea username para buscar..." autocomplete="off">
