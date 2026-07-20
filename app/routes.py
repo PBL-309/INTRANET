@@ -110,7 +110,20 @@ def entrega_uniformes():
             flash(f'Error al guardar las entregas: {e}', 'danger')
             return redirect(url_for('main.entrega_uniformes'))
 
-    registros = EntregaUniforme.query.order_by(EntregaUniforme.fecha_entrega.desc()).limit(20).all()
+    all_registros = EntregaUniforme.query.order_by(EntregaUniforme.fecha_entrega.desc()).all()
+    registros = all_registros[:20]
+    registros_data = []
+    for registro in all_registros:
+        registros_data.append({
+            'id': registro.id,
+            'user_id': registro.user_id,
+            'username': registro.username,
+            'nombre': registro.user.nombre if registro.user else registro.username,
+            'prenda': registro.prenda,
+            'cantidad': registro.cantidad,
+            'observaciones': registro.observaciones or '',
+            'fecha_entrega': registro.fecha_entrega.strftime('%Y-%m-%d %H:%M')
+        })
     resumen_por_usuario = (
         db.session.query(
             User.username,
@@ -133,15 +146,19 @@ def entrega_uniformes():
     )
 
     total_general = sum(item[1] for item in resumen_por_prenda)
+    report_date = datetime.now()
 
     return render_template(
         'entrega_uniformes.html',
         usuarios=usuarios,
         prendas=prendas,
         registros=registros,
+        all_registros=all_registros,
+        registros_data=registros_data,
         resumen_por_usuario=resumen_por_usuario,
         resumen_por_prenda=resumen_por_prenda,
         total_general=total_general,
+        report_date=report_date,
     )
 
 
