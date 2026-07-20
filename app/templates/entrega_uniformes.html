@@ -54,9 +54,11 @@
         .stat strong { display: block; color: var(--navy); font-size: 1.05rem; }
         .stat span { color: var(--muted); font-size: 0.9rem; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.92rem; }
-        th, td { padding: 10px; border-bottom: 1px solid var(--border); text-align: left; }
+        th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); text-align: left; }
         th { color: var(--navy); background: #f8fafc; }
-        .pill { display: inline-block; padding: 5px 8px; border-radius: 999px; background: rgba(16,185,129,.14); color: #047857; font-weight: 700; font-size: 0.82rem; }
+        .pill { display: inline-block; padding: 6px 10px; border-radius: 999px; background: rgba(16,185,129,.14); color: #047857; font-weight: 700; font-size: 0.82rem; }
+        .doc_button { display: inline-flex; align-items: center; gap: 8px; justify-content: center; padding: 10px 14px; border-radius: 12px; background: #0f4c81; color: #fff; text-decoration: none; font-weight: 700; border: 1px solid rgba(15,76,129,.25); }
+        .doc_button:hover { transform: translateY(-1px); box-shadow: 0 12px 20px rgba(15,23,42,0.12); }
         @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -65,8 +67,7 @@
         <div class="hero">
             <div class="badge"><i class="fas fa-user-shield"></i> Control de entregas de uniformes</div>
             <h1>Registro de entregas de uniformes</h1>
-            <p>Elige al colaborador, selecciona la prenda, indica la cantidad y guarda la entrega con fecha y hora automáticas.</p>
-            <button id="open_report" style="margin-top:18px; padding:12px 20px; border:none; border-radius:14px; background:#0f4c81; color:#fff; font-weight:700; cursor:pointer;">Generar documento o reporte</button>
+            <p>Selecciona el colaborador, registra las prendas entregadas y genera un documento individual para cada entrega.</p>
         </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -151,92 +152,34 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Usuario</th>
+                        <th>No. Nómina</th>
+                        <th>Colaborador</th>
                         <th>Prenda</th>
                         <th>Cantidad</th>
                         <th>Fecha y hora</th>
                         <th>Observaciones</th>
+                        <th>Documento</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for registro in registros %}
                         <tr>
+                            <td>{{ registro.username }}</td>
                             <td>{{ registro.user.nombre if registro.user else registro.username }}</td>
                             <td>{{ registro.prenda }}</td>
                             <td>{{ registro.cantidad }}</td>
                             <td>{{ registro.fecha_entrega.strftime('%Y-%m-%d %H:%M') }}</td>
                             <td>{{ registro.observaciones or '-' }}</td>
+                            <td><a class="doc_button" href="{{ url_for('main.entrega_uniforme_documento', registro_id=registro.id) }}" target="_blank"><i class="fas fa-file-invoice"></i> Generar</a></td>
                         </tr>
                     {% else %}
-                        <tr><td colspan="5">Sin registros aún.</td></tr>
+                        <tr><td colspan="7">Sin registros aún.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
 
-    <div id="report_modal" style="display:none; position:fixed; inset:0; background:rgba(7,27,47,0.82); z-index:1000; align-items:center; justify-content:center; overflow:auto; padding:30px;">
-        <div style="background:#fff; border-radius:20px; width:min(1100px,100%); max-height:90vh; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,0.35); display:flex; flex-direction:column;">
-            <div style="padding:22px 24px; border-bottom:1px solid #e2e8f0; display:flex; align-items:center; justify-content:space-between; gap:16px;">
-                <div>
-                    <div style="font-size:0.95rem; color:#64748b; margin-bottom:4px;">Resumen de entregas cargadas</div>
-                    <h2 style="margin:0; font-size:1.4rem; color:#0f172a;">Documento de entrega</h2>
-                </div>
-                <button id="close_report" style="border:none; background:transparent; font-size:1.5rem; color:#0f172a; cursor:pointer;">&times;</button>
-            </div>
-            <div style="padding:20px 24px; overflow:auto; flex:1;">
-                <div style="display:flex; flex-wrap:wrap; gap:16px; align-items:center; margin-bottom:20px;">
-                    <div style="flex:1; min-width:220px;">
-                        <strong>Fecha del reporte:</strong>
-                        <div>{{ report_date.strftime('%Y-%m-%d %H:%M') }}</div>
-                    </div>
-                    <div style="flex:1; min-width:220px;">
-                        <strong>Total de entregas:</strong>
-                        <div>{{ all_registros|length }}</div>
-                    </div>
-                    <div style="flex:1; min-width:220px;">
-                        <strong>Total de piezas:</strong>
-                        <div>{{ total_general }}</div>
-                    </div>
-                    <div style="flex:1; min-width:220px; display:flex; gap:8px;">
-                        <button id="print_report" style="padding:12px 20px; border:none; border-radius:14px; background:#0f4c81; color:#fff; font-weight:700; cursor:pointer;">Imprimir carta</button>
-                    </div>
-                </div>
-                <div style="margin-bottom:18px;">
-                    <input id="modal_search" placeholder="Buscar por No. nomina" style="width:100%; border:1px solid #cbd5e1; border-radius:12px; padding:12px; font-size:0.95rem;" />
-                </div>
-                <div style="overflow:auto; max-height:55vh;">
-                    <table id="modal_report_table" style="width:100%; border-collapse:collapse; font-size:0.92rem;">
-                        <thead>
-                            <tr style="background:#f8fafc; color:#0f172a; text-align:left;">
-                                <th style="padding:12px; border-bottom:1px solid #e2e8f0;">No. nomina</th>
-                                <th style="padding:12px; border-bottom:1px solid #e2e8f0;">Colaborador</th>
-                                <th style="padding:12px; border-bottom:1px solid #e2e8f0;">Prenda</th>
-                                <th style="padding:12px; border-bottom:1px solid #e2e8f0;">Cantidad</th>
-                                <th style="padding:12px; border-bottom:1px solid #e2e8f0;">Fecha</th>
-                                <th style="padding:12px; border-bottom:1px solid #e2e8f0;">Comentarios</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for registro in all_registros %}
-                                <tr class="report_row" data-username="{{ registro.username|lower }}">
-                                    <td style="padding:12px; border-bottom:1px solid #e2e8f0;">{{ registro.username }}</td>
-                                    <td style="padding:12px; border-bottom:1px solid #e2e8f0;">{{ registro.user.nombre if registro.user else registro.username }}</td>
-                                    <td style="padding:12px; border-bottom:1px solid #e2e8f0;">{{ registro.prenda }}</td>
-                                    <td style="padding:12px; border-bottom:1px solid #e2e8f0;">{{ registro.cantidad }}</td>
-                                    <td style="padding:12px; border-bottom:1px solid #e2e8f0;">{{ registro.fecha_entrega.strftime('%Y-%m-%d %H:%M') }}</td>
-                                    <td style="padding:12px; border-bottom:1px solid #e2e8f0;">{{ registro.observaciones or '-' }}</td>
-                                </tr>
-                            {% else %}
-                                <tr><td colspan="6" style="padding:12px;">No hay registros cargados aún.</td></tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
 <script>
 // Autocomplete simple por username
 const input = document.getElementById('username_input');
@@ -273,158 +216,30 @@ input && input.addEventListener('input', (e) => {
 });
 
 // Añadir / eliminar filas de prenda
-document.getElementById('add_item').addEventListener('click', ()=>{
+const addItemButton = document.getElementById('add_item');
+addItemButton.addEventListener('click', () => {
     const container = document.getElementById('items_container');
     const row = document.querySelector('.item_row');
     const clone = row.cloneNode(true);
-    // reset values
     clone.querySelector('select').selectedIndex = 0;
     clone.querySelector('input[type=number]').value = 1;
-    // añadir botón de eliminar
     const del = document.createElement('button');
     del.type = 'button';
     del.textContent = 'Eliminar';
     del.style.marginTop = '8px';
     del.style.background = '#fee2e2';
     del.style.color = '#991b1b';
-    del.addEventListener('click', ()=> clone.remove());
+    del.style.borderRadius = '10px';
+    del.style.padding = '10px 14px';
+    del.addEventListener('click', () => clone.remove());
     clone.appendChild(del);
     container.appendChild(clone);
 });
 
-document.getElementById('clear_user').addEventListener('click', ()=>{
+document.getElementById('clear_user').addEventListener('click', () => {
     document.getElementById('username_input').value = '';
     document.getElementById('user_id').value = '';
     document.getElementById('user_suggestions').innerHTML = '';
 });
 
-const reportModal = document.getElementById('report_modal');
-const openReport = document.getElementById('open_report');
-const closeReport = document.getElementById('close_report');
-const modalSearch = document.getElementById('modal_search');
-const printReport = document.getElementById('print_report');
-
-openReport && openReport.addEventListener('click', () => {
-    reportModal.style.display = 'flex';
-    modalSearch.value = '';
-    filterReportRows('');
-});
-closeReport && closeReport.addEventListener('click', () => {
-    reportModal.style.display = 'none';
-});
-modalSearch && modalSearch.addEventListener('input', (e) => {
-    filterReportRows(e.target.value);
-});
-
-function filterReportRows(query) {
-    const text = query.trim().toLowerCase();
-    const rows = document.querySelectorAll('#modal_report_table .report_row');
-    rows.forEach(row => {
-        const username = row.getAttribute('data-username') || '';
-        const visible = !text || username.includes(text);
-        row.style.display = visible ? '' : 'none';
-    });
-}
-
-printReport && printReport.addEventListener('click', () => {
-    const dataRows = Array.from(document.querySelectorAll('#modal_report_table .report_row'))
-        .filter(row => row.style.display !== 'none')
-        .map(row => ({
-            username: row.children[0].innerText.trim(),
-            nombre: row.children[1].innerText.trim(),
-            prenda: row.children[2].innerText.trim(),
-            cantidad: row.children[3].innerText.trim(),
-            fecha: row.children[4].innerText.trim(),
-            observaciones: row.children[5].innerText.trim(),
-        }));
-    const reportHtml = buildPrintReport(dataRows);
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(reportHtml);
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-});
-
-function buildPrintReport(rows) {
-    const encargad = '{{ current_user.nombre }}';
-    const encargadoUsername = '{{ current_user.username }}';
-    const fechaReporte = new Date().toLocaleString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit', hour:'2-digit', minute:'2-digit' });
-    const itemsHtml = rows.map(row => `
-            <tr>
-                <td>${row.username}</td>
-                <td>${row.nombre}</td>
-                <td>${row.prenda}</td>
-                <td>${row.cantidad}</td>
-                <td>${row.fecha}</td>
-                <td>${row.observaciones}</td>
-            </tr>`).join('');
-    return `<!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8">
-<title>Reporte de entregas</title>
-<style>
-@page { size: letter portrait; margin: 24mm; }
-body { font-family: Arial, sans-serif; color: #0f172a; margin: 0; padding: 0; }
-.page { width: 100%; max-width: 816px; margin: 0 auto; padding: 20px; }
-.header { text-align: center; margin-bottom: 24px; }
-.header h1 { margin: 0; font-size: 22px; }
-.header p { margin: 4px 0 0; color: #475569; }
-.summary { margin: 24px 0; display: flex; flex-wrap: wrap; gap: 16px; }
-.summary .block { flex: 1; min-width: 220px; background: #f8fafc; padding: 14px 16px; border-radius: 12px; border: 1px solid #e2e8f0; }
-.summary .block strong { display: block; margin-bottom: 6px; font-size: 0.95rem; color: #0f172a; }
-table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 0.92rem; }
-th, td { border: 1px solid #cbd5e1; padding: 10px 12px; }
-th { background: #f8fafc; color: #0f172a; }
-.footer { margin-top: 30px; display: flex; justify-content: space-between; gap: 20px; }
-.sign { width: 48%; text-align: left; }
-.sign-line { margin-top: 50px; border-top: 1px solid #0f172a; width: 100%; }
-.sign-label { margin-top: 8px; font-size: 0.88rem; color: #475569; }
-@media print { button { display:none; } }
-</style>
-</head>
-<body>
-<div class="page">
-    <div class="header">
-        <h1>Reporte de entregas de uniformes</h1>
-        <p>Documento impreso en tamaño carta</p>
-        <p>Fecha del reporte: ${fechaReporte}</p>
-    </div>
-    <div class="summary">
-        <div class="block"><strong>Total de registros:</strong> ${rows.length}</div>
-        <div class="block"><strong>Encargado de registro:</strong> ${encargad}</div>
-        <div class="block"><strong>No. nómina del encargado:</strong> ${encargadoUsername}</div>
-    </div>
-    <table>
-        <thead>
-            <tr>
-                <th>No. nómina</th>
-                <th>Colaborador</th>
-                <th>Prenda</th>
-                <th>Cantidad</th>
-                <th>Fecha y hora</th>
-                <th>Comentarios</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${itemsHtml}
-        </tbody>
-    </table>
-    <div class="footer">
-        <div class="sign">
-            <div class="sign-line"></div>
-            <div class="sign-label">Nombre del encargado (registró)</div>
-            <div>${encargad}</div>
-        </div>
-        <div class="sign">
-            <div class="sign-line"></div>
-            <div class="sign-label">Nombre del que entregó</div>
-            <div>__________________________</div>
-        </div>
-    </div>
-</div>
-</body>
-</html>`;
-}
 </script>
-</html>

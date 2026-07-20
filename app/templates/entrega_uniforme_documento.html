@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documento de entrega de uniforme</title>
+    <style>
+        :root {
+            color-scheme: light;
+            color: #0f172a;
+            background: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f1f5f9;
+        }
+        .page {
+            max-width: 820px;
+            margin: 28px auto;
+            background: #fff;
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: 0 24px 80px rgba(15, 23, 42, 0.12);
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 28px 32px;
+            background: linear-gradient(135deg, #0f4c81 0%, #1d4ed8 100%);
+            color: #fff;
+        }
+        .header img {
+            width: 110px;
+            height: auto;
+            object-fit: contain;
+            background: #fff;
+            padding: 12px;
+            border-radius: 18px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            letter-spacing: 0.02em;
+        }
+        .header p {
+            margin: 8px 0 0;
+            color: rgba(255,255,255,0.88);
+            font-size: 0.96rem;
+            line-height: 1.5;
+        }
+        .content {
+            padding: 30px 32px 32px;
+        }
+        .panel {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+        .panel-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 18px 20px;
+        }
+        .panel-item strong {
+            display: block;
+            margin-bottom: 10px;
+            color: #0f172a;
+            font-size: 0.95rem;
+        }
+        .panel-item span {
+            color: #475569;
+            font-size: 1rem;
+        }
+        .section {
+            margin-bottom: 28px;
+        }
+        .section h2 {
+            margin: 0 0 14px;
+            font-size: 1.15rem;
+            color: #0f172a;
+            letter-spacing: 0.01em;
+        }
+        .data-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .data-row {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 18px 20px;
+        }
+        .data-row strong {
+            display: block;
+            color: #0f172a;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        .data-row span {
+            color: #475569;
+            font-size: 0.96rem;
+        }
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.95rem;
+        }
+        .details-table th,
+        .details-table td {
+            padding: 14px 16px;
+            border: 1px solid #e2e8f0;
+            text-align: left;
+        }
+        .details-table th {
+            background: #f8fafc;
+            color: #0f172a;
+        }
+        .footer {
+            display: flex;
+            gap: 24px;
+            justify-content: space-between;
+            margin-top: 32px;
+            flex-wrap: wrap;
+        }
+        .signature {
+            flex: 1;
+            min-width: 220px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .signature .line {
+            height: 1px;
+            background: #cbd5e1;
+            margin-top: 32px;
+        }
+        .signature span {
+            color: #475569;
+            font-size: 0.92rem;
+        }
+        .print-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 22px;
+            border-radius: 14px;
+            background: #0f4c81;
+            color: #fff;
+            font-weight: 700;
+            text-decoration: none;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: transform .18s ease, box-shadow .18s ease;
+        }
+        .print-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 32px rgba(15,23,42,0.16);
+        }
+        @media (max-width: 760px) {
+            .panel, .data-grid, .footer { grid-template-columns: 1fr; }
+            .header { flex-direction: column; align-items: flex-start; }
+        }
+        @media print {
+            body { background: #fff; }
+            .page { box-shadow: none; border-radius: 0; margin: 0; }
+            .print-button { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="header">
+            <div>
+                <h1>Documento de entrega de uniforme</h1>
+                <p>Registro individual de la prenda entregada al colaborador.</p>
+                <p style="margin-top: 8px; font-size: 0.95rem; opacity: 0.88;">Generado el {{ report_date.strftime('%d/%m/%Y %H:%M') }}</p>
+            </div>
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo de la empresa">
+        </div>
+        <div class="content">
+            <div class="section">
+                <div class="data-grid">
+                    <div class="data-row">
+                        <strong>No. nómina</strong>
+                        <span>{{ registro.username }}</span>
+                    </div>
+                    <div class="data-row">
+                        <strong>Colaborador</strong>
+                        <span>{{ registro.user.nombre if registro.user else registro.username }}</span>
+                    </div>
+                    <div class="data-row">
+                        <strong>Fecha de entrega</strong>
+                        <span>{{ registro.fecha_entrega.strftime('%d/%m/%Y %H:%M') }}</span>
+                    </div>
+                    <div class="data-row">
+                        <strong>Registrado por</strong>
+                        <span>{{ current_user.nombre }} ({{ current_user.username }})</span>
+                    </div>
+                </div>
+            </div>
+            <div class="section">
+                <h2>Detalles de la entrega</h2>
+                <table class="details-table">
+                    <thead>
+                        <tr>
+                            <th>Prenda</th>
+                            <th>Cantidad</th>
+                            <th>Observaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ registro.prenda }}</td>
+                            <td>{{ registro.cantidad }}</td>
+                            <td>{{ registro.observaciones or 'Ninguna' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="footer">
+                <div class="signature">
+                    <span>Firma del colaborador</span>
+                    <div class="line"></div>
+                </div>
+                <div class="signature">
+                    <span>Firma del responsable de entrega</span>
+                    <div class="line"></div>
+                </div>
+            </div>
+            <div style="margin-top: 32px; text-align: right;">
+                <a class="print-button" href="javascript:window.print();"><i class="fas fa-print"></i> Imprimir documento</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

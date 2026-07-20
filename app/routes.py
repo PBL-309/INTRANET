@@ -173,6 +173,16 @@ def search_users():
     result = [{'id': u.id, 'username': u.username, 'nombre': u.nombre} for u in users]
     return jsonify(result)
 
+@main.route('/entrega_uniforme/documento/<int:registro_id>')
+@login_required
+def entrega_uniforme_documento(registro_id):
+    registro = EntregaUniforme.query.get_or_404(registro_id)
+    return render_template(
+        'entrega_uniforme_documento.html',
+        registro=registro,
+        report_date=datetime.now()
+    )
+
 @main.route('/consultar_evaluaciones')
 @login_required
 def consultar_evaluaciones():
