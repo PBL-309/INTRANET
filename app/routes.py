@@ -50,6 +50,18 @@ def entrega_uniformes():
         prendas_list = request.form.getlist('prenda[]') or request.form.getlist('prenda')
         cantidades_list = request.form.getlist('cantidad[]') or request.form.getlist('cantidad')
 
+        cantidades_por_prenda = []
+        for idx, prenda_catalogo in enumerate(prendas):
+            try:
+                cantidad = int(request.form.get(f'cantidad_prenda_{idx}', '0') or 0)
+            except (TypeError, ValueError):
+                cantidad = 0
+            if cantidad > 0:
+                cantidades_por_prenda.append((prenda_catalogo, cantidad))
+        if cantidades_por_prenda:
+            prendas_list = [item[0] for item in cantidades_por_prenda]
+            cantidades_list = [str(item[1]) for item in cantidades_por_prenda]
+
         # Fallback: si viene un solo par prenda/cantidad como strings
         if not prendas_list and request.form.get('prenda'):
             prendas_list = [request.form.get('prenda')]
@@ -73,10 +85,12 @@ def entrega_uniformes():
 
         # Crear entregas por cada prenda válida
         created = 0
+        first_registro_id = None
+        fecha_entrega = datetime.now().replace(microsecond=0)
         try:
             for idx, pr in enumerate(prendas_list):
                 pr = (pr or '').strip()
-                if not pr:
+                if not pr or pr not in prendas:
                     continue
                 # obtener cantidad correspondiente, si existe
                 try:
@@ -92,9 +106,12 @@ def entrega_uniformes():
                     prenda=pr,
                     cantidad=cantidad,
                     observaciones=observaciones or None,
-                    fecha_entrega=datetime.now()
+                    fecha_entrega=fecha_entrega
                 )
                 db.session.add(entrega)
+                db.session.flush()
+                if first_registro_id is None:
+                    first_registro_id = entrega.id
                 created += 1
 
             if created == 0:
@@ -103,7 +120,7 @@ def entrega_uniformes():
 
             db.session.commit()
             flash(f'✅ Se registraron {created} entrega(s) para {usuario.nombre} ({usuario.username}).', 'success')
-            return redirect(url_for('main.entrega_uniformes'))
+            return redirect(url_for('main.entrega_uniformes', entrega=first_registro_id))
         except Exception as e:
             db.session.rollback()
             current_app.logger.exception('Error guardando entregas')
@@ -111,7 +128,27 @@ def entrega_uniformes():
             return redirect(url_for('main.entrega_uniformes'))
 
     all_registros = EntregaUniforme.query.order_by(EntregaUniforme.fecha_entrega.desc()).all()
-    registros = all_registros[:20]
+    filtro = request.args.get('q', '').strip().lower()
+    prenda_filtro = request.args.get('prenda', '').strip()
+    registros_filtrados = [
+        registro for registro in all_registros
+        if (not filtro or filtro in registro.username.lower()
+            or filtro in ((registro.user.nombre if registro.user else '') or '').lower())
+        and (not prenda_filtro or registro.prenda == prenda_filtro)
+    ]
+    grupos = {}
+    for registro in registros_filtrados:
+        clave = (registro.user_id, registro.fecha_entrega)
+        if clave not in grupos:
+            grupos[clave] = {
+                'id': registro.id, 'usuario': registro.user, 'username': registro.username,
+                'fecha_entrega': registro.fecha_entrega, 'observaciones': registro.observaciones,
+                'items': [], 'total': 0
+            }
+        grupos[clave]['items'].append(registro)
+        grupos[clave]['total'] += registro.cantidad
+    entregas_recientes = list(grupos.values())[:20]
+    registros = registros_filtrados[:20]
     registros_data = []
     for registro in all_registros:
         registros_data.append({
@@ -153,6 +190,7 @@ def entrega_uniformes():
         usuarios=usuarios,
         prendas=prendas,
         registros=registros,
+        entregas_recientes=entregas_recientes,
         all_registros=all_registros,
         registros_data=registros_data,
         resumen_por_usuario=resumen_por_usuario,
@@ -168,8 +206,10 @@ def search_users():
     q = request.args.get('q', '').strip()
     if not q:
         return jsonify([])
-    users = User.query.filter(User.username.ilike(f"%{q}%"))
-    users = users.order_by(User.username).limit(12).all()
+    users = User.query.filter(
+        db.or_(User.username.ilike(f"%{q}%"), User.nombre.ilike(f"%{q}%"))
+    )
+    users = users.order_by(User.nombre, User.username).limit(12).all()
     result = [{'id': u.id, 'username': u.username, 'nombre': u.nombre} for u in users]
     return jsonify(result)
 
@@ -177,9 +217,14 @@ def search_users():
 @login_required
 def entrega_uniforme_documento(registro_id):
     registro = EntregaUniforme.query.get_or_404(registro_id)
+    registros = EntregaUniforme.query.filter_by(
+        user_id=registro.user_id, fecha_entrega=registro.fecha_entrega
+    ).order_by(EntregaUniforme.id).all()
     return render_template(
         'entrega_uniforme_documento.html',
         registro=registro,
+        registros=registros,
+        total_piezas=sum(item.cantidad for item in registros),
         report_date=datetime.now()
     )
 

@@ -1,245 +1,59 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de uniformes</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --navy: #071b2f;
-            --blue: #0f4c81;
-            --amber: #f59e0b;
-            --green: #10b981;
-            --red: #dc2626;
-            --surface: #ffffff;
-            --muted: #64748b;
-            --border: #e2e8f0;
-        }
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #071b2f 0%, #0f4c81 45%, #1d4ed8 100%);
-            color: #0f172a;
-            min-height: 100vh;
-            padding: 24px;
-        }
-        .wrap { max-width: 1200px; margin: 0 auto; }
-        .hero {
-            background: rgba(255,255,255,0.95);
-            border-radius: 24px;
-            padding: 24px 28px;
-            box-shadow: 0 20px 45px rgba(0,0,0,0.2);
-            margin-bottom: 20px;
-        }
-        .hero h1 { margin: 0 0 8px; color: var(--navy); font-size: 1.9rem; }
-        .hero p { margin: 0; color: var(--muted); line-height: 1.6; }
-        .badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; background: rgba(245,158,11,.14); color: #92400e; font-weight: 700; margin-bottom: 14px; }
-        .grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 20px; }
-        .card { background: var(--surface); border-radius: 22px; padding: 20px; box-shadow: 0 18px 40px rgba(0,0,0,0.16); }
-        .card h2 { margin-top: 0; font-size: 1.1rem; color: var(--navy); }
-        .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
-        label { font-weight: 700; color: var(--navy); font-size: 0.95rem; }
-        input, select, textarea, button { width: 100%; border-radius: 12px; border: 1px solid var(--border); padding: 11px 12px; font-size: 0.95rem; }
-        textarea { min-height: 90px; resize: vertical; }
-        button { background: linear-gradient(135deg, var(--amber) 0%, #ea580c 100%); color: white; font-weight: 800; border: none; cursor: pointer; }
-        button:hover { transform: translateY(-1px); }
-        .flash { padding: 12px 14px; border-radius: 12px; margin-bottom: 14px; font-weight: 600; }
-        .flash.success { background: #ecfdf5; color: #166534; }
-        .flash.warning { background: #fff7ed; color: #9a2c00; }
-        .flash.danger { background: #fef2f2; color: #991b1b; }
-        .stats { display: grid; gap: 10px; }
-        .stat { background: linear-gradient(135deg, #f8fafc, #eff6ff); border: 1px solid var(--border); border-radius: 16px; padding: 12px 14px; }
-        .stat strong { display: block; color: var(--navy); font-size: 1.05rem; }
-        .stat span { color: var(--muted); font-size: 0.9rem; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.92rem; }
-        th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); text-align: left; }
-        th { color: var(--navy); background: #f8fafc; }
-        .pill { display: inline-block; padding: 6px 10px; border-radius: 999px; background: rgba(16,185,129,.14); color: #047857; font-weight: 700; font-size: 0.82rem; }
-        .doc_button { display: inline-flex; align-items: center; gap: 8px; justify-content: center; padding: 10px 14px; border-radius: 12px; background: #0f4c81; color: #fff; text-decoration: none; font-weight: 700; border: 1px solid rgba(15,76,129,.25); }
-        .doc_button:hover { transform: translateY(-1px); box-shadow: 0 12px 20px rgba(15,23,42,0.12); }
-        @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Entrega de uniformes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--ink:#14213d;--blue:#164e86;--blue2:#0e3a65;--accent:#ef7d22;--bg:#f3f6f9;--line:#dfe6ed;--muted:#68778a;--white:#fff;--green:#087c60;--shadow:0 12px 34px rgba(20,33,61,.09)}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:"DM Sans",sans-serif} button,input,textarea,select{font:inherit}
+    .topbar{background:var(--blue2);color:#fff}.topbar-inner{max-width:1240px;margin:auto;padding:19px 24px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;gap:13px;align-items:center}.brand-mark{width:42px;height:42px;border-radius:12px;background:#fff;padding:6px;object-fit:contain}.brand small{display:block;color:#bed2e5;margin-top:2px}.back{color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.24);padding:9px 13px;border-radius:10px}
+    main{max-width:1240px;margin:0 auto;padding:32px 24px 50px}.intro{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:24px}.eyebrow{color:var(--blue);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700}.intro h1{font-size:clamp(1.8rem,3vw,2.45rem);margin:7px 0}.intro p{margin:0;color:var(--muted)}.metrics{display:flex;gap:10px}.metric{background:#fff;border:1px solid var(--line);border-radius:13px;padding:11px 16px;min-width:120px}.metric strong{display:block;font-size:1.25rem}.metric span{color:var(--muted);font-size:.78rem}
+    .flash{padding:13px 16px;border-radius:12px;margin-bottom:18px;font-weight:600}.flash.success{background:#dff7ef;color:#07634d}.flash.warning{background:#fff2d6;color:#875400}.flash.danger{background:#fde5e5;color:#942828}
+    .layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(310px,.7fr);gap:22px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}.card-head{padding:21px 23px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.card-head h2{font-size:1.08rem;margin:0}.step{color:var(--blue);background:#eaf3fb;border-radius:99px;padding:5px 10px;font-size:.75rem;font-weight:700}.card-body{padding:22px 23px}
+    label{display:block;font-weight:600;font-size:.88rem;margin-bottom:7px}.search-wrap{position:relative}.search-input{width:100%;border:1px solid #cbd6e0;border-radius:12px;padding:13px 14px 13px 42px;outline:none}.search-input:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(22,78,134,.1)}.search-icon{position:absolute;left:15px;top:13px;color:var(--muted)}.suggestions{position:absolute;z-index:10;top:100%;left:0;right:0;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);margin-top:5px;overflow:hidden}.suggestion{padding:11px 13px;cursor:pointer;border-bottom:1px solid #edf1f5}.suggestion:hover{background:#f1f6fb}.suggestion strong,.suggestion span{display:block}.suggestion span{color:var(--muted);font-size:.8rem;margin-top:2px}.selected-user{display:none;margin-top:10px;background:#edf6ff;border:1px solid #cce2f5;border-radius:12px;padding:11px 13px;align-items:center;justify-content:space-between}.selected-user.show{display:flex}.selected-user small{display:block;color:var(--muted)}.link-btn{background:none;border:0;color:var(--blue);font-weight:700;cursor:pointer}
+    .uniforms{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:20px}.uniform{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);padding:12px;border-radius:13px;transition:.15s}.uniform.active{border-color:#6da3cf;background:#f0f7fd}.uniform-name{font-size:.86rem;font-weight:600}.qty{display:flex;align-items:center;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#fff}.qty button{width:30px;height:30px;border:0;background:#f1f4f7;color:var(--ink);cursor:pointer;font-size:1.05rem}.qty input{width:36px;border:0;text-align:center;font-weight:700;outline:none;-moz-appearance:textfield}.qty input::-webkit-inner-spin-button{display:none}
+    textarea{width:100%;border:1px solid #cbd6e0;border-radius:12px;padding:12px;resize:vertical;min-height:74px;outline:none}.field{margin-top:20px}.submit{width:100%;border:0;border-radius:12px;padding:14px;background:var(--accent);color:#fff;font-weight:700;cursor:pointer;margin-top:18px;box-shadow:0 8px 18px rgba(239,125,34,.24)}.submit:disabled{opacity:.5;cursor:not-allowed}.helper{text-align:center;color:var(--muted);font-size:.76rem;margin:9px 0 0}
+    .summary-list{display:grid;gap:8px}.summary-row{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-bottom:1px solid #edf1f5}.summary-row:last-child{border:0}.summary-row span{color:var(--muted);font-size:.84rem}.summary-row strong{font-size:.88rem}.bar{height:5px;background:#edf1f5;border-radius:9px;margin-top:5px;overflow:hidden}.bar i{display:block;height:100%;background:var(--accent);border-radius:9px}
+    .history{margin-top:22px}.filters{display:flex;gap:9px}.filters input,.filters select{border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:#fff}.filters button{border:0;background:var(--blue);color:#fff;border-radius:10px;padding:9px 13px;cursor:pointer}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:#f8fafc}th,td{text-align:left;padding:14px 17px;border-bottom:1px solid #edf1f5}td{font-size:.87rem}.person strong,.person span{display:block}.person span{color:var(--muted);font-size:.76rem}.tags{display:flex;flex-wrap:wrap;gap:5px}.tag{background:#edf3f8;padding:5px 8px;border-radius:7px;font-size:.74rem}.doc{display:inline-block;text-decoration:none;color:var(--blue);font-weight:700;border:1px solid #b9d2e7;border-radius:9px;padding:8px 11px;white-space:nowrap}.empty{text-align:center;color:var(--muted);padding:28px}.success-panel{display:none;background:#e9f8f3;border:1px solid #bce8d8;border-radius:14px;padding:16px;margin-bottom:18px}.success-panel.show{display:flex;justify-content:space-between;align-items:center;gap:15px}.success-panel a{background:var(--green);color:#fff;text-decoration:none;border-radius:10px;padding:10px 13px;font-weight:700}
+    @media(max-width:850px){.layout{grid-template-columns:1fr}.intro{align-items:start;flex-direction:column}.metrics{width:100%}.metric{flex:1}.uniforms{grid-template-columns:1fr}.filters{flex-wrap:wrap}.filters input{flex:1}.topbar-inner{padding:15px 18px}main{padding:24px 16px}.back{font-size:0;width:40px}.back:after{content:"←";font-size:18px}.card-head{align-items:flex-start;gap:10px}}
+  </style>
 </head>
 <body>
-    <div class="wrap">
-        <div class="hero">
-            <div class="badge"><i class="fas fa-user-shield"></i> Control de entregas de uniformes</div>
-            <h1>Registro de entregas de uniformes</h1>
-            <p>Selecciona el colaborador, registra las prendas entregadas y genera un documento individual para cada entrega.</p>
-        </div>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="flash {{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <div class="grid">
-            <div class="card">
-                <h2><i class="fas fa-plus-circle"></i> Registrar entrega</h2>
-                <form method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <div class="field">
-                        <label for="username_input">Colaborador (por No. nomina)</label>
-                        <input id="username_input" name="username" placeholder="Teclea No. nomina para buscar..." autocomplete="off">
-                        <input type="hidden" id="user_id" name="user_id">
-                        <div id="user_suggestions" style="position:relative; z-index:50;"></div>
-                    </div>
-                    <div id="items_container">
-                        <div class="field item_row">
-                            <label>Prenda</label>
-                            <select name="prenda[]" required>
-                                <option value="">Selecciona una prenda</option>
-                                {% for prenda in prendas %}
-                                    <option value="{{ prenda }}">{{ prenda }}</option>
-                                {% endfor %}
-                            </select>
-                            <label style="margin-top:8px">Cantidad</label>
-                            <input name="cantidad[]" type="number" min="1" value="1" required>
-                        </div>
-                    </div>
-                    <div style="display:flex; gap:8px; margin-bottom:12px;">
-                        <button type="button" id="add_item" class="" style="flex:1; background:#eef2ff; color:#0f172a; font-weight:700;">Agregar prenda</button>
-                        <button type="button" id="clear_user" class="" style="flex:1; background:#fee2e2; color:#991b1b; font-weight:700;">Limpiar usuario</button>
-                    </div>
-                    <div class="field">
-                        <label for="observaciones">Observaciones</label>
-                        <textarea id="observaciones" name="observaciones" placeholder="Ej. talla M, entregado por turno, etc."></textarea>
-                    </div>
-                    <button type="submit"><i class="fas fa-save"></i> Guardar entrega</button>
-                </form>
-            </div>
-
-            <div class="card">
-                <h2><i class="fas fa-chart-line"></i> Resumen rápido</h2>
-                <div class="stats">
-                    <div class="stat">
-                        <strong>{{ total_general }}</strong>
-                        <span>Total de prendas entregadas</span>
-                    </div>
-                    <div class="stat">
-                        <strong>{{ registros|length }}</strong>
-                        <span>Entradas recientes</span>
-                    </div>
-                </div>
-
-                <h3 style="margin: 16px 0 8px; color: var(--navy);">Por usuario</h3>
-                <ul>
-                    {% for usuario, nombre, total in resumen_por_usuario %}
-                        <li><strong>{{ nombre }}</strong> ({{ usuario }}) — <span class="pill">{{ total }} piezas</span></li>
-                    {% else %}
-                        <li>No hay entregas registradas todavía.</li>
-                    {% endfor %}
-                </ul>
-
-                <h3 style="margin: 16px 0 8px; color: var(--navy);">Por prenda</h3>
-                <ul>
-                    {% for prenda, total in resumen_por_prenda %}
-                        <li><strong>{{ prenda }}</strong> — <span class="pill">{{ total }} piezas</span></li>
-                    {% else %}
-                        <li>No hay datos por prenda.</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-
-        <div class="card" style="margin-top: 20px;">
-            <h2><i class="fas fa-list"></i> Últimas entregas</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>No. Nómina</th>
-                        <th>Colaborador</th>
-                        <th>Prenda</th>
-                        <th>Cantidad</th>
-                        <th>Fecha y hora</th>
-                        <th>Observaciones</th>
-                        <th>Documento</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for registro in registros %}
-                        <tr>
-                            <td>{{ registro.username }}</td>
-                            <td>{{ registro.user.nombre if registro.user else registro.username }}</td>
-                            <td>{{ registro.prenda }}</td>
-                            <td>{{ registro.cantidad }}</td>
-                            <td>{{ registro.fecha_entrega.strftime('%Y-%m-%d %H:%M') }}</td>
-                            <td>{{ registro.observaciones or '-' }}</td>
-                            <td><a class="doc_button" href="{{ url_for('main.entrega_uniforme_documento', registro_id=registro.id) }}" target="_blank"><i class="fas fa-file-invoice"></i> Generar</a></td>
-                        </tr>
-                    {% else %}
-                        <tr><td colspan="7">Sin registros aún.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+  <header class="topbar"><div class="topbar-inner"><div class="brand"><img class="brand-mark" src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo"><div><strong>Control de uniformes</strong><small>Administración de personal</small></div></div><a class="back" href="{{ url_for('main.dashboard') }}">← Volver al inicio</a></div></header>
+  <main>
+    <section class="intro"><div><span class="eyebrow">Recursos materiales</span><h1>Entrega de uniformes</h1><p>Registra una entrega completa y genera su comprobante en un solo paso.</p></div><div class="metrics"><div class="metric"><strong>{{ total_general }}</strong><span>Piezas entregadas</span></div><div class="metric"><strong>{{ entregas_recientes|length }}</strong><span>Entregas recientes</span></div></div></section>
+    {% with messages=get_flashed_messages(with_categories=true) %}{% for category,message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}{% endwith %}
+    {% if request.args.get('entrega') %}<div class="success-panel show"><div><strong>Comprobante listo</strong><div>La entrega quedó guardada y agrupada en un solo documento.</div></div><a target="_blank" href="{{ url_for('main.entrega_uniforme_documento', registro_id=request.args.get('entrega')) }}">Ver comprobante</a></div>{% endif %}
+    <div class="layout">
+      <section class="card"><div class="card-head"><h2>Nueva entrega</h2><span class="step">1 operación</span></div><div class="card-body">
+        <form method="post" id="delivery-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" id="user_id" name="user_id">
+          <label for="username_input">Colaborador</label><div class="search-wrap"><span class="search-icon">⌕</span><input class="search-input" id="username_input" name="username" autocomplete="off" placeholder="Buscar por nombre o número de nómina"><div id="suggestions" class="suggestions" hidden></div></div>
+          <div id="selected-user" class="selected-user"><div><strong id="selected-name"></strong><small id="selected-number"></small></div><button type="button" id="clear-user" class="link-btn">Cambiar</button></div>
+          <div class="uniforms">
+            {% for prenda in prendas %}<div class="uniform"><span class="uniform-name">{{ prenda|title }}</span><div class="qty"><button type="button" aria-label="Restar">−</button><input type="number" min="0" max="99" value="0" name="cantidad_prenda_{{ loop.index0 }}" aria-label="Cantidad de {{ prenda }}"><button type="button" aria-label="Sumar">+</button></div></div>{% endfor %}
+          </div>
+          <div class="field"><label for="observaciones">Notas <span style="font-weight:400;color:var(--muted)">(opcional)</span></label><textarea id="observaciones" name="observaciones" maxlength="250" placeholder="Tallas, condiciones o información adicional"></textarea></div>
+          <button class="submit" id="submit" disabled>Registrar entrega y crear comprobante</button><p class="helper">Selecciona un colaborador y al menos una pieza.</p>
+        </form>
+      </div></section>
+      <aside class="card"><div class="card-head"><h2>Distribución por prenda</h2></div><div class="card-body"><div class="summary-list">
+        {% for prenda,total in resumen_por_prenda %}<div class="summary-row"><div style="flex:1"><strong>{{ prenda|title }}</strong><div class="bar"><i style="width:{{ (total / total_general * 100) if total_general else 0 }}%"></i></div></div><span>{{ total }} piezas</span></div>{% else %}<div class="empty">Aún no hay entregas registradas.</div>{% endfor %}
+      </div></div></aside>
     </div>
-
-<script>
-// Autocomplete simple por username
-const input = document.getElementById('username_input');
-const hiddenId = document.getElementById('user_id');
-const suggestionsBox = document.getElementById('user_suggestions');
-let timeoutId = null;
-input && input.addEventListener('input', (e) => {
-    const q = e.target.value.trim();
-    hiddenId.value = '';
-    if (timeoutId) clearTimeout(timeoutId);
-    if (!q) { suggestionsBox.innerHTML = ''; return; }
-    timeoutId = setTimeout(() => {
-        fetch('/_search_users?q=' + encodeURIComponent(q))
-            .then(r => r.json())
-            .then(data => {
-                if (!data || !data.length) { suggestionsBox.innerHTML = ''; return; }
-                const html = ['<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:6px;">'];
-                data.forEach(u => {
-                    html.push(`<div class="suggestion" data-id="${u.id}" data-username="${u.username}" style="padding:6px;cursor:pointer">${u.username} — ${u.nombre}</div>`);
-                });
-                html.push('</div>');
-                suggestionsBox.innerHTML = html.join('');
-                Array.from(suggestionsBox.querySelectorAll('.suggestion')).forEach(el => {
-                    el.addEventListener('click', () => {
-                        const id = el.getAttribute('data-id');
-                        const username = el.getAttribute('data-username');
-                        hiddenId.value = id;
-                        input.value = username;
-                        suggestionsBox.innerHTML = '';
-                    });
-                });
-            }).catch(()=>{ suggestionsBox.innerHTML = ''; });
-    }, 220);
-});
-
-// Añadir / eliminar filas de prenda
-const addItemButton = document.getElementById('add_item');
-addItemButton.addEventListener('click', () => {
-    const container = document.getElementById('items_container');
-    const row = document.querySelector('.item_row');
-    const clone = row.cloneNode(true);
-    clone.querySelector('select').selectedIndex = 0;
-    clone.querySelector('input[type=number]').value = 1;
-    const del = document.createElement('button');
-    del.type = 'button';
-    del.textContent = 'Eliminar';
-    del.style.marginTop = '8px';
-    del.style.background = '#fee2e2';
-    del.style.color = '#991b1b';
-    del.style.borderRadius = '10px';
-    del.style.padding = '10px 14px';
-    del.addEventListener('click', () => clone.remove());
-    clone.appendChild(del);
-    container.appendChild(clone);
-});
-
-document.getElementById('clear_user').addEventListener('click', () => {
-    document.getElementById('username_input').value = '';
-    document.getElementById('user_id').value = '';
-    document.getElementById('user_suggestions').innerHTML = '';
-});
-
-</script>
+    <section class="card history"><div class="card-head"><h2>Historial de entregas</h2><form class="filters" method="get"><input name="q" value="{{ request.args.get('q','') }}" placeholder="Nombre o nómina"><select name="prenda"><option value="">Todas las prendas</option>{% for prenda in prendas %}<option value="{{ prenda }}" {{ 'selected' if request.args.get('prenda')==prenda }}>{{ prenda|title }}</option>{% endfor %}</select><button>Filtrar</button></form></div><div class="table-wrap"><table><thead><tr><th>Colaborador</th><th>Contenido</th><th>Total</th><th>Fecha</th><th></th></tr></thead><tbody>
+      {% for entrega in entregas_recientes %}<tr><td class="person"><strong>{{ entrega.usuario.nombre if entrega.usuario else entrega.username }}</strong><span>Nómina {{ entrega.username }}</span></td><td><div class="tags">{% for item in entrega['items'] %}<span class="tag">{{ item.prenda|title }} · {{ item.cantidad }}</span>{% endfor %}</div></td><td><strong>{{ entrega.total }}</strong> pzas.</td><td>{{ entrega.fecha_entrega.strftime('%d/%m/%Y') }}<br><span style="color:var(--muted)">{{ entrega.fecha_entrega.strftime('%H:%M') }}</span></td><td><a class="doc" target="_blank" href="{{ url_for('main.entrega_uniforme_documento', registro_id=entrega.id) }}">Ver comprobante</a></td></tr>{% else %}<tr><td class="empty" colspan="5">No hay entregas que coincidan con la búsqueda.</td></tr>{% endfor %}
+    </tbody></table></div></section>
+  </main>
+  <script>
+    const input=document.querySelector('#username_input'),hidden=document.querySelector('#user_id'),box=document.querySelector('#suggestions'),selected=document.querySelector('#selected-user'),submit=document.querySelector('#submit');let timer;
+    function validate(){submit.disabled=!(hidden.value&&[...document.querySelectorAll('.qty input')].some(i=>+i.value>0))}
+    input.addEventListener('input',()=>{hidden.value='';selected.classList.remove('show');validate();clearTimeout(timer);const q=input.value.trim();if(q.length<2){box.hidden=true;return}timer=setTimeout(async()=>{try{const data=await fetch('/_search_users?q='+encodeURIComponent(q)).then(r=>r.json());box.innerHTML=data.length?data.map(u=>`<div class="suggestion" data-id="${u.id}" data-user="${u.username}" data-name="${u.nombre}"><strong>${u.nombre}</strong><span>Nómina ${u.username}</span></div>`).join(''):'<div class="suggestion"><span>Sin resultados</span></div>';box.hidden=false}catch(e){box.hidden=true}},180)});
+    box.addEventListener('click',e=>{const item=e.target.closest('[data-id]');if(!item)return;hidden.value=item.dataset.id;input.value=item.dataset.user;document.querySelector('#selected-name').textContent=item.dataset.name;document.querySelector('#selected-number').textContent='Nómina '+item.dataset.user;selected.classList.add('show');box.hidden=true;validate()});
+    document.querySelector('#clear-user').onclick=()=>{hidden.value='';input.value='';selected.classList.remove('show');input.focus();validate()};
+    document.querySelectorAll('.qty').forEach(q=>{const i=q.querySelector('input'),b=q.querySelectorAll('button'),row=q.closest('.uniform');function set(v){i.value=Math.max(0,Math.min(99,v));row.classList.toggle('active',+i.value>0);validate()}b[0].onclick=()=>set(+i.value-1);b[1].onclick=()=>set(+i.value+1);i.oninput=()=>set(+i.value||0)});document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))box.hidden=true});
+  </script>
+</body></html>
