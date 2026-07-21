@@ -257,6 +257,24 @@ def entrega_uniforme_documento(registro_id):
         report_date=datetime.now()
     )
 
+
+@main.route('/entrega_uniforme/eliminar/<int:registro_id>', methods=['POST'])
+@login_required
+def eliminar_entrega_uniforme(registro_id):
+    registro = EntregaUniforme.query.get_or_404(registro_id)
+    colaborador = registro.user.nombre if registro.user else registro.username
+    prenda = registro.prenda
+    fecha = registro.fecha_entrega.strftime('%d/%m/%Y')
+    try:
+        db.session.delete(registro)
+        db.session.commit()
+        flash(f'Se eliminó {prenda.title()} de {colaborador}, entregada el {fecha}.', 'success')
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception('Error eliminando entrega de uniforme')
+        flash('No fue posible eliminar el registro. Intenta nuevamente.', 'danger')
+    return redirect(url_for('main.entrega_uniformes'))
+
 @main.route('/consultar_evaluaciones')
 @login_required
 def consultar_evaluaciones():
