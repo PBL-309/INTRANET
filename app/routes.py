@@ -136,17 +136,33 @@ def entrega_uniformes():
             or filtro in ((registro.user.nombre if registro.user else '') or '').lower())
         and (not prenda_filtro or registro.prenda == prenda_filtro)
     ]
+    # El historial muestra una sola fila por colaborador. Internamente se
+    # conservan las entregas por fecha para mantener la trazabilidad y generar
+    # un comprobante independiente de cada visita.
     grupos = {}
     for registro in registros_filtrados:
-        clave = (registro.user_id, registro.fecha_entrega)
-        if clave not in grupos:
-            grupos[clave] = {
-                'id': registro.id, 'usuario': registro.user, 'username': registro.username,
-                'fecha_entrega': registro.fecha_entrega, 'observaciones': registro.observaciones,
-                'items': [], 'total': 0
+        if registro.user_id not in grupos:
+            grupos[registro.user_id] = {
+                'usuario': registro.user,
+                'username': registro.username,
+                'items': [],
+                'entregas': {},
+                'total': 0,
+                'ultima_fecha': registro.fecha_entrega,
             }
-        grupos[clave]['items'].append(registro)
-        grupos[clave]['total'] += registro.cantidad
+        grupo = grupos[registro.user_id]
+        grupo['items'].append(registro)
+        grupo['total'] += registro.cantidad
+        if registro.fecha_entrega not in grupo['entregas']:
+            grupo['entregas'][registro.fecha_entrega] = {
+                'id': registro.id,
+                'fecha': registro.fecha_entrega,
+                'total': 0,
+            }
+        grupo['entregas'][registro.fecha_entrega]['total'] += registro.cantidad
+
+    for grupo in grupos.values():
+        grupo['entregas'] = list(grupo['entregas'].values())
     entregas_recientes = list(grupos.values())[:20]
     registros = registros_filtrados[:20]
     registros_data = []
@@ -217,14 +233,17 @@ def search_users():
 @login_required
 def entrega_uniforme_documento(registro_id):
     registro = EntregaUniforme.query.get_or_404(registro_id)
+    # Un solo reporte por colaborador: incluye todas sus entregas históricas,
+    # manteniendo cada artículo y su fecha como un renglón independiente.
     registros = EntregaUniforme.query.filter_by(
-        user_id=registro.user_id, fecha_entrega=registro.fecha_entrega
-    ).order_by(EntregaUniforme.id).all()
+        user_id=registro.user_id
+    ).order_by(EntregaUniforme.fecha_entrega, EntregaUniforme.id).all()
     return render_template(
         'entrega_uniforme_documento.html',
         registro=registro,
         registros=registros,
         total_piezas=sum(item.cantidad for item in registros),
+        total_fechas=len({item.fecha_entrega for item in registros}),
         report_date=datetime.now()
     )
 
