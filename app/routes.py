@@ -51,6 +51,7 @@ def entrega_uniformes():
         cantidades_list = request.form.getlist('cantidad[]') or request.form.getlist('cantidad')
 
         cantidades_por_prenda = []
+        observaciones_por_prenda = {}
         for idx, prenda_catalogo in enumerate(prendas):
             try:
                 cantidad = int(request.form.get(f'cantidad_prenda_{idx}', '0') or 0)
@@ -58,6 +59,9 @@ def entrega_uniformes():
                 cantidad = 0
             if cantidad > 0:
                 cantidades_por_prenda.append((prenda_catalogo, cantidad))
+                observaciones_por_prenda[prenda_catalogo] = request.form.get(
+                    f'observacion_prenda_{idx}', ''
+                ).strip()
         if cantidades_por_prenda:
             prendas_list = [item[0] for item in cantidades_por_prenda]
             cantidades_list = [str(item[1]) for item in cantidades_por_prenda]
@@ -100,12 +104,18 @@ def entrega_uniformes():
                 if cantidad < 1:
                     continue
 
+                detalle_prenda = observaciones_por_prenda.get(pr, '')
+                notas = [detalle_prenda] if detalle_prenda else []
+                if observaciones:
+                    notas.append(f'Nota general: {observaciones}')
+                observacion_registro = ' · '.join(notas)[:250] or None
+
                 entrega = EntregaUniforme(
                     user_id=usuario.id,
                     username=usuario.username,
                     prenda=pr,
                     cantidad=cantidad,
-                    observaciones=observaciones or None,
+                    observaciones=observacion_registro,
                     fecha_entrega=fecha_entrega
                 )
                 db.session.add(entrega)
