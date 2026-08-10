@@ -11,7 +11,7 @@ from io import BytesIO
 import os
 import requests # Necesario para verificar reCAPTCHA v3
 import logging
-from app.models import Aviso, ContactoEmergencia,  Evento, File, Folder, FormularioRespuesta, PortalWeb, Respuesta, User, VacationRequest, Noticia, RegistroCompetencia, EvaluacionDesempeno, AsistenciaFinAnio, PermisosEvaluacion, EntregaUniforme, EntregaGeneralUniforme
+from app.models import Aviso, ContactoEmergencia,  Evento, File, Folder, FormularioRespuesta, PortalWeb, Respuesta, User, VacationRequest, Noticia, RegistroCompetencia, EvaluacionDesempeno, AsistenciaFinAnio, PermisosEvaluacion, EntregaUniforme, EntregaGeneralUniforme, MensajeChat
 from app.forms import LoginForm
 from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
@@ -399,6 +399,120 @@ def eliminar_entrega_uniformes_general(registro_id):
         current_app.logger.exception('Error eliminando entrega general de uniformes')
         flash('No fue posible eliminar el registro.', 'danger')
     return redirect(url_for('main.entrega_uniformes_general'))
+
+
+def _chat_user_data(user):
+    return {
+        'id': user.id,
+        'username': user.username,
+        'nombre': user.nombre,
+        'iniciales': ''.join(parte[0] for parte in user.nombre.split()[:2]).upper(),
+    }
+
+
+@main.route('/api/chat/usuarios')
+@login_required
+def chat_usuarios():
+    q = request.args.get('q', '').strip()
+    query = User.query.filter(
+        User.id != current_user.id,
+        ~db.func.lower(User.username).in_(USUARIOS_SIN_FUNCIONES),
+    )
+    if q:
+        query = query.filter(db.or_(User.nombre.ilike(f'%{q}%'), User.username.ilike(f'%{q}%')))
+    users = query.order_by(User.nombre).limit(30).all()
+    return jsonify([_chat_user_data(user) for user in users])
+
+
+@main.route('/api/chat/conversaciones')
+@login_required
+def chat_conversaciones():
+    mensajes = MensajeChat.query.filter(
+        db.or_(
+            MensajeChat.remitente_id == current_user.id,
+            MensajeChat.destinatario_id == current_user.id,
+        )
+    ).order_by(MensajeChat.fecha_envio.desc()).limit(500).all()
+
+    conversaciones = {}
+    for mensaje in mensajes:
+        contacto = mensaje.destinatario if mensaje.remitente_id == current_user.id else mensaje.remitente
+        if contacto.id not in conversaciones:
+            conversaciones[contacto.id] = {
+                **_chat_user_data(contacto),
+                'ultimo_mensaje': mensaje.contenido,
+                'fecha': mensaje.fecha_envio.strftime('%d/%m %H:%M'),
+                'no_leidos': 0,
+            }
+        if mensaje.destinatario_id == current_user.id and mensaje.leido_en is None:
+            conversaciones[contacto.id]['no_leidos'] += 1
+
+    total_no_leidos = sum(item['no_leidos'] for item in conversaciones.values())
+    return jsonify({'conversaciones': list(conversaciones.values()), 'no_leidos': total_no_leidos})
+
+
+@main.route('/api/chat/mensajes/<int:contacto_id>')
+@login_required
+def chat_mensajes(contacto_id):
+    contacto = db.session.get(User, contacto_id)
+    if not contacto or contacto.id == current_user.id:
+        return jsonify({'error': 'Usuario no válido.'}), 404
+
+    MensajeChat.query.filter_by(
+        remitente_id=contacto.id,
+        destinatario_id=current_user.id,
+        leido_en=None,
+    ).update({'leido_en': datetime.now()}, synchronize_session=False)
+    db.session.commit()
+
+    mensajes = MensajeChat.query.filter(
+        db.or_(
+            db.and_(MensajeChat.remitente_id == current_user.id, MensajeChat.destinatario_id == contacto.id),
+            db.and_(MensajeChat.remitente_id == contacto.id, MensajeChat.destinatario_id == current_user.id),
+        )
+    ).order_by(MensajeChat.fecha_envio.desc()).limit(100).all()
+    mensajes.reverse()
+    return jsonify({
+        'contacto': _chat_user_data(contacto),
+        'mensajes': [{
+            'id': mensaje.id,
+            'contenido': mensaje.contenido,
+            'propio': mensaje.remitente_id == current_user.id,
+            'fecha': mensaje.fecha_envio.strftime('%d/%m/%Y %H:%M'),
+            'leido': mensaje.leido_en is not None,
+        } for mensaje in mensajes],
+    })
+
+
+@main.route('/api/chat/mensajes', methods=['POST'])
+@login_required
+def enviar_mensaje_chat():
+    data = request.get_json(silent=True) or {}
+    destinatario_id = data.get('destinatario_id')
+    contenido = str(data.get('contenido', '')).strip()
+    destinatario = db.session.get(User, destinatario_id) if destinatario_id else None
+    if not destinatario or destinatario.id == current_user.id:
+        return jsonify({'error': 'Selecciona un destinatario válido.'}), 400
+    if destinatario.username.lower() in USUARIOS_SIN_FUNCIONES:
+        return jsonify({'error': 'Este usuario no está disponible en el chat.'}), 400
+    if not contenido:
+        return jsonify({'error': 'Escribe un mensaje.'}), 400
+    if len(contenido) > 1000:
+        return jsonify({'error': 'El mensaje es demasiado largo.'}), 400
+    try:
+        mensaje = MensajeChat(
+            remitente_id=current_user.id,
+            destinatario_id=destinatario.id,
+            contenido=contenido,
+            fecha_envio=datetime.now(),
+        )
+        db.session.add(mensaje)
+        db.session.commit()
+        return jsonify({'ok': True, 'id': mensaje.id})
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception('Error enviando mensaje de chat')
+        return jsonify({'error': 'No fue posible enviar el mensaje.'}), 500
 
 @main.route('/consultar_evaluaciones')
 @login_required

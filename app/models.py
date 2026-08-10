@@ -58,6 +58,25 @@ class EntregaGeneralUniforme(db.Model):
     )
 
 
+class MensajeChat(db.Model):
+    __tablename__ = 'mensaje_chat'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    remitente_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
+    destinatario_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
+    contenido = db.Column(db.String(1000), nullable=False)
+    fecha_envio = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+    leido_en = db.Column(db.DateTime, nullable=True)
+
+    remitente = db.relationship(
+        'User', foreign_keys=[remitente_id],
+        backref=db.backref('mensajes_chat_enviados', lazy=True)
+    )
+    destinatario = db.relationship(
+        'User', foreign_keys=[destinatario_id],
+        backref=db.backref('mensajes_chat_recibidos', lazy=True)
+    )
+
+
 class VacationRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.username'), nullable=False)
