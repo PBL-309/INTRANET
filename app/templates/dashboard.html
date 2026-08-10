@@ -1325,6 +1325,21 @@
     @media(max-width:480px){main{padding:.65rem}.dashboard-welcome{margin-bottom:.7rem}.welcome-copy p{font-size:.75rem}.dashboard-grid{gap:.75rem}.dash-hero{aspect-ratio:16/10;min-height:200px}.quick-access{grid-template-columns:1fr 1fr;gap:.55rem}.quick-card{min-height:88px!important;padding:.8rem!important}.quick-icon{right:10px;bottom:8px}.accordion-button{font-size:.84rem!important;padding:.7rem}.dash-panel .accordion{padding:6px}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
+<style id="dashboard-viewport-fit">
+    /* Vista completa: prioriza que el tablero de escritorio no necesite scroll. */
+    .app-shell{grid-template-rows:64px minmax(0,1fr)}
+    .app-header{height:64px;padding:.45rem 1rem}.brand img{height:38px}.brand span{font-size:1rem}.global-search{padding:.45rem .75rem}.icon-btn{width:38px;height:38px}.user-img{width:34px;height:34px}.user-profile{padding:.25rem .55rem .25rem .25rem}
+    main{height:calc(100vh - 64px);padding:.7rem .9rem;gap:.55rem;overflow:hidden}
+    .dashboard-welcome{min-height:48px;padding:.48rem .85rem;border-radius:13px}.welcome-icon{width:32px;height:32px;border-radius:9px;font-size:.9rem}.welcome-copy{gap:.65rem}.welcome-copy h1{font-size:1rem}.welcome-copy p{display:none}.welcome-meta{display:flex;align-items:center;gap:.55rem}.welcome-meta strong,.welcome-meta span{font-size:.72rem;display:inline}.dashboard-welcome:after{width:150px;height:150px;top:-100px}
+    .dashboard-grid{gap:.7rem;grid-template-columns:minmax(0,1.52fr) minmax(310px,.9fr);grid-template-rows:minmax(0,1.25fr) minmax(142px,.75fr)}
+    .dash-hero .card{border-radius:15px}.dash-panel{border-radius:15px}.dash-panel .accordion{gap:5px;padding:6px;overflow:hidden}.dash-panel .accordion-item{border-radius:10px!important;margin:0!important}.accordion-button{min-height:42px;padding:.48rem .7rem;font-size:.8rem!important}.accordion-button i{width:25px;height:25px;border-radius:7px;font-size:.8rem!important;margin-right:.4rem}.accordion-body{padding:.65rem}
+    .dash-panel .accordion-item:last-child{min-height:0!important;overflow:hidden!important}.dash-panel .accordion-item:last-child>.accordion-body{padding:.55rem .65rem!important;overflow:hidden!important}.dash-panel .accordion-item:last-child h5{font-size:.75rem!important;margin:0 0 .4rem!important}.dash-panel .accordion-item:last-child>.accordion-body>div{display:grid!important;grid-template-columns:1fr 1fr;align-content:start!important;gap:.4rem!important}.dash-panel .accordion-item:last-child>.accordion-body>div>div{background:#f7f8fa;border:1px solid var(--dash-line);border-radius:8px;padding:.42rem .5rem}.dash-panel .accordion-item:last-child>.accordion-body>div>div:last-child{grid-column:1/-1}.dash-panel .accordion-item:last-child strong{font-size:.7rem!important;margin:0 0 .15rem!important}.dash-panel .accordion-item:last-child p{font-size:.64rem!important;line-height:1.2!important;text-align:left!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.dash-panel .accordion-item:last-child ol{font-size:.61rem!important;line-height:1.15!important;grid-template-columns:repeat(4,1fr)!important;gap:.18rem .65rem!important;padding-left:1rem!important}
+    .quick-access{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:repeat(2,minmax(0,1fr));gap:.55rem}.quick-card{min-height:0!important;height:100%!important;padding:.7rem .9rem!important;border-radius:12px!important}.quick-card-text{font-size:.78rem}.quick-icon{font-size:1.5rem!important;right:12px;bottom:8px}
+    #sidebar{padding:.7rem;}.app-nav__head{padding:.6rem .7rem;margin-bottom:.5rem;border-radius:10px}.sidebar-card{padding:.7rem;border-radius:12px}.sidebar-card__title{margin-bottom:.35rem}.docs-stack{gap:.3rem}.sidebar-group{margin-bottom:.2rem}.sidebar-group__toggle{padding:.52rem .65rem;border-radius:9px;font-size:.78rem}.sidebar-group__body .doc-pill{font-size:.72rem;padding:.42rem .6rem}
+    @media(max-width:1024px){.app-shell{grid-template-rows:64px auto}main{height:auto;min-height:calc(100vh - 64px);overflow:visible;padding:.8rem}.dashboard-welcome{margin-bottom:.7rem}.dashboard-grid{grid-template-columns:1fr;grid-template-areas:"hero" "quick" "panel";grid-template-rows:auto}.dash-hero{min-height:250px;aspect-ratio:16/7.5}.dash-panel .accordion{overflow:visible}.dash-panel .accordion-item:last-child>.accordion-body>div{grid-template-columns:1fr 1fr}.quick-access{grid-template-rows:repeat(2,90px)}}
+    @media(max-width:768px){.app-header{height:60px}.app-shell{grid-template-rows:60px auto}#sidebar{top:60px}main{min-height:calc(100vh - 60px)}.dashboard-welcome{min-height:44px}.welcome-meta{display:none}.dash-hero{min-height:215px}.dash-panel .accordion-item:last-child ol{grid-template-columns:repeat(2,1fr)!important}.quick-access{grid-template-rows:repeat(2,84px)}}
+    @media(max-width:480px){.quick-access{grid-template-columns:1fr!important;grid-template-rows:repeat(4,68px)}.quick-card{min-height:68px!important}.dash-panel .accordion-item:last-child>.accordion-body>div{grid-template-columns:1fr}.dash-panel .accordion-item:last-child>.accordion-body>div>div:last-child{grid-column:auto}.welcome-copy h1{font-size:.86rem}}
+</style>
 </head>
 <body>
 
@@ -1513,7 +1528,7 @@
             <section class="dashboard-welcome" aria-label="Bienvenida">
                 <div class="welcome-copy">
                     <span class="welcome-icon"><i class="bi bi-shield-check"></i></span>
-                    <div><h1><span id="dashboardGreeting">Bienvenido</span>, {{ current_user.nombre }}</h1><p>Tu espacio central para consultar información, documentos y servicios internos.</p></div>
+                    <div><h1><span id="dashboardGreeting">Bienvenido</span>, {{ current_user.nombre.split()[0] }}</h1><p>Información y servicios internos.</p></div>
                 </div>
                 <div class="welcome-meta"><strong id="dashboardDate"></strong><span id="dashboardTime"></span></div>
             </section>
@@ -1729,7 +1744,7 @@
                             <span class="quick-card-text">Calendario De Nómina 2026</span>
                             <i class="bi bi-calendar-event quick-icon"></i>
                         </a>
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#avisoPrivacidadModal" class="quick-card card-red-full" style="grid-column: 1/-1;">
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#avisoPrivacidadModal" class="quick-card card-red-full">
                             <span class="quick-card-text">Aviso de Privacidad Integral</span>
                         </a>
                     </div>
