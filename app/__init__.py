@@ -1,12 +1,13 @@
-from flask import Flask
+from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
+from flask_login import LoginManager, current_user
 from flask_mail import Mail
 from flask_wtf.csrf import CSRFProtect
 import os
 from datetime import timedelta
 import logging
 import threading
+import re
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -44,6 +45,74 @@ def create_app():
     login_manager.login_message_category = "warning"
     from app.routes import main
     app.register_blueprint(main)
+
+    @app.after_request
+    def aplicar_navegacion_global(response):
+        """Mantiene toda la intranet en una pestaña y agrega regreso al inicio."""
+        if response.is_streamed or response.direct_passthrough or response.mimetype != 'text/html':
+            return response
+
+        html = response.get_data(as_text=True)
+        if not html:
+            return response
+
+        # Quitar aperturas en pestaña nueva declaradas directamente en HTML.
+        html = re.sub(
+            r'\s+target=(["\'])_blank\1',
+            '',
+            html,
+            flags=re.IGNORECASE,
+        )
+
+        navigation_script = """
+        <script id="intranet-single-tab-navigation">
+        (() => {
+            const keepSameTab = (root = document) => {
+                root.querySelectorAll?.('a[target="_blank"]').forEach(link => {
+                    link.removeAttribute('target');
+                });
+            };
+            keepSameTab();
+            new MutationObserver(mutations => mutations.forEach(mutation =>
+                mutation.addedNodes.forEach(node => {
+                    if (node.nodeType === 1) {
+                        if (node.matches?.('a[target="_blank"]')) node.removeAttribute('target');
+                        keepSameTab(node);
+                    }
+                })
+            )).observe(document.documentElement, {childList: true, subtree: true});
+            document.addEventListener('click', event => {
+                const link = event.target.closest?.('a');
+                if (link?.target === '_blank') link.removeAttribute('target');
+            }, true);
+        })();
+        </script>
+        """
+
+        home_button = ''
+        if current_user.is_authenticated and request.endpoint != 'main.dashboard':
+            home_button = """
+            <style id="intranet-home-button-style">
+            .intranet-home-button{position:fixed;left:18px;bottom:18px;z-index:99999;
+                display:inline-flex;align-items:center;gap:8px;padding:10px 14px;
+                border-radius:999px;background:#17324d;color:#fff!important;
+                text-decoration:none!important;font:700 13px/1.2 'Segoe UI',Arial,sans-serif;
+                border:1px solid rgba(255,255,255,.25);box-shadow:0 8px 24px rgba(15,35,55,.24)}
+            .intranet-home-button:hover{background:#0f2539;transform:translateY(-1px)}
+            @media(max-width:600px){.intranet-home-button{left:12px;bottom:12px;padding:9px 12px}}
+            @media print{.intranet-home-button{display:none!important}}
+            </style>
+            <a class="intranet-home-button" href="/dashboard" aria-label="Volver al inicio">← Volver al inicio</a>
+            """
+
+        injection = home_button + navigation_script
+        if re.search(r'</body\s*>', html, flags=re.IGNORECASE):
+            html = re.sub(r'</body\s*>', injection + '</body>', html, count=1, flags=re.IGNORECASE)
+        else:
+            html += injection
+        response.set_data(html)
+        return response
+
     with app.app_context():
         from app.models import User
         db.create_all()
@@ -95,5 +164,4 @@ def create_app():
     def load_user(user_id):
         return User.query.get(int(user_id))
     return app
-
 
