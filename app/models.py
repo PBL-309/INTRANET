@@ -37,6 +37,27 @@ class EntregaUniforme(db.Model):
     user = db.relationship('User', backref='entregas_uniformes')
 
 
+class EntregaGeneralUniforme(db.Model):
+    """Entrega de la nueva dotación del personal por un usuario designado."""
+    __tablename__ = 'entrega_general_uniforme'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    receptor_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
+    entregado_por_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    prenda = db.Column(db.String(80), nullable=False)
+    cantidad = db.Column(db.Integer, nullable=False, default=1)
+    detalle = db.Column(db.String(250), nullable=True)
+    fecha_entrega = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+    receptor = db.relationship(
+        'User', foreign_keys=[receptor_id],
+        backref=db.backref('nuevos_uniformes_recibidos', lazy=True)
+    )
+    entregado_por = db.relationship(
+        'User', foreign_keys=[entregado_por_id],
+        backref=db.backref('nuevos_uniformes_entregados', lazy=True)
+    )
+
+
 class VacationRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.username'), nullable=False)

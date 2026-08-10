@@ -11,7 +11,7 @@ from io import BytesIO
 import os
 import requests # Necesario para verificar reCAPTCHA v3
 import logging
-from app.models import Aviso, ContactoEmergencia,  Evento, File, Folder, FormularioRespuesta, PortalWeb, Respuesta, User, VacationRequest, Noticia, RegistroCompetencia, EvaluacionDesempeno, AsistenciaFinAnio, PermisosEvaluacion, EntregaUniforme
+from app.models import Aviso, ContactoEmergencia,  Evento, File, Folder, FormularioRespuesta, PortalWeb, Respuesta, User, VacationRequest, Noticia, RegistroCompetencia, EvaluacionDesempeno, AsistenciaFinAnio, PermisosEvaluacion, EntregaUniforme, EntregaGeneralUniforme
 from app.forms import LoginForm
 from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
@@ -274,6 +274,125 @@ def eliminar_entrega_uniforme(registro_id):
         current_app.logger.exception('Error eliminando entrega de uniforme')
         flash('No fue posible eliminar el registro. Intenta nuevamente.', 'danger')
     return redirect(url_for('main.entrega_uniformes'))
+
+
+@main.route('/entrega_uniformes_general', methods=['GET', 'POST'])
+@login_required
+def entrega_uniformes_general():
+    prendas = ['CHAMARRA', 'PLAYERA TIPO POLO', 'PLAYERA BLANCA DE VESTIR', 'PANTALÓN', 'PANTS', 'BOTAS']
+
+    if request.method == 'POST':
+        receptor_id = request.form.get('receptor_id', type=int)
+        receptor = db.session.get(User, receptor_id) if receptor_id else None
+        if not receptor:
+            flash('Selecciona a la persona que recibe los uniformes.', 'warning')
+            return redirect(url_for('main.entrega_uniformes_general'))
+
+        items = []
+        nota_general = request.form.get('nota_general', '').strip()
+        for idx, prenda in enumerate(prendas):
+            try:
+                cantidad = int(request.form.get(f'cantidad_{idx}', '0') or 0)
+            except (TypeError, ValueError):
+                cantidad = 0
+            if cantidad > 0:
+                detalle = request.form.get(f'detalle_{idx}', '').strip()
+                textos = [detalle] if detalle else []
+                if nota_general:
+                    textos.append(f'Nota general: {nota_general}')
+                items.append((prenda, cantidad, ' · '.join(textos)[:250] or None))
+
+        if not items:
+            flash('Agrega al menos una prenda para registrar la entrega.', 'warning')
+            return redirect(url_for('main.entrega_uniformes_general'))
+
+        fecha = datetime.now().replace(microsecond=0)
+        try:
+            for prenda, cantidad, detalle in items:
+                db.session.add(EntregaGeneralUniforme(
+                    receptor_id=receptor.id,
+                    entregado_por_id=current_user.id,
+                    prenda=prenda,
+                    cantidad=cantidad,
+                    detalle=detalle,
+                    fecha_entrega=fecha,
+                ))
+            db.session.commit()
+            flash(f'Entrega registrada para {receptor.nombre}.', 'success')
+            return redirect(url_for('main.entrega_uniformes_general', receptor=receptor.id))
+        except Exception:
+            db.session.rollback()
+            current_app.logger.exception('Error registrando entrega general de uniformes')
+            flash('No fue posible guardar la entrega. Intenta nuevamente.', 'danger')
+            return redirect(url_for('main.entrega_uniformes_general'))
+
+    usuarios = User.query.order_by(User.nombre, User.username).all()
+    registros = EntregaGeneralUniforme.query.order_by(EntregaGeneralUniforme.fecha_entrega.desc()).all()
+    por_receptor = {}
+    for registro in registros:
+        if registro.receptor_id not in por_receptor:
+            por_receptor[registro.receptor_id] = {
+                'receptor': registro.receptor,
+                'items': [],
+                'fechas': set(),
+                'total': 0,
+                'ultima_fecha': registro.fecha_entrega,
+                'ultimo_entregador': registro.entregado_por,
+            }
+        grupo = por_receptor[registro.receptor_id]
+        grupo['items'].append(registro)
+        grupo['fechas'].add(registro.fecha_entrega)
+        grupo['total'] += registro.cantidad
+
+    atendidos_ids = set(por_receptor)
+    pendientes = [usuario for usuario in usuarios if usuario.id not in atendidos_ids]
+    return render_template(
+        'entrega_uniformes_general.html',
+        prendas=prendas,
+        usuarios=usuarios,
+        entregas=list(por_receptor.values()),
+        pendientes=pendientes,
+        atendidos=len(atendidos_ids),
+        total_personal=len(usuarios),
+        total_piezas=sum(registro.cantidad for registro in registros),
+    )
+
+
+@main.route('/entrega_uniformes_general/reporte/<int:receptor_id>')
+@login_required
+def reporte_entrega_uniformes_general(receptor_id):
+    receptor = db.session.get(User, receptor_id)
+    if not receptor:
+        return ('', 404)
+    registros = EntregaGeneralUniforme.query.filter_by(receptor_id=receptor_id).order_by(
+        EntregaGeneralUniforme.fecha_entrega, EntregaGeneralUniforme.id
+    ).all()
+    if not registros:
+        return ('', 404)
+    return render_template(
+        'entrega_uniformes_general_reporte.html',
+        receptor=receptor,
+        registros=registros,
+        total_piezas=sum(item.cantidad for item in registros),
+        total_fechas=len({item.fecha_entrega for item in registros}),
+        report_date=datetime.now(),
+    )
+
+
+@main.route('/entrega_uniformes_general/eliminar/<int:registro_id>', methods=['POST'])
+@login_required
+def eliminar_entrega_uniformes_general(registro_id):
+    registro = EntregaGeneralUniforme.query.get_or_404(registro_id)
+    nombre = registro.receptor.nombre
+    try:
+        db.session.delete(registro)
+        db.session.commit()
+        flash(f'Registro de {registro.prenda.title()} eliminado para {nombre}.', 'success')
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception('Error eliminando entrega general de uniformes')
+        flash('No fue posible eliminar el registro.', 'danger')
+    return redirect(url_for('main.entrega_uniformes_general'))
 
 @main.route('/consultar_evaluaciones')
 @login_required
