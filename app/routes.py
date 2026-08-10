@@ -279,7 +279,7 @@ def eliminar_entrega_uniforme(registro_id):
 @main.route('/entrega_uniformes_general', methods=['GET', 'POST'])
 @login_required
 def entrega_uniformes_general():
-    prendas = ['CHAMARRA', 'PLAYERA TIPO POLO', 'PLAYERA BLANCA DE VESTIR', 'PANTALÓN', 'PANTS', 'BOTAS']
+    prendas = ['CHAQUETA', 'PLAYERA TIPO POLO', 'PLAYERA BLANCA DE VESTIR', 'PANTALÓN', 'BOTAS']
 
     if request.method == 'POST':
         receptor_id = request.form.get('receptor_id', type=int)
