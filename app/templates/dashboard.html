@@ -1340,6 +1340,27 @@
     @media(max-width:768px){.app-header{height:60px}.app-shell{grid-template-rows:60px auto}#sidebar{top:60px}main{min-height:calc(100vh - 60px)}.dashboard-welcome{min-height:44px}.welcome-meta{display:none}.dash-hero{min-height:215px}.dash-panel .accordion-item:last-child ol{grid-template-columns:repeat(2,1fr)!important}.quick-access{grid-template-rows:repeat(2,84px)}}
     @media(max-width:480px){.quick-access{grid-template-columns:1fr!important;grid-template-rows:repeat(4,68px)}.quick-card{min-height:68px!important}.dash-panel .accordion-item:last-child>.accordion-body>div{grid-template-columns:1fr}.dash-panel .accordion-item:last-child>.accordion-body>div>div:last-child{grid-column:auto}.welcome-copy h1{font-size:.86rem}}
 </style>
+<style id="dashboard-balanced-layout">
+    /* Distribución proporcional del área útil, sin franja de bienvenida. */
+    .app-shell{grid-template-columns:clamp(220px,14vw,265px) minmax(0,1fr)}
+    main{gap:0;padding:.65rem .75rem}
+    .dashboard-grid{width:100%;height:100%;flex:1;grid-template-columns:minmax(0,1.48fr) minmax(340px,.88fr);grid-template-rows:minmax(0,55fr) minmax(0,45fr);gap:.65rem}
+    .dash-hero,.dash-quick,.dash-panel{width:100%;height:100%;min-width:0;min-height:0}
+    .dash-hero .card,.dash-hero #carouselNoticias,.dash-hero .carousel-inner,.dash-hero .carousel-item,.dash-hero .carousel-item img{width:100%;height:100%}
+    .dash-hero .carousel-item img{object-fit:cover}
+    .dash-panel .accordion{height:100%!important;min-height:0}
+    .dash-panel .accordion-item:last-child{display:flex!important;flex:1 1 0!important;min-height:0!important}
+    .dash-panel .accordion-item:last-child>.accordion-body{display:flex!important;flex:1 1 auto!important;min-height:0!important;padding:.65rem!important}
+    .dash-panel .accordion-item:last-child>.accordion-body>div{flex:1 1 auto;min-height:0;align-content:stretch!important;grid-template-rows:minmax(0,.8fr) minmax(0,1.2fr)!important}
+    .dash-panel .accordion-item:last-child>.accordion-body>div>div{display:flex;flex-direction:column;justify-content:center;padding:.55rem .65rem}
+    .dash-panel .accordion-item:last-child p{font-size:clamp(.61rem,.62vw,.72rem)!important;-webkit-line-clamp:3}
+    .dash-panel .accordion-item:last-child ol{font-size:clamp(.58rem,.59vw,.68rem)!important;align-items:center}
+    .quick-access{width:100%;height:100%;grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:repeat(2,minmax(0,1fr))!important}
+    .quick-card{width:100%;height:100%!important;min-width:0;min-height:0!important}
+    @media(max-width:1180px){.app-shell{grid-template-columns:220px minmax(0,1fr)}.dashboard-grid{grid-template-columns:minmax(0,1.35fr) minmax(315px,.9fr)}}
+    @media(max-width:1024px){.app-shell{display:flex;flex-direction:column}.dashboard-grid{height:auto;grid-template-columns:1fr;grid-template-rows:auto;grid-template-areas:"hero" "quick" "panel"}.dash-hero{height:auto;aspect-ratio:16/8}.dash-quick,.dash-panel{height:auto}.quick-access{grid-template-rows:repeat(2,90px)!important}.dash-panel .accordion-item:last-child>.accordion-body>div{grid-template-rows:auto!important}}
+    @media(max-width:480px){.quick-access{grid-template-columns:1fr!important;grid-template-rows:repeat(4,68px)!important}}
+</style>
 </head>
 <body>
 
@@ -1525,13 +1546,6 @@
         </aside>
 
         <main>
-            <section class="dashboard-welcome" aria-label="Bienvenida">
-                <div class="welcome-copy">
-                    <span class="welcome-icon"><i class="bi bi-shield-check"></i></span>
-                    <div><h1><span id="dashboardGreeting">Bienvenido</span>, {{ current_user.nombre.split()[0] }}</h1><p>Información y servicios internos.</p></div>
-                </div>
-                <div class="welcome-meta"><strong id="dashboardDate"></strong><span id="dashboardTime"></span></div>
-            </section>
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     <div style="padding: 1rem 1.5rem 0 1.5rem;">
@@ -2074,23 +2088,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             document.body.classList.add('reveal-ready');
-            const now = new Date();
-            const hour = now.getHours();
-            const greeting = hour < 12 ? 'Buenos días' : hour < 19 ? 'Buenas tardes' : 'Buenas noches';
-            const greetingEl = document.getElementById('dashboardGreeting');
-            const dateEl = document.getElementById('dashboardDate');
-            const timeEl = document.getElementById('dashboardTime');
-            if (greetingEl) greetingEl.textContent = greeting;
-            if (dateEl) dateEl.textContent = new Intl.DateTimeFormat('es-MX', {
-                weekday: 'long', day: 'numeric', month: 'long'
-            }).format(now).replace(/^./, value => value.toUpperCase());
-            const updateClock = () => {
-                if (timeEl) timeEl.textContent = new Intl.DateTimeFormat('es-MX', {
-                    hour: '2-digit', minute: '2-digit'
-                }).format(new Date());
-            };
-            updateClock();
-            setInterval(updateClock, 30000);
         });
     </script>
 </body>
