@@ -402,11 +402,16 @@ def eliminar_entrega_uniformes_general(registro_id):
 
 
 def _chat_user_data(user):
+    foto_filename = f'uploads/{user.username}.jpg'
+    foto_path = os.path.join(current_app.root_path, 'static', foto_filename)
+    if not os.path.exists(foto_path):
+        foto_filename = 'uploads/default.png'
     return {
         'id': user.id,
         'username': user.username,
         'nombre': user.nombre,
         'iniciales': ''.join(parte[0] for parte in user.nombre.split()[:2]).upper(),
+        'foto_url': url_for('static', filename=foto_filename),
     }
 
 
