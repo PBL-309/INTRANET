@@ -33,11 +33,14 @@ def filtrar_portales_para_usuario(user_id):
         portales_filtrados.append(portal)
     return portales_filtrados
 main = Blueprint('main', __name__)
+USUARIOS_SIN_FUNCIONES = {'admin', 'admin1'}
 
 @main.route('/entrega_uniformes', methods=['GET', 'POST'])
 @login_required
 def entrega_uniformes():
-    usuarios = User.query.order_by(User.nombre.asc(), User.username.asc()).all()
+    usuarios = User.query.filter(
+        ~db.func.lower(User.username).in_(USUARIOS_SIN_FUNCIONES)
+    ).order_by(User.nombre.asc(), User.username.asc()).all()
     prendas = ['CHAMARRAS', 'PLAYERA TIPO POLO', 'PLAYERA BLANCA DE VESTIR', 'PANTALONES', 'PANTS', 'BOTAS']
 
     if request.method == 'POST':
@@ -233,7 +236,8 @@ def search_users():
     if not q:
         return jsonify([])
     users = User.query.filter(
-        db.or_(User.username.ilike(f"%{q}%"), User.nombre.ilike(f"%{q}%"))
+        db.or_(User.username.ilike(f"%{q}%"), User.nombre.ilike(f"%{q}%")),
+        ~db.func.lower(User.username).in_(USUARIOS_SIN_FUNCIONES)
     )
     users = users.order_by(User.nombre, User.username).limit(12).all()
     result = [{'id': u.id, 'username': u.username, 'nombre': u.nombre} for u in users]
@@ -326,7 +330,9 @@ def entrega_uniformes_general():
             flash('No fue posible guardar la entrega. Intenta nuevamente.', 'danger')
             return redirect(url_for('main.entrega_uniformes_general'))
 
-    usuarios = User.query.order_by(User.nombre, User.username).all()
+    usuarios = User.query.filter(
+        ~db.func.lower(User.username).in_(USUARIOS_SIN_FUNCIONES)
+    ).order_by(User.nombre, User.username).all()
     registros = EntregaGeneralUniforme.query.order_by(EntregaGeneralUniforme.fecha_entrega.desc()).all()
     por_receptor = {}
     for registro in registros:
