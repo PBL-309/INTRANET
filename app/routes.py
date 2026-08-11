@@ -11,6 +11,7 @@ from io import BytesIO
 import os
 import requests # Necesario para verificar reCAPTCHA v3
 import logging
+import secrets
 from app.models import Aviso, ContactoEmergencia,  Evento, File, Folder, FormularioRespuesta, PortalWeb, Respuesta, User, VacationRequest, Noticia, RegistroCompetencia, EvaluacionDesempeno, AsistenciaFinAnio, PermisosEvaluacion, EntregaUniforme, EntregaGeneralUniforme, MensajeChat
 from app.forms import LoginForm
 from datetime import datetime, timedelta
@@ -1855,7 +1856,9 @@ def listar_usuarios_permitidos():
 @main.route('/api/listado_fotos')
 def listado_fotos():
     """Retorna lista de usuarios con URLs de fotos para reconocimiento facial."""
-    usuarios = User.query.filter(User.username != 'admin').all()
+    usuarios = User.query.filter(
+        ~db.func.lower(User.username).in_(USUARIOS_SIN_FUNCIONES)
+    ).all()
     import os
     
     usuarios_info = []
@@ -1881,6 +1884,7 @@ def _face_cache_file_path():
 
 
 @main.route('/api/face_cache', methods=['GET', 'POST'])
+@login_required
 def face_cache():
     usuarios_resp = listado_fotos().get_json()
     current_firma = usuarios_resp.get('firma', '')
@@ -1955,6 +1959,11 @@ def recognize_face():
     Reconoce un rostro en una imagen enviada como base64.
     Usa el servicio facial precargado en servidor.
     """
+    return jsonify({
+        "success": False,
+        "error": "Endpoint sustituido por la verificacion privada en el dispositivo"
+    }), 410
+
     try:
         from app.facial_service import facial_service
         
@@ -2032,8 +2041,50 @@ def recognize_face():
         }), 500
 
 
-@main.route('/api/login_facial', methods=['POST'])
-def login_facial():
+def _validar_recaptcha_facial(recaptcha_token):
+    """Valida reCAPTCHA sin conservar autorizaciones reutilizables en la sesion."""
+    if not recaptcha_token:
+        return False, "Completa la verificacion de seguridad"
+
+    secret_key = current_app.config.get('RECAPTCHA_PRIVATE_KEY')
+    if not secret_key:
+        return False, "Configuracion de captcha no disponible"
+
+    try:
+        verify_resp = requests.post(
+            'https://www.google.com/recaptcha/api/siteverify',
+            data={
+                'secret': secret_key,
+                'response': recaptcha_token,
+                'remoteip': request.remote_addr
+            },
+            timeout=8
+        )
+        verify_data = verify_resp.json()
+    except Exception:
+        return False, "No se pudo validar captcha"
+
+    if not verify_data.get('success'):
+        return False, "Captcha invalido o expirado"
+    return True, None
+
+
+def _limite_intentos_facial():
+    ahora = datetime.utcnow().timestamp()
+    intentos = [
+        float(valor) for valor in session.get('facial_attempts', [])
+        if ahora - float(valor) < 300
+    ]
+    if len(intentos) >= 5:
+        session['facial_attempts'] = intentos
+        return False
+    intentos.append(ahora)
+    session['facial_attempts'] = intentos
+    return True
+
+
+@main.route('/api/facial/challenge', methods=['POST'])
+def crear_reto_facial():
     body = request.get_json(silent=True) or {}
     username = (body.get('username') or '').strip()
     recaptcha_token = (body.get('recaptcha_token') or '').strip()
@@ -2041,55 +2092,80 @@ def login_facial():
     if not username:
         return jsonify({"success": False, "error": "Usuario requerido"}), 400
 
-    verified_at = session.get('facial_captcha_verified_at')
-    captcha_ok = False
-
-    if verified_at:
-        if datetime.utcnow().timestamp() - float(verified_at) <= 300:
-            captcha_ok = True
-        else:
-            session.pop('facial_captcha_verified_at', None)
-
-    if not captcha_ok:
-        if not recaptcha_token:
-            return jsonify({"success": False, "error": "Captcha facial no verificado"}), 403
-
-        secret_key = current_app.config.get('RECAPTCHA_PRIVATE_KEY')
-        if not secret_key:
-            return jsonify({"success": False, "error": "Configuracion de captcha no disponible"}), 500
-
-        try:
-            verify_resp = requests.post(
-                'https://www.google.com/recaptcha/api/siteverify',
-                data={
-                    'secret': secret_key,
-                    'response': recaptcha_token,
-                    'remoteip': request.remote_addr
-                },
-                timeout=8
-            )
-            verify_data = verify_resp.json()
-        except Exception:
-            return jsonify({"success": False, "error": "No se pudo validar captcha"}), 502
-
-        if not verify_data.get('success'):
-            return jsonify({"success": False, "error": "Captcha invalido o expirado"}), 403
-
-    session.pop('facial_captcha_verified_at', None)
-
     user = User.query.filter_by(username=username).first()
     if not user:
         return jsonify({"success": False, "error": "Usuario no encontrado"}), 404
 
-    if user.username == 'admin':
-        return jsonify({"success": False, "error": "Admin requiere contrasena"}), 403
+    if user.username.lower() in USUARIOS_SIN_FUNCIONES:
+        return jsonify({"success": False, "error": "Este usuario requiere acceso convencional"}), 403
+
+    foto_relativa = f'uploads/{user.username}.jpg'
+    foto_path = os.path.join(current_app.root_path, 'static', foto_relativa)
+    if not os.path.isfile(foto_path):
+        return jsonify({"success": False, "error": "Tu cuenta no tiene una foto de perfil registrada"}), 404
+
+    if not _limite_intentos_facial():
+        return jsonify({"success": False, "error": "Demasiados intentos. Espera cinco minutos"}), 429
+
+    captcha_ok, captcha_error = _validar_recaptcha_facial(recaptcha_token)
+    if not captcha_ok:
+        return jsonify({"success": False, "error": captcha_error}), 403
+
+    token = secrets.token_urlsafe(32)
+    session['facial_challenge'] = {
+        'username': user.username,
+        'token': token,
+        'expires_at': datetime.utcnow().timestamp() + 120
+    }
+    return jsonify({
+        "success": True,
+        "challenge": token,
+        "photo_url": url_for('static', filename=foto_relativa),
+        "nombre": user.nombre
+    })
+
+
+@main.route('/api/facial/complete', methods=['POST'])
+def completar_login_facial():
+    body = request.get_json(silent=True) or {}
+    username = (body.get('username') or '').strip()
+    token = (body.get('challenge') or '').strip()
+    reto = session.pop('facial_challenge', None)
+
+    if not reto or not token:
+        return jsonify({"success": False, "error": "La verificacion facial expiro"}), 403
+    if datetime.utcnow().timestamp() > float(reto.get('expires_at', 0)):
+        return jsonify({"success": False, "error": "La verificacion facial expiro"}), 403
+    if not secrets.compare_digest(token, str(reto.get('token', ''))):
+        return jsonify({"success": False, "error": "Verificacion facial invalida"}), 403
+    if username != reto.get('username'):
+        return jsonify({"success": False, "error": "El usuario no coincide con el reto"}), 403
+
+    user = User.query.filter_by(username=username).first()
+    if not user or user.username.lower() in USUARIOS_SIN_FUNCIONES:
+        return jsonify({"success": False, "error": "Usuario no autorizado"}), 403
 
     login_user(user)
+    session.pop('facial_attempts', None)
     return jsonify({"success": True, "redirect": url_for('main.dashboard')})
+
+
+@main.route('/api/login_facial', methods=['POST'])
+def login_facial_obsoleto():
+    """Impide que el endpoint anterior autentique confiando solo en un username."""
+    return jsonify({
+        "success": False,
+        "error": "Actualiza la pagina para usar el nuevo acceso facial"
+    }), 410
 
 
 @main.route('/api/verify_facial_captcha', methods=['POST'])
 def verify_facial_captcha():
+    return jsonify({
+        "success": False,
+        "error": "Actualiza la pagina para usar el nuevo acceso facial"
+    }), 410
+
     body = request.get_json(silent=True) or {}
     recaptcha_token = (body.get('recaptcha_token') or '').strip()
 
