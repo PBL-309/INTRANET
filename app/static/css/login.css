@@ -672,6 +672,13 @@ button[type="submit"]:active {
 .face-retry { width: 100%; min-height: 46px; margin-top: 14px; border: 0; border-radius: 12px; background: #941d35; color: #fff; font-weight: 700; }
 .face-open { overflow: hidden; }
 
+.passkey-sheet { width:min(390px,100%);padding:30px 24px;border-radius:24px;background:#fff;text-align:center;box-shadow:0 28px 80px rgba(0,0,0,.28) }
+.passkey-icon { width:72px;height:72px;margin:0 auto 16px;display:grid;place-items:center;border-radius:24px;background:#fae8ec;color:#941d38;font-size:2rem }
+.passkey-sheet h3 { margin:0 0 8px;color:#1b2435;font-size:1.3rem }.passkey-sheet p{margin:0;color:#687186;font-size:.88rem;line-height:1.5}
+.passkey-pulse { height:44px;display:flex;align-items:center;justify-content:center;gap:7px }.passkey-pulse span{width:8px;height:8px;border-radius:50%;background:#a51e3b;animation:passkeyPulse 1s ease-in-out infinite}.passkey-pulse span:nth-child(2){animation-delay:.14s}.passkey-pulse span:nth-child(3){animation-delay:.28s}
+@keyframes passkeyPulse{0%,100%{opacity:.25;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+.passkey-cancel{margin-top:8px;border:0;background:transparent;color:#687186;font-weight:700;min-height:42px}
+
 @media (max-width: 600px) {
     input, button { font-size: 16px; }
     .face-modal { align-items: end; padding: 0; }

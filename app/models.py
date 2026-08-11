@@ -24,6 +24,21 @@ class User(db.Model, UserMixin):
         return check_password_hash(self.password_hash, password)
 
 
+class PasskeyCredential(db.Model):
+    __tablename__ = 'passkey_credential'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
+    credential_id = db.Column(db.LargeBinary, unique=True, nullable=False)
+    public_key = db.Column(db.LargeBinary, nullable=False)
+    sign_count = db.Column(db.Integer, nullable=False, default=0)
+    nombre_dispositivo = db.Column(db.String(100), nullable=False, default='Dispositivo personal')
+    transports = db.Column(db.String(100), nullable=True)
+    creado_en = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    ultimo_uso = db.Column(db.DateTime, nullable=True)
+
+    user = db.relationship('User', backref=db.backref('passkeys', lazy=True, cascade='all, delete-orphan'))
+
+
 class EntregaUniforme(db.Model):
     __tablename__ = 'entrega_uniforme'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

@@ -18,19 +18,11 @@
                 <p class="branding-subtitle">Plataforma de Gestión y Administración<br>H. Cuerpo de Bomberos</p>
             </div>
         </div>
-
         <div class="form-side">
-            <div class="login-header">
-                <h2>Bienvenido</h2>
-                <p>Ingresa a tu espacio de trabajo</p>
-            </div>
-
+            <div class="login-header"><h2>Bienvenido</h2><p>Ingresa a tu espacio de trabajo</p></div>
             {% with messages = get_flashed_messages(with_categories=true) %}
-                {% for category, message in messages %}
-                    <div class="alert {{ category }}"><i class="bi bi-info-circle-fill"></i>{{ message }}</div>
-                {% endfor %}
+                {% for category, message in messages %}<div class="alert {{ category }}"><i class="bi bi-info-circle-fill"></i>{{ message }}</div>{% endfor %}
             {% endwith %}
-
             <form method="POST" id="loginForm">
                 {{ form.hidden_tag() }}
                 <div class="form-group">
@@ -48,57 +40,60 @@
                     </div>
                 </div>
                 <div id="recaptcha-container">{{ form.recaptcha }}</div>
-                <button type="submit" id="submitBtn">Ingresar <i class="bi bi-arrow-right"></i></button>
+                <button type="submit">Ingresar <i class="bi bi-arrow-right"></i></button>
                 <div class="divider"><span>o</span></div>
-                <button type="button" id="faceLoginBtn" class="btn-facial">
-                    <i class="bi bi-person-bounding-box"></i>
-                    <span>Reconocer mi rostro</span>
+                <button type="button" id="passkeyLoginBtn" class="btn-facial">
+                    <i class="bi bi-person-badge"></i><span>Ingresar con rostro o huella</span>
                 </button>
-                <p class="facial-privacy"><i class="bi bi-shield-check"></i> La cámara se procesa únicamente en este dispositivo.</p>
+                <p class="facial-privacy"><i class="bi bi-shield-check"></i> Sin nómina ni captcha. Requiere haber vinculado este dispositivo.</p>
             </form>
-
             <div class="copyright">&copy; 2026 H. Cuerpo de Bomberos.</div>
         </div>
     </div>
 
-    <div class="face-modal" id="faceModal" hidden aria-modal="true" role="dialog" aria-labelledby="faceTitle">
-        <section class="face-sheet">
-            <header class="face-header">
-                <div><span class="face-kicker">ACCESO SEGURO</span><h3 id="faceTitle">Reconocimiento facial</h3></div>
-                <button type="button" class="face-close" id="faceClose" aria-label="Cerrar"><i class="bi bi-x-lg"></i></button>
-            </header>
-            <div class="face-camera">
-                <video id="cameraVideo" autoplay muted playsinline></video>
-                <div class="face-mask" aria-hidden="true"><div class="face-oval"></div></div>
-                <div class="face-loader" id="faceLoader"><span></span></div>
-            </div>
-            <div class="face-progress"><span id="faceProgress"></span></div>
-            <p class="face-status" id="faceStatus" aria-live="polite">Preparando verificación…</p>
-            <p class="face-detail" id="faceDetail">Mantén el teléfono a la altura de tus ojos.</p>
-            <button type="button" class="face-retry" id="faceRetry" hidden>Intentar de nuevo</button>
+    <div class="face-modal" id="passkeyModal" hidden aria-modal="true" role="dialog">
+        <section class="passkey-sheet">
+            <div class="passkey-icon"><i class="bi bi-person-check"></i></div>
+            <h3 id="passkeyStatus">Confirma tu identidad</h3>
+            <p id="passkeyDetail">Usa el rostro, huella o PIN configurado en tu celular.</p>
+            <div class="passkey-pulse" id="passkeyPulse"><span></span><span></span><span></span></div>
+            <button type="button" class="face-retry" id="passkeyRetry" hidden>Intentar de nuevo</button>
+            <button type="button" class="passkey-cancel" id="passkeyCancel">Cancelar</button>
         </section>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/dist/face-api.js" defer></script>
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const username = document.getElementById('usernameInput');
         const passwordBox = document.getElementById('passwordContainer');
         const password = document.getElementById('passwordInput');
-        const faceButton = document.getElementById('faceLoginBtn');
-        const modal = document.getElementById('faceModal');
-        const video = document.getElementById('cameraVideo');
-        const status = document.getElementById('faceStatus');
-        const detail = document.getElementById('faceDetail');
-        const loader = document.getElementById('faceLoader');
-        const progress = document.getElementById('faceProgress');
-        const retry = document.getElementById('faceRetry');
+        const button = document.getElementById('passkeyLoginBtn');
+        const modal = document.getElementById('passkeyModal');
+        const status = document.getElementById('passkeyStatus');
+        const detail = document.getElementById('passkeyDetail');
+        const retry = document.getElementById('passkeyRetry');
+        const pulse = document.getElementById('passkeyPulse');
         const csrf = document.querySelector('meta[name="csrf-token"]').content;
-        const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/model';
-        let stream = null;
-        let stopped = true;
-        let challenge = null;
-        let references = [];
+
+        const decode = value => {
+            const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
+            const bytes = atob(normalized + '='.repeat((4 - normalized.length % 4) % 4));
+            return Uint8Array.from(bytes, char => char.charCodeAt(0));
+        };
+        const encode = value => btoa(String.fromCharCode(...new Uint8Array(value)))
+            .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        const serialize = credential => ({
+            id: credential.id,
+            rawId: encode(credential.rawId),
+            type: credential.type,
+            response: {
+                authenticatorData: encode(credential.response.authenticatorData),
+                clientDataJSON: encode(credential.response.clientDataJSON),
+                signature: encode(credential.response.signature),
+                userHandle: credential.response.userHandle ? encode(credential.response.userHandle) : null
+            },
+            clientExtensionResults: credential.getClientExtensionResults()
+        });
 
         function syncAdmin() {
             const admin = ['admin', 'admin1'].includes(username.value.trim().toLowerCase());
@@ -106,190 +101,39 @@
             password.required = admin;
             username.inputMode = admin ? 'text' : 'numeric';
         }
-        username.addEventListener('input', syncAdmin);
-        syncAdmin();
+        username.addEventListener('input', syncAdmin); syncAdmin();
 
-        function captchaToken() {
-            return window.grecaptcha ? grecaptcha.getResponse() : '';
-        }
-
-        async function api(url, payload) {
+        async function post(url, body = {}) {
             const response = await fetch(url, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrf},
-                body: JSON.stringify(payload)
+                method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrf}, body: JSON.stringify(body)
             });
             const data = await response.json().catch(() => ({}));
             if (!response.ok) throw new Error(data.error || 'No fue posible continuar');
             return data;
         }
 
-        function setState(message, extra = '', percent = 0, failed = false) {
-            status.textContent = message;
-            detail.textContent = extra;
-            progress.style.width = `${percent}%`;
-            status.classList.toggle('is-error', failed);
-            retry.hidden = !failed;
-        }
-
-        function stopCamera() {
-            stopped = true;
-            if (stream) stream.getTracks().forEach(track => track.stop());
-            stream = null;
-            video.srcObject = null;
-        }
-
-        function closeModal() {
-            stopCamera();
-            modal.hidden = true;
-            document.body.classList.remove('face-open');
-        }
-
-        async function loadModels() {
-            if (faceapi.nets.tinyFaceDetector.params) return;
-            await Promise.all([
-                faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-                faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-                faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
-            ]);
-        }
-
-        async function loadReferences() {
-            const response = await fetch('/api/listado_fotos', {cache: 'no-store'});
-            const catalog = await response.json();
-            if (!response.ok || !catalog.success) throw new Error('No fue posible consultar las fotos registradas');
-
-            const cacheKey = 'intranet-face-references-v2';
+        async function loginWithPasskey() {
+            modal.hidden = false; retry.hidden = true; pulse.hidden = false;
+            status.textContent = 'Confirma tu identidad';
+            detail.textContent = 'Usa el rostro, huella o PIN configurado en tu celular.';
             try {
-                const saved = JSON.parse(localStorage.getItem(cacheKey));
-                if (saved?.signature === catalog.firma && Array.isArray(saved.items) && saved.items.length) {
-                    return saved.items.map(item => ({...item, descriptor: new Float32Array(item.descriptor)}));
-                }
-            } catch (_) { localStorage.removeItem(cacheKey); }
-
-            const items = [];
-            const total = catalog.usuarios.length;
-            for (let offset = 0; offset < total; offset += 4) {
-                const batch = catalog.usuarios.slice(offset, offset + 4);
-                const results = await Promise.all(batch.map(async person => {
-                    try {
-                        const image = await faceapi.fetchImage(`${person.foto_url}?v=${person.mtime}`);
-                        const found = await faceapi.detectSingleFace(image, new faceapi.TinyFaceDetectorOptions({inputSize: 320, scoreThreshold: .42}))
-                            .withFaceLandmarks().withFaceDescriptor();
-                        return found ? {username: person.username, nombre: person.nombre, descriptor: Array.from(found.descriptor)} : null;
-                    } catch (_) { return null; }
-                }));
-                items.push(...results.filter(Boolean));
-                const done = Math.min(offset + batch.length, total);
-                setState('Preparando reconocimiento…', `Analizando fotos registradas: ${done} de ${total}. Esto solo ocurre la primera vez.`, 10 + Math.round((done / Math.max(total, 1)) * 25));
-            }
-            if (!items.length) throw new Error('No hay fotografías aptas para reconocimiento facial');
-            try { localStorage.setItem(cacheKey, JSON.stringify({signature: catalog.firma, items})); } catch (_) {}
-            return items.map(item => ({...item, descriptor: new Float32Array(item.descriptor)}));
-        }
-
-        async function begin() {
-            stopCamera();
-            retry.hidden = true;
-            loader.hidden = false;
-            modal.hidden = false;
-            document.body.classList.add('face-open');
-            setState('Preparando verificación…', 'Esto puede tardar unos segundos la primera vez.', 8);
-
-            if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
-                throw new Error('La cámara requiere abrir la intranet mediante HTTPS');
-            }
-            await loadModels();
-            references = await loadReferences();
-            if (!captchaToken()) throw new Error('Completa primero la verificación “No soy un robot”');
-
-            stream = await navigator.mediaDevices.getUserMedia({
-                audio: false,
-                video: {facingMode: 'user', width: {ideal: 640}, height: {ideal: 720}}
-            });
-            video.srcObject = stream;
-            await video.play();
-            stopped = false;
-            loader.hidden = true;
-            await verifyLive();
-        }
-
-        async function verifyLive() {
-            let candidate = null;
-            let matches = 0;
-            let firstSide = 0;
-            let movementDone = false;
-            const started = Date.now();
-            setState('Mira de frente', 'Centra tu rostro dentro del óvalo.', 40);
-
-            while (!stopped && Date.now() - started < 45000) {
-                const result = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({inputSize: 320, scoreThreshold: .5}))
-                    .withFaceLandmarks().withFaceDescriptor();
-                if (!result) {
-                    setState('No veo tu rostro', 'Mejora la iluminación y mantente dentro del óvalo.', 40);
-                    await new Promise(resolve => setTimeout(resolve, 350));
-                    continue;
-                }
-
-                let nearest = null;
-                let distance = Infinity;
-                for (const person of references) {
-                    const currentDistance = faceapi.euclideanDistance(person.descriptor, result.descriptor);
-                    if (currentDistance < distance) { distance = currentDistance; nearest = person; }
-                }
-                if (nearest && distance <= .48) {
-                    if (candidate?.username === nearest.username) matches = Math.min(matches + 1, 5);
-                    else { candidate = nearest; matches = 1; }
-                } else {
-                    candidate = null;
-                    matches = Math.max(matches - 1, 0);
-                }
-
-                const marks = result.landmarks.positions;
-                const eyeCenter = (marks[36].x + marks[45].x) / 2;
-                const eyeDistance = Math.max(Math.abs(marks[45].x - marks[36].x), 1);
-                const yaw = (marks[30].x - eyeCenter) / eyeDistance;
-
-                if (!firstSide && Math.abs(yaw) > .13) {
-                    firstSide = Math.sign(yaw);
-                    setState('Muy bien', 'Ahora mueve lentamente el rostro hacia el otro lado.', 68);
-                } else if (firstSide && Math.sign(yaw) === -firstSide && Math.abs(yaw) > .13) {
-                    movementDone = true;
-                } else if (!firstSide) {
-                    setState('Confirma que eres tú', 'Mueve lentamente el rostro hacia cualquier lado.', 52);
-                }
-
-                if (movementDone && matches >= 4 && candidate) {
-                    setState(`Hola, ${candidate.nombre}`, 'Identidad confirmada. Ingresando…', 92);
-                    const challengeData = await api('/api/facial/challenge', {
-                        username: candidate.username,
-                        recaptcha_token: captchaToken()
-                    });
-                    challenge = challengeData.challenge;
-                    const result = await api('/api/facial/complete', {username: candidate.username, challenge});
-                    stopCamera();
-                    window.location.assign(result.redirect);
-                    return;
-                }
-                await new Promise(resolve => setTimeout(resolve, 280));
-            }
-            if (!stopped) throw new Error('No pudimos confirmar tu identidad a tiempo');
-        }
-
-        async function run() {
-            try { await begin(); }
-            catch (error) {
-                stopCamera();
-                loader.hidden = true;
-                setState('No se pudo completar', error.message, 0, true);
+                if (!window.PublicKeyCredential || !navigator.credentials) throw new Error('Este navegador no admite acceso biométrico');
+                const options = await post('/api/passkey/auth/options');
+                options.challenge = decode(options.challenge);
+                if (options.allowCredentials) options.allowCredentials = options.allowCredentials.map(item => ({...item, id: decode(item.id)}));
+                const credential = await navigator.credentials.get({publicKey: options});
+                status.textContent = 'Identidad confirmada'; detail.textContent = 'Ingresando a la intranet…';
+                const result = await post('/api/passkey/auth/verify', serialize(credential));
+                window.location.assign(result.redirect);
+            } catch (error) {
+                pulse.hidden = true; retry.hidden = false;
+                status.textContent = 'No se pudo ingresar';
+                detail.textContent = error.name === 'NotAllowedError' ? 'La verificación fue cancelada o expiró.' : error.message;
             }
         }
-
-        faceButton.addEventListener('click', run);
-        retry.addEventListener('click', run);
-        document.getElementById('faceClose').addEventListener('click', closeModal);
-        modal.addEventListener('click', event => { if (event.target === modal) closeModal(); });
-        window.addEventListener('pagehide', stopCamera);
+        button.addEventListener('click', loginWithPasskey);
+        retry.addEventListener('click', loginWithPasskey);
+        document.getElementById('passkeyCancel').addEventListener('click', () => { modal.hidden = true; });
     });
     </script>
 </body>

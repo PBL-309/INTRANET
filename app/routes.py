@@ -12,7 +12,21 @@ import os
 import requests # Necesario para verificar reCAPTCHA v3
 import logging
 import secrets
-from app.models import Aviso, ContactoEmergencia,  Evento, File, Folder, FormularioRespuesta, PortalWeb, Respuesta, User, VacationRequest, Noticia, RegistroCompetencia, EvaluacionDesempeno, AsistenciaFinAnio, PermisosEvaluacion, EntregaUniforme, EntregaGeneralUniforme, MensajeChat
+import base64
+from webauthn import (
+    generate_authentication_options,
+    generate_registration_options,
+    options_to_json,
+    verify_authentication_response,
+    verify_registration_response,
+)
+from webauthn.helpers.structs import (
+    AuthenticatorSelectionCriteria,
+    PublicKeyCredentialDescriptor,
+    ResidentKeyRequirement,
+    UserVerificationRequirement,
+)
+from app.models import Aviso, ContactoEmergencia,  Evento, File, Folder, FormularioRespuesta, PortalWeb, Respuesta, User, VacationRequest, Noticia, RegistroCompetencia, EvaluacionDesempeno, AsistenciaFinAnio, PermisosEvaluacion, EntregaUniforme, EntregaGeneralUniforme, MensajeChat, PasskeyCredential
 from app.forms import LoginForm
 from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
@@ -862,6 +876,149 @@ def login():
             flash('Usuario incorrecto.', 'danger')
 
     return render_template('login.html', form=form)
+
+
+def _passkey_context():
+    host = request.host.split(':', 1)[0].lower()
+    origin = f"http://{request.host}" if host in {'localhost', '127.0.0.1'} else f"https://{host}"
+    return host, origin
+
+
+def _b64url_encode(value):
+    return base64.urlsafe_b64encode(value).rstrip(b'=').decode('ascii')
+
+
+def _b64url_decode(value):
+    return base64.urlsafe_b64decode(value + '=' * (-len(value) % 4))
+
+
+@main.route('/configurar-passkey')
+@login_required
+def configurar_passkey():
+    if current_user.username.lower() in USUARIOS_SIN_FUNCIONES:
+        return redirect(url_for('main.dashboard'))
+    credenciales = PasskeyCredential.query.filter_by(user_id=current_user.id).order_by(
+        PasskeyCredential.creado_en.desc()
+    ).all()
+    return render_template('configurar_passkey.html', credenciales=credenciales)
+
+
+@main.route('/api/passkey/register/options', methods=['POST'])
+@login_required
+def passkey_register_options():
+    if current_user.username.lower() in USUARIOS_SIN_FUNCIONES:
+        return jsonify({'success': False, 'error': 'Usuario no autorizado'}), 403
+    rp_id, _ = _passkey_context()
+    existentes = PasskeyCredential.query.filter_by(user_id=current_user.id).all()
+    options = generate_registration_options(
+        rp_id=rp_id,
+        rp_name='Intranet Bomberos de Leon',
+        user_id=f'intranet-user-{current_user.id}'.encode(),
+        user_name=current_user.username,
+        user_display_name=current_user.nombre,
+        exclude_credentials=[PublicKeyCredentialDescriptor(id=item.credential_id) for item in existentes],
+        authenticator_selection=AuthenticatorSelectionCriteria(
+            resident_key=ResidentKeyRequirement.REQUIRED,
+            require_resident_key=True,
+            user_verification=UserVerificationRequirement.REQUIRED,
+        ),
+        timeout=60000,
+    )
+    session['passkey_registration_challenge'] = _b64url_encode(options.challenge)
+    return current_app.response_class(options_to_json(options), mimetype='application/json')
+
+
+@main.route('/api/passkey/register/verify', methods=['POST'])
+@login_required
+def passkey_register_verify():
+    challenge = session.pop('passkey_registration_challenge', None)
+    if not challenge:
+        return jsonify({'success': False, 'error': 'El registro expiro. Intenta nuevamente'}), 403
+    rp_id, origin = _passkey_context()
+    try:
+        verification = verify_registration_response(
+            credential=request.get_json(force=True),
+            expected_challenge=_b64url_decode(challenge),
+            expected_rp_id=rp_id,
+            expected_origin=origin,
+            require_user_verification=True,
+        )
+    except Exception as exc:
+        logging.getLogger(__name__).warning('Registro passkey rechazado: %s', exc)
+        return jsonify({'success': False, 'error': 'No se pudo validar la passkey'}), 400
+
+    if PasskeyCredential.query.filter_by(credential_id=verification.credential_id).first():
+        return jsonify({'success': False, 'error': 'Este dispositivo ya esta registrado'}), 409
+    body = request.get_json(silent=True) or {}
+    transports = ((body.get('response') or {}).get('transports') or [])
+    credential = PasskeyCredential(
+        user_id=current_user.id,
+        credential_id=verification.credential_id,
+        public_key=verification.credential_public_key,
+        sign_count=verification.sign_count,
+        nombre_dispositivo=(body.get('deviceName') or 'Celular personal')[:100],
+        transports=','.join(transports)[:100],
+    )
+    db.session.add(credential)
+    db.session.commit()
+    return jsonify({'success': True})
+
+
+@main.route('/api/passkey/auth/options', methods=['POST'])
+def passkey_auth_options():
+    rp_id, _ = _passkey_context()
+    options = generate_authentication_options(
+        rp_id=rp_id,
+        allow_credentials=[],
+        user_verification=UserVerificationRequirement.REQUIRED,
+        timeout=60000,
+    )
+    session['passkey_auth_challenge'] = _b64url_encode(options.challenge)
+    return current_app.response_class(options_to_json(options), mimetype='application/json')
+
+
+@main.route('/api/passkey/auth/verify', methods=['POST'])
+def passkey_auth_verify():
+    challenge = session.pop('passkey_auth_challenge', None)
+    body = request.get_json(silent=True) or {}
+    if not challenge:
+        return jsonify({'success': False, 'error': 'La solicitud expiro. Intenta nuevamente'}), 403
+    try:
+        credential_id = _b64url_decode(body.get('id', ''))
+    except Exception:
+        return jsonify({'success': False, 'error': 'Credencial invalida'}), 400
+    stored = PasskeyCredential.query.filter_by(credential_id=credential_id).first()
+    if not stored:
+        return jsonify({'success': False, 'error': 'Este dispositivo no esta vinculado'}), 404
+    rp_id, origin = _passkey_context()
+    try:
+        verification = verify_authentication_response(
+            credential=body,
+            expected_challenge=_b64url_decode(challenge),
+            expected_rp_id=rp_id,
+            expected_origin=origin,
+            credential_public_key=stored.public_key,
+            credential_current_sign_count=stored.sign_count,
+            require_user_verification=True,
+        )
+    except Exception as exc:
+        logging.getLogger(__name__).warning('Acceso passkey rechazado: %s', exc)
+        return jsonify({'success': False, 'error': 'No se pudo comprobar tu identidad'}), 403
+
+    stored.sign_count = verification.new_sign_count
+    stored.ultimo_uso = datetime.utcnow()
+    db.session.commit()
+    login_user(stored.user)
+    return jsonify({'success': True, 'redirect': url_for('main.dashboard')})
+
+
+@main.route('/api/passkey/<int:credential_id>/delete', methods=['POST'])
+@login_required
+def passkey_delete(credential_id):
+    credential = PasskeyCredential.query.filter_by(id=credential_id, user_id=current_user.id).first_or_404()
+    db.session.delete(credential)
+    db.session.commit()
+    return jsonify({'success': True})
 
 @main.route('/logout')
 @login_required
@@ -1854,6 +2011,7 @@ def listar_usuarios_permitidos():
     return jsonify({"success": True, "usuarios": lista})
 
 @main.route('/api/listado_fotos')
+@login_required
 def listado_fotos():
     """Retorna lista de usuarios con URLs de fotos para reconocimiento facial."""
     usuarios = User.query.filter(
@@ -2085,6 +2243,8 @@ def _limite_intentos_facial():
 
 @main.route('/api/facial/challenge', methods=['POST'])
 def crear_reto_facial():
+    return jsonify({'success': False, 'error': 'El acceso facial anterior fue sustituido por passkeys'}), 410
+
     body = request.get_json(silent=True) or {}
     username = (body.get('username') or '').strip()
     recaptcha_token = (body.get('recaptcha_token') or '').strip()
@@ -2127,6 +2287,8 @@ def crear_reto_facial():
 
 @main.route('/api/facial/complete', methods=['POST'])
 def completar_login_facial():
+    return jsonify({'success': False, 'error': 'El acceso facial anterior fue sustituido por passkeys'}), 410
+
     body = request.get_json(silent=True) or {}
     username = (body.get('username') or '').strip()
     token = (body.get('challenge') or '').strip()
