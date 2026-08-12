@@ -461,6 +461,8 @@ def chat_conversaciones():
             conversaciones[contacto.id] = {
                 **_chat_user_data(contacto),
                 'ultimo_mensaje': mensaje.contenido,
+                'ultimo_mensaje_id': mensaje.id,
+                'ultimo_mensaje_propio': mensaje.remitente_id == current_user.id,
                 'fecha': mensaje.fecha_envio.strftime('%d/%m %H:%M'),
                 'no_leidos': 0,
             }
@@ -500,6 +502,7 @@ def chat_mensajes(contacto_id):
             'propio': mensaje.remitente_id == current_user.id,
             'fecha': mensaje.fecha_envio.strftime('%d/%m/%Y %H:%M'),
             'leido': mensaje.leido_en is not None,
+            'editado': mensaje.editado_en is not None,
         } for mensaje in mensajes],
     })
 
@@ -533,6 +536,32 @@ def enviar_mensaje_chat():
         db.session.rollback()
         current_app.logger.exception('Error enviando mensaje de chat')
         return jsonify({'error': 'No fue posible enviar el mensaje.'}), 500
+
+
+@main.route('/api/chat/mensajes/<int:mensaje_id>', methods=['PUT', 'DELETE'])
+@login_required
+def modificar_mensaje_chat(mensaje_id):
+    mensaje = MensajeChat.query.filter_by(id=mensaje_id, remitente_id=current_user.id).first()
+    if not mensaje:
+        return jsonify({'error': 'Mensaje no encontrado o sin permiso.'}), 404
+    try:
+        if request.method == 'DELETE':
+            db.session.delete(mensaje)
+            db.session.commit()
+            return jsonify({'ok': True})
+        contenido = str((request.get_json(silent=True) or {}).get('contenido', '')).strip()
+        if not contenido:
+            return jsonify({'error': 'El mensaje no puede quedar vacío.'}), 400
+        if len(contenido) > 1000:
+            return jsonify({'error': 'El mensaje es demasiado largo.'}), 400
+        mensaje.contenido = contenido
+        mensaje.editado_en = datetime.now()
+        db.session.commit()
+        return jsonify({'ok': True, 'contenido': mensaje.contenido})
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception('Error modificando mensaje de chat')
+        return jsonify({'error': 'No fue posible modificar el mensaje.'}), 500
 
 @main.route('/consultar_evaluaciones')
 @login_required

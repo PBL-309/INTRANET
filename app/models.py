@@ -81,6 +81,7 @@ class MensajeChat(db.Model):
     contenido = db.Column(db.String(1000), nullable=False)
     fecha_envio = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
     leido_en = db.Column(db.DateTime, nullable=True)
+    editado_en = db.Column(db.DateTime, nullable=True)
 
     remitente = db.relationship(
         'User', foreign_keys=[remitente_id],
