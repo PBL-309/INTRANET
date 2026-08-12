@@ -416,6 +416,74 @@ def eliminar_entrega_uniformes_general(registro_id):
     return redirect(url_for('main.entrega_uniformes_general'))
 
 
+@main.route('/api/entrega_uniformes_general/persona/<int:receptor_id>')
+@login_required
+def articulos_entrega_general(receptor_id):
+    receptor = db.session.get(User, receptor_id)
+    if not receptor:
+        return jsonify({'error': 'Persona no encontrada.'}), 404
+    registros = EntregaGeneralUniforme.query.filter_by(receptor_id=receptor_id).order_by(
+        EntregaGeneralUniforme.fecha_entrega.desc(), EntregaGeneralUniforme.id.desc()
+    ).all()
+    return jsonify({
+        'receptor': {'id': receptor.id, 'nombre': receptor.nombre, 'username': receptor.username},
+        'articulos': [{
+            'id': item.id,
+            'prenda': item.prenda,
+            'cantidad': item.cantidad,
+            'detalle': item.detalle or '',
+            'fecha': item.fecha_entrega.strftime('%Y-%m-%dT%H:%M'),
+        } for item in registros]
+    })
+
+
+@main.route('/api/entrega_uniformes_general/persona/<int:receptor_id>', methods=['PUT'])
+@login_required
+def actualizar_articulos_entrega_general(receptor_id):
+    prendas_validas = {'CHAQUETA', 'PLAYERA TIPO POLO', 'PLAYERA BLANCA DE VESTIR', 'PANTALÓN', 'BOTAS'}
+    data = request.get_json(silent=True) or {}
+    cambios = data.get('articulos', [])
+    if not isinstance(cambios, list) or not cambios:
+        return jsonify({'error': 'No hay cambios para guardar.'}), 400
+    registros = {
+        item.id: item for item in EntregaGeneralUniforme.query.filter_by(receptor_id=receptor_id).all()
+    }
+    try:
+        actualizados = eliminados = 0
+        for cambio in cambios:
+            try:
+                registro_id = int(cambio.get('id'))
+            except (TypeError, ValueError):
+                continue
+            registro = registros.get(registro_id)
+            if not registro:
+                continue
+            if cambio.get('eliminar'):
+                db.session.delete(registro)
+                eliminados += 1
+                continue
+            prenda = str(cambio.get('prenda', '')).strip().upper()
+            cantidad = int(cambio.get('cantidad', 0))
+            if prenda not in prendas_validas or cantidad < 1 or cantidad > 99:
+                raise ValueError('Revisa el artículo y su cantidad.')
+            registro.prenda = prenda
+            registro.cantidad = cantidad
+            registro.detalle = str(cambio.get('detalle', '')).strip()[:250] or None
+            fecha_texto = str(cambio.get('fecha', '')).strip()
+            if fecha_texto:
+                registro.fecha_entrega = datetime.fromisoformat(fecha_texto)
+            actualizados += 1
+        db.session.commit()
+        return jsonify({'ok': True, 'actualizados': actualizados, 'eliminados': eliminados})
+    except (ValueError, TypeError):
+        db.session.rollback()
+        return jsonify({'error': 'Revisa cantidades, artículos y fechas.'}), 400
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception('Error actualizando artículos de entrega general')
+        return jsonify({'error': 'No fue posible actualizar los artículos.'}), 500
+
+
 def _chat_user_data(user):
     foto_filename = f'uploads/{user.username}.jpg'
     foto_path = os.path.join(current_app.root_path, 'static', foto_filename)
