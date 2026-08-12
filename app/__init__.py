@@ -105,7 +105,22 @@ def create_app():
             <a class="intranet-home-button" href="/dashboard" aria-label="Volver al inicio">← Volver al inicio</a>
             """
 
-        injection = home_button + navigation_script
+        global_chat = ''
+        if current_user.is_authenticated and request.endpoint not in {'main.dashboard', 'main.chat_widget'}:
+            global_chat = """
+            <style id="intranet-global-chat-style">
+            #globalChatBubble{position:fixed;right:18px;bottom:18px;z-index:100001;width:58px;height:58px;border:0;border-radius:19px;background:linear-gradient(135deg,#8b1528,#b52d45);color:#fff;font-size:22px;box-shadow:0 14px 30px rgba(92,12,27,.34);cursor:grab;touch-action:none;user-select:none}#globalChatBubble:active{cursor:grabbing}#globalChatBadge{position:absolute;right:-5px;top:-6px;min-width:21px;height:21px;padding:0 5px;display:none;place-items:center;border:2px solid #fff;border-radius:99px;background:#f4b62c;color:#382400;font:900 10px/1 Arial}#globalChatBadge.show{display:grid}
+            #globalChatPanel{position:fixed;right:18px;bottom:88px;z-index:100000;width:min(740px,calc(100vw - 36px));height:min(590px,calc(100dvh - 112px));overflow:hidden;border:1px solid #ffffffcc;border-radius:20px;background:#fff;box-shadow:0 28px 80px rgba(23,32,51,.3);opacity:0;visibility:hidden;transform:translateY(10px) scale(.98);transition:.2s}#globalChatPanel.show{opacity:1;visibility:visible;transform:none}#globalChatFrame{width:100%;height:100%;border:0;background:#fff}
+            @media(max-width:680px){#globalChatBubble{width:56px;height:56px;right:12px;bottom:12px}#globalChatPanel{inset:0;width:100%;height:100dvh;border:0;border-radius:0}#globalChatPanel.show+#globalChatBubble{visibility:hidden}}@media print{#globalChatBubble,#globalChatPanel{display:none!important}}
+            </style>
+            <aside id="globalChatPanel" aria-hidden="true"><iframe id="globalChatFrame" title="Chat interno" data-src="/chat-widget"></iframe></aside>
+            <button id="globalChatBubble" type="button" aria-label="Abrir chat interno"><span aria-hidden="true">💬</span><span id="globalChatBadge"></span></button>
+            <script id="intranet-global-chat-script">
+            (()=>{const bubble=document.getElementById('globalChatBubble'),panel=document.getElementById('globalChatPanel'),frame=document.getElementById('globalChatFrame'),badge=document.getElementById('globalChatBadge');if(!bubble)return;const key='intranet-chat-bubble-position';let moved=false,startX=0,startY=0,originX=0,originY=0;const clamp=(v,min,max)=>Math.min(Math.max(v,min),max);const save=()=>localStorage.setItem(key,JSON.stringify({left:parseFloat(bubble.style.left),top:parseFloat(bubble.style.top)}));const place=(left,top)=>{bubble.style.left=clamp(left,8,innerWidth-bubble.offsetWidth-8)+'px';bubble.style.top=clamp(top,8,innerHeight-bubble.offsetHeight-8)+'px';bubble.style.right='auto';bubble.style.bottom='auto'};try{const p=JSON.parse(localStorage.getItem(key));if(Number.isFinite(p?.left)&&Number.isFinite(p?.top))place(p.left,p.top)}catch(e){}bubble.addEventListener('pointerdown',e=>{moved=false;startX=e.clientX;startY=e.clientY;const r=bubble.getBoundingClientRect();originX=r.left;originY=r.top;bubble.setPointerCapture(e.pointerId)});bubble.addEventListener('pointermove',e=>{if(!bubble.hasPointerCapture(e.pointerId))return;const dx=e.clientX-startX,dy=e.clientY-startY;if(Math.hypot(dx,dy)>5)moved=true;if(moved)place(originX+dx,originY+dy)});bubble.addEventListener('pointerup',e=>{if(moved){save();e.preventDefault()}bubble.releasePointerCapture(e.pointerId)});bubble.addEventListener('click',()=>{if(moved)return;if(!frame.src)frame.src=frame.dataset.src;const open=panel.classList.toggle('show');panel.setAttribute('aria-hidden',String(!open))});addEventListener('resize',()=>{const r=bubble.getBoundingClientRect();place(r.left,r.top)});addEventListener('message',e=>{if(e.origin!==location.origin)return;if(e.data?.type==='intranet-chat-close'){panel.classList.remove('show');panel.setAttribute('aria-hidden','true')}if(e.data?.type==='intranet-chat-unread'){const n=Number(e.data.count)||0;badge.textContent=n>99?'99+':n;badge.classList.toggle('show',n>0)}})})();
+            </script>
+            """
+
+        injection = home_button + global_chat + navigation_script
         if re.search(r'</body\s*>', html, flags=re.IGNORECASE):
             html = re.sub(r'</body\s*>', injection + '</body>', html, count=1, flags=re.IGNORECASE)
         else:
@@ -164,4 +179,3 @@ def create_app():
     def load_user(user_id):
         return User.query.get(int(user_id))
     return app
-

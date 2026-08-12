@@ -859,6 +859,12 @@ def service_worker():
     response.headers['Service-Worker-Allowed'] = '/'
     response.headers['Cache-Control'] = 'no-cache'
     return response
+
+@main.route('/chat-widget')
+@login_required
+def chat_widget():
+    return render_template('chat_widget.html')
+
 @main.route('/login', methods=['GET', 'POST'])
 def login():
 
