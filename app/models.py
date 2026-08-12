@@ -16,6 +16,7 @@ class User(db.Model, UserMixin):
     turno = db.Column(db.String(30))
     puesto = db.Column(db.String(50))
     estacion = db.Column(db.String(50))
+    ultima_actividad = db.Column(db.DateTime, nullable=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

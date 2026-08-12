@@ -421,12 +421,14 @@ def _chat_user_data(user):
     foto_path = os.path.join(current_app.root_path, 'static', foto_filename)
     if not os.path.exists(foto_path):
         foto_filename = 'uploads/default.png'
+    conectado = bool(user.ultima_actividad and user.ultima_actividad >= datetime.now() - timedelta(seconds=75))
     return {
         'id': user.id,
         'username': user.username,
         'nombre': user.nombre,
         'iniciales': ''.join(parte[0] for parte in user.nombre.split()[:2]).upper(),
         'foto_url': url_for('static', filename=foto_filename),
+        'conectado': conectado,
     }
 
 
@@ -442,6 +444,14 @@ def chat_usuarios():
         query = query.filter(db.or_(User.nombre.ilike(f'%{q}%'), User.username.ilike(f'%{q}%')))
     users = query.order_by(User.nombre).limit(30).all()
     return jsonify([_chat_user_data(user) for user in users])
+
+
+@main.route('/api/chat/presencia')
+@login_required
+def chat_presencia():
+    current_user.ultima_actividad = datetime.now()
+    db.session.commit()
+    return jsonify({'ok': True})
 
 
 @main.route('/api/chat/conversaciones')
@@ -1064,6 +1074,8 @@ def passkey_delete(credential_id):
 @main.route('/logout')
 @login_required
 def logout():
+    current_user.ultima_actividad = None
+    db.session.commit()
     logout_user()
     flash('Has cerrado sesión.', 'info')
     return redirect(url_for('main.login'))

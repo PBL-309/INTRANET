@@ -67,6 +67,9 @@ def create_app():
         navigation_script = """
         <script id="intranet-single-tab-navigation">
         (() => {
+            const markPresence = () => fetch('/api/chat/presencia', {cache:'no-store', credentials:'same-origin'}).catch(() => {});
+            markPresence();
+            setInterval(markPresence, 30000);
             const keepSameTab = (root = document) => {
                 root.querySelectorAll?.('a[target="_blank"]').forEach(link => {
                     link.removeAttribute('target');
@@ -139,6 +142,10 @@ def create_app():
         columnas_chat = {fila[1] for fila in db.session.execute(db.text("PRAGMA table_info(mensaje_chat)"))}
         if 'editado_en' not in columnas_chat:
             db.session.execute(db.text("ALTER TABLE mensaje_chat ADD COLUMN editado_en DATETIME"))
+            db.session.commit()
+        columnas_usuario = {fila[1] for fila in db.session.execute(db.text("PRAGMA table_info(user)"))}
+        if 'ultima_actividad' not in columnas_usuario:
+            db.session.execute(db.text("ALTER TABLE user ADD COLUMN ultima_actividad DATETIME"))
             db.session.commit()
         
         # Inicializar servicio de reconocimiento facial (DESHABILITADO - Usuario quitó facial recognition)
