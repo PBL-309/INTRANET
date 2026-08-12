@@ -13,6 +13,9 @@
     --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
+.portal-scope-option{flex:1;cursor:pointer}.portal-scope-option input{position:absolute;opacity:0;pointer-events:none}.portal-scope-option span{display:flex;align-items:center;justify-content:center;gap:.4rem;min-height:45px;padding:.6rem;border:1px solid #d9dee5;border-radius:11px;color:#5e6878;font-size:.78rem;font-weight:700;text-align:center;transition:.18s}.portal-scope-option input:checked+span{border-color:#941d38;background:#fae9ed;color:#941d38;box-shadow:0 0 0 3px rgba(148,29,56,.08)}
+.portal-user-tools{display:flex;align-items:center;justify-content:space-between;margin:0 2px 7px;color:#697386}.portal-user-tools button{border:0;background:transparent;color:#941d38;font-size:.75rem;font-weight:700}.portal-user-list{max-height:230px;overflow:auto;border:1px solid #dde2e8;border-radius:12px;background:#f8f9fa}.portal-user-option{display:flex;align-items:center;gap:.7rem;margin:0;padding:.65rem .75rem;border-bottom:1px solid #e7eaee;cursor:pointer}.portal-user-option:last-child{border:0}.portal-user-option:hover{background:#fff}.portal-user-option input{width:18px;height:18px;accent-color:#941d38}.portal-user-option span{min-width:0}.portal-user-option strong,.portal-user-option small{display:block}.portal-user-option strong{font-size:.78rem;color:#202838}.portal-user-option small{margin-top:2px;color:#758090;font-size:.67rem}
+
 * {
     margin: 0;
     padding: 0;

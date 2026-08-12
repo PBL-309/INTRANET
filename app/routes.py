@@ -40,13 +40,13 @@ USUARIOS_RESTRINGIDOS_P5 = {
 
 }
 def filtrar_portales_para_usuario(user_id):
-    portales = PortalWeb.query.all()
-    portales_filtrados = []
-    for portal in portales:
-        if portal.id == 5 and user_id in USUARIOS_RESTRINGIDOS_P5:
-            continue
-        portales_filtrados.append(portal)
-    return portales_filtrados
+    usuario = db.session.get(User, user_id)
+    if usuario and usuario.username.lower() == 'admin':
+        return PortalWeb.query.order_by(PortalWeb.nombre.asc()).all()
+    return PortalWeb.query.filter(
+        ~PortalWeb.usuarios_permitidos.any() |
+        PortalWeb.usuarios_permitidos.any(User.id == user_id)
+    ).order_by(PortalWeb.nombre.asc()).all()
 main = Blueprint('main', __name__)
 USUARIOS_SIN_FUNCIONES = {'admin', 'admin1'}
 
@@ -830,6 +830,11 @@ def dashboard():
     eventos = Evento.query.order_by(Evento.fecha.asc()).all()
     noticias = Noticia.query.order_by(Noticia.orden.asc()).all()
     portales = filtrar_portales_para_usuario(current_user.id)
+    usuarios_portales = []
+    if current_user.username.lower() == 'admin':
+        usuarios_portales = User.query.filter(
+            ~db.func.lower(User.username).in_(USUARIOS_SIN_FUNCIONES)
+        ).order_by(User.nombre.asc(), User.username.asc()).all()
 
     return render_template(
         'dashboard.html',
@@ -838,6 +843,7 @@ def dashboard():
         eventos=eventos,
         noticias=noticias,
         portales=portales,
+        usuarios_portales=usuarios_portales,
         user_image=user_image
     )
 @main.route('/uploads/<filename>')
@@ -2887,42 +2893,42 @@ def move_noticia(id, direction):
 @main.route('/agregar_portal', methods=['POST'])
 @login_required
 def agregar_portal():
-    if current_user.id == 2:
-        nombre = request.form.get('nombre')
-        url = request.form.get('url')
+    if current_user.username.lower() == 'admin':
+        nombre = (request.form.get('nombre') or '').strip()
+        url = (request.form.get('url') or '').strip()
         if nombre and url:
             nuevo_portal = PortalWeb(nombre=nombre, url=url)
+            restringido = request.form.get('visibilidad') == 'seleccionados'
+            if restringido:
+                ids = {int(value) for value in request.form.getlist('usuarios[]') if value.isdigit()}
+                if not ids:
+                    return jsonify({"success": False, "error": "Selecciona al menos un usuario"}), 400
+                nuevo_portal.usuarios_permitidos = User.query.filter(
+                    User.id.in_(ids),
+                    ~db.func.lower(User.username).in_(USUARIOS_SIN_FUNCIONES)
+                ).all()
             db.session.add(nuevo_portal)
             db.session.commit()
             return jsonify({"success": True})
-    return jsonify({"success": False}), 403
+        return jsonify({"success": False, "error": "Nombre y URL son obligatorios"}), 400
+    return jsonify({"success": False, "error": "No autorizado"}), 403
 
 
 @main.route('/eliminar_portal', methods=['POST'])
 @login_required
 def eliminar_portal():
-    import sys
     try:
-        print(f"DEBUG eliminar_portal: user_id={current_user.id}", file=sys.stderr)
-        print(f"DEBUG eliminar_portal: request.json={request.json}", file=sys.stderr)
-        if current_user.id == 2:
+        if current_user.username.lower() == 'admin':
             portal_id = request.json.get('id')
-            print(f"DEBUG eliminar_portal: portal_id={portal_id}", file=sys.stderr)
-            portal = PortalWeb.query.get(portal_id)
+            portal = db.session.get(PortalWeb, portal_id)
             if portal:
+                portal.usuarios_permitidos = []
                 db.session.delete(portal)
                 db.session.commit()
-                print(f"DEBUG eliminar_portal: eliminado portal_id={portal_id}", file=sys.stderr)
                 return jsonify({"success": True})
-            else:
-                print(f"DEBUG eliminar_portal: portal no encontrado id={portal_id}", file=sys.stderr)
-        else:
-            print(f"DEBUG eliminar_portal: usuario no autorizado id={current_user.id}", file=sys.stderr)
         return jsonify({"success": False}), 403
     except Exception as e:
-        import traceback
-        print(f"ERROR eliminar_portal: {e}", file=sys.stderr)
-        traceback.print_exc(file=sys.stderr)
+        logging.getLogger(__name__).exception("Error al eliminar portal")
         return jsonify({"success": False, "error": str(e)}), 500
 
 

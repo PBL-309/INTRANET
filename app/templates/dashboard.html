@@ -1652,7 +1652,7 @@
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePortales">
                                     <i class="bi bi-globe"></i> PORTALES WEB
                                 </button>
-                                {% if current_user.id == 2 %}<button class="btn btn-light btn-sm position-absolute top-50 end-0 translate-middle-y me-5" style="z-index: 5;" data-bs-toggle="modal" data-bs-target="#portalModal">➕</button>{% endif %}
+                                {% if current_user.username|lower == 'admin' %}<button class="btn btn-light btn-sm position-absolute top-50 end-0 translate-middle-y me-5" style="z-index: 5;" data-bs-toggle="modal" data-bs-target="#portalModal">➕</button>{% endif %}
                             </h2>
                             <div id="collapsePortales" class="accordion-collapse collapse" data-bs-parent="#mainAccordion">
                                 <div class="accordion-body">
@@ -1669,7 +1669,7 @@
                                             <button type="button" class="portal-fav-btn" data-portal-id="{{ portal.id }}" data-portal-name="{{ portal.nombre }}" data-portal-url="{{ portal.url }}" aria-label="Marcar como favorito">
                                                 <i class="bi bi-star"></i>
                                             </button>
-                                            {% if current_user.id == 2 %}<button class="btn btn-sm btn-link text-danger delete-portal-btn" data-portal-id="{{ portal.id }}">❌</button>{% endif %}
+                                            {% if current_user.username|lower == 'admin' %}<button class="btn btn-sm btn-link text-danger delete-portal-btn" data-portal-id="{{ portal.id }}">❌</button>{% endif %}
                                         </div>
                                     </div>
                                     {% endfor %}
@@ -1883,7 +1883,27 @@
                     </div>
                     <div class="modal-body">
                         <input type="text" id="nombrePortal" name="nombre" class="form-control mb-3" placeholder="Nombre del portal" required>
-                        <input type="text" id="urlPortal" name="url" class="form-control" placeholder="URL del portal" required>
+                        <input type="url" id="urlPortal" name="url" class="form-control" placeholder="https://portal.ejemplo.com" required>
+                        <div class="portal-visibility mt-3">
+                            <label class="form-label fw-semibold">¿Quién puede verlo?</label>
+                            <div class="d-flex gap-2 mb-3">
+                                <label class="portal-scope-option"><input type="radio" name="visibilidad" value="todos" checked> <span><i class="bi bi-people"></i> Todo el personal</span></label>
+                                <label class="portal-scope-option"><input type="radio" name="visibilidad" value="seleccionados"> <span><i class="bi bi-person-check"></i> Solo seleccionados</span></label>
+                            </div>
+                            <div id="portalUserPicker" hidden>
+                                <input type="search" id="portalUserSearch" class="form-control mb-2" placeholder="Buscar por nombre o nómina" autocomplete="off">
+                                <div class="portal-user-tools"><small id="portalSelectedCount">0 seleccionados</small><button type="button" id="portalClearUsers">Limpiar</button></div>
+                                <div class="portal-user-list" id="portalUserList">
+                                    {% for usuario in usuarios_portales %}
+                                    <label class="portal-user-option" data-search="{{ (usuario.nombre ~ ' ' ~ usuario.username)|lower }}">
+                                        <input type="checkbox" name="usuarios[]" value="{{ usuario.id }}">
+                                        <span><strong>{{ usuario.nombre }}</strong><small>Nómina {{ usuario.username }} · {{ usuario.puesto or 'Sin puesto' }}</small></span>
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                                <div class="form-text">El portal no aparecerá para las personas que no selecciones.</div>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>

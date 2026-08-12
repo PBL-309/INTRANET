@@ -160,6 +160,18 @@ class PortalWeb(db.Model):
     nombre = db.Column(db.String(100), nullable=False)
     url = db.Column(db.String(255), nullable=False)
     favicon = db.Column(db.String(255), nullable=True)
+    usuarios_permitidos = db.relationship(
+        'User',
+        secondary='portal_web_usuario',
+        lazy='select',
+        backref=db.backref('portales_permitidos', lazy='dynamic')
+    )
+
+
+class PortalWebUsuario(db.Model):
+    __tablename__ = 'portal_web_usuario'
+    portal_id = db.Column(db.Integer, db.ForeignKey('portal_web.id', ondelete='CASCADE'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), primary_key=True)
 
 def __init__(self, nombre, url):
     self.nombre = nombre
