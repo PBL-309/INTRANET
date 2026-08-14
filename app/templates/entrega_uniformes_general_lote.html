@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Reportes de uniformes · Turno {{ turno }}</title>
+  <style>
+    :root{--ink:#182a3e;--blue:#124f7e;--orange:#e77825;--line:#dbe3e9;--muted:#68778a}*{box-sizing:border-box}body{margin:0;background:#edf1f4;font-family:Arial,sans-serif;color:var(--ink)}.toolbar{position:sticky;top:0;z-index:5;background:#edf1f4ee;backdrop-filter:blur(8px);border-bottom:1px solid #d6dfe6;padding:13px 20px}.toolbar-inner{width:850px;max-width:100%;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:15px}.toolbar-info strong,.toolbar-info span{display:block}.toolbar-info span{color:var(--muted);font-size:12px;margin-top:2px}.toolbar-actions{display:flex;gap:8px}.toolbar a,.toolbar button{border:1px solid #cad6df;background:#fff;color:var(--ink);padding:10px 13px;border-radius:8px;text-decoration:none;font-weight:700;cursor:pointer}.toolbar button{border-color:var(--blue);background:var(--blue);color:#fff}.sheet{width:850px;height:1050px;background:#fff;margin:18px auto 30px;padding:38px 48px 32px;box-shadow:0 15px 40px #182a3e1c;display:flex;flex-direction:column;break-after:page;page-break-after:always}.sheet:last-child{break-after:auto;page-break-after:auto}.head{display:flex;justify-content:space-between;align-items:start;border-bottom:4px solid var(--blue);padding-bottom:17px}.head img{width:88px;height:68px;object-fit:contain}.title{text-align:right}.title small{color:var(--orange);text-transform:uppercase;letter-spacing:.12em;font-weight:700}.title h1{margin:6px 0 4px;font-size:23px}.meta{color:var(--muted);font-size:11px}.intro{font-size:12px;line-height:1.5;margin:20px 0 15px}.person{display:grid;grid-template-columns:2fr 1fr 1fr;border:1px solid var(--line);border-radius:9px;overflow:hidden;margin-bottom:20px}.datum{padding:12px 14px;border-right:1px solid var(--line)}.datum:last-child{border:0}.datum label{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;margin-bottom:5px}.datum strong{font-size:12px}h2{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--blue);margin:0 0 8px}table{width:100%;border-collapse:collapse;font-size:11px}thead{display:table-header-group}tr{break-inside:avoid;page-break-inside:avoid}th{background:#edf3f7;color:var(--blue);text-transform:uppercase;font-size:8px;letter-spacing:.06em;text-align:left}th,td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}td:nth-child(3),th:nth-child(3){text-align:center}.signature-area{margin-top:auto;padding-top:24px}.statement{font-size:10px;color:#4d5c6e;line-height:1.45;margin:0 0 52px}.signatures{display:grid;grid-template-columns:1fr 1fr;gap:58px}.signature{text-align:center;border-top:1px solid #7d8995;padding-top:8px;font-size:9px}.signature strong{display:block;font-size:11px;margin-bottom:3px}.footer{margin-top:27px;border-top:1px solid var(--line);padding-top:9px;display:flex;justify-content:space-between;color:var(--muted);font-size:8px}@page{size:letter;margin:0}@media print{body{background:#fff}.toolbar{display:none}.sheet{width:100%;height:100vh;margin:0;box-shadow:none;padding:11mm 14mm 9mm}}@media(max-width:880px){.toolbar-inner,.sheet{width:calc(100% - 24px)}.sheet{height:auto;min-height:1000px;padding:28px 24px}.person{grid-template-columns:1fr}.datum{border-right:0;border-bottom:1px solid var(--line)}.toolbar-inner{align-items:flex-start}.toolbar-actions{flex-direction:column}.toolbar a,.toolbar button{padding:8px 10px}}
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <div class="toolbar-inner">
+      <div class="toolbar-info"><strong>Turno {{ turno }}</strong><span>{{ reportes|length }} reportes · ordenados por número de nómina</span></div>
+      <div class="toolbar-actions"><a href="{{ url_for('main.entrega_uniformes_general') }}">← Regresar</a><button onclick="window.print()">Imprimir lote completo</button></div>
+    </div>
+  </div>
+  {% for reporte in reportes %}
+  {% set receptor = reporte.receptor %}
+  {% set registros = reporte.registros %}
+  <main class="sheet">
+    <header class="head"><img src="{{ url_for('static',filename='img/logo.png') }}" alt="Logo"><div class="title"><small>Nueva dotación · Turno {{ turno }}</small><h1>Entrega general de uniformes</h1><div class="meta">Reporte NG-{{ '%05d'|format(receptor.id) }} · {{ loop.index }} de {{ reportes|length }}</div></div></header>
+    <p class="intro">Constancia de los artículos de la nueva dotación entregados al integrante del personal que se identifica a continuación.</p>
+    <section class="person"><div class="datum"><label>Persona que recibe</label><strong>{{ receptor.nombre }}</strong></div><div class="datum"><label>Número de nómina</label><strong>{{ receptor.username }}</strong></div><div class="datum"><label>Fechas registradas</label><strong>{{ reporte.total_fechas }}</strong></div></section>
+    <h2>Detalle de artículos entregados</h2>
+    <table><thead><tr><th>Fecha</th><th>Artículo y detalle</th><th>Cantidad</th><th>Entregado por</th></tr></thead><tbody>{% for item in registros %}<tr><td>{{ item.fecha_entrega.strftime('%d/%m/%Y') }}</td><td><strong>{{ item.prenda|title }}</strong>{% if item.detalle %}<br><span style="color:var(--muted)">{{ item.detalle }}</span>{% endif %}</td><td>{{ item.cantidad }}</td><td>{{ item.entregado_por.nombre }}</td></tr>{% endfor %}<tr><td colspan="2"><strong>Total de piezas</strong></td><td><strong>{{ reporte.total_piezas }}</strong></td><td></td></tr></tbody></table>
+    <div class="signature-area"><p class="statement">La persona receptora confirma haber recibido los artículos descritos y se compromete a utilizarlos y conservarlos conforme a las disposiciones internas de la institución.</p><div class="signatures"><div class="signature"><strong>{{ registros[-1].entregado_por.nombre }}</strong>Nombre y firma de quien entrega</div><div class="signature"><strong>{{ receptor.nombre }}</strong>Nombre y firma de quien recibe</div></div><footer class="footer"><span>Generado el {{ report_date.strftime('%d/%m/%Y a las %H:%M') }}</span><span>Control interno · NG-{{ '%05d'|format(receptor.id) }}</span></footer></div>
+  </main>
+  {% endfor %}
+</body>
+</html>

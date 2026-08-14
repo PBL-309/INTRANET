@@ -367,6 +367,11 @@ def entrega_uniformes_general():
 
     atendidos_ids = set(por_receptor)
     pendientes = [usuario for usuario in usuarios if usuario.id not in atendidos_ids]
+    turnos_con_entregas = sorted({
+        (grupo['receptor'].turno or '').strip()
+        for grupo in por_receptor.values()
+        if (grupo['receptor'].turno or '').strip()
+    })
     return render_template(
         'entrega_uniformes_general.html',
         prendas=prendas,
@@ -376,6 +381,7 @@ def entrega_uniformes_general():
         atendidos=len(atendidos_ids),
         total_personal=len(usuarios),
         total_piezas=sum(registro.cantidad for registro in registros),
+        turnos_con_entregas=turnos_con_entregas,
     )
 
 
@@ -396,6 +402,52 @@ def reporte_entrega_uniformes_general(receptor_id):
         registros=registros,
         total_piezas=sum(item.cantidad for item in registros),
         total_fechas=len({item.fecha_entrega for item in registros}),
+        report_date=datetime.now(),
+    )
+
+
+def _numero_nomina_orden(username):
+    """Ordena primero las nóminas numéricas por su valor real."""
+    texto = str(username or '').strip()
+    return (0, int(texto), texto) if texto.isdigit() else (1, 0, texto.casefold())
+
+
+@main.route('/entrega_uniformes_general/reportes/turno/<path:turno>')
+@login_required
+def reportes_entrega_uniformes_por_turno(turno):
+    turno_normalizado = (turno or '').strip()
+    if not turno_normalizado:
+        return ('', 404)
+
+    registros = (
+        EntregaGeneralUniforme.query
+        .join(User, User.id == EntregaGeneralUniforme.receptor_id)
+        .filter(db.func.lower(db.func.trim(User.turno)) == turno_normalizado.lower())
+        .filter(~db.func.lower(User.username).in_(USUARIOS_SIN_FUNCIONES))
+        .order_by(EntregaGeneralUniforme.fecha_entrega, EntregaGeneralUniforme.id)
+        .all()
+    )
+    por_receptor = {}
+    for registro in registros:
+        por_receptor.setdefault(registro.receptor_id, {
+            'receptor': registro.receptor,
+            'registros': [],
+        })['registros'].append(registro)
+    reportes = sorted(
+        por_receptor.values(),
+        key=lambda reporte: _numero_nomina_orden(reporte['receptor'].username),
+    )
+    if not reportes:
+        return ('', 404)
+    for reporte in reportes:
+        items = reporte['registros']
+        reporte['total_piezas'] = sum(item.cantidad for item in items)
+        reporte['total_fechas'] = len({item.fecha_entrega.date() for item in items})
+
+    return render_template(
+        'entrega_uniformes_general_lote.html',
+        turno=turno_normalizado,
+        reportes=reportes,
         report_date=datetime.now(),
     )
 
