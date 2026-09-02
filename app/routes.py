@@ -13,6 +13,11 @@ import requests # Necesario para verificar reCAPTCHA v3
 import logging
 import secrets
 import base64
+import re
+import shutil
+import xml.etree.ElementTree as ET
+import unicodedata
+from functools import wraps
 from webauthn import (
     generate_authentication_options,
     generate_registration_options,
@@ -26,7 +31,7 @@ from webauthn.helpers.structs import (
     ResidentKeyRequirement,
     UserVerificationRequirement,
 )
-from app.models import Aviso, ContactoEmergencia,  Evento, File, Folder, FormularioRespuesta, PortalWeb, Respuesta, User, VacationRequest, Noticia, RegistroCompetencia, EvaluacionDesempeno, AsistenciaFinAnio, PermisosEvaluacion, EntregaUniforme, EntregaGeneralUniforme, MensajeChat, PasskeyCredential
+from app.models import Aviso, ContactoEmergencia,  Evento, File, Folder, FormularioRespuesta, PortalWeb, Respuesta, User, VacationRequest, Noticia, RegistroCompetencia, EvaluacionDesempeno, AsistenciaFinAnio, PermisosEvaluacion, EntregaUniforme, EntregaGeneralUniforme, MensajeChat, PasskeyCredential, AreaCompra, OrdenCompra, PartidaOrdenCompra, ProveedorCompra, PartidaPresupuestal, FacturaOrdenCompra
 from app.forms import LoginForm
 from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
@@ -36,6 +41,7 @@ from email import encoders
 from app import mail
 import smtplib
 import openpyxl
+from decimal import Decimal, InvalidOperation
 USUARIOS_RESTRINGIDOS_P5 = {
 
 }
@@ -1003,8 +1009,766 @@ def dashboard():
         noticias=noticias,
         portales=portales,
         usuarios_portales=usuarios_portales,
-        user_image=user_image
+        user_image=user_image,
+        puede_compras=_codigo_area_compra_usuario(current_user) is not None,
     )
+
+
+USUARIOS_AREAS_COMPRA = {
+    'CRISTIAN ADAN RODRIGUEZ CARDENAS': 'SP', 'ANA VALERIA GARCIA MORENO': 'SP',
+    'EVA GOMEZ HERRERA': 'SP', 'OMAR FERNANDO HERNANDEZ SOLIS': 'PV',
+    'MARIA CLAUDIA YEPEZ GUTIERREZ': 'CONT', 'VICTOR HUGO BECERRA MORENO': 'CONT',
+    'MIGUEL ANGEL DE ANDA AGUINAGA': 'CONT', 'MARIA DEL CARMEN MORENO GUTIERREZ': 'CONT',
+    'ISMAEL MURILLO BOLIVAR': 'CH', 'SALMA KARIME ORTIZ GARNICA': 'CH',
+    'KARLA VANESSA RIOS AVINA': 'CH',
+}
+
+
+def _texto_sin_acentos(valor):
+    return ''.join(c for c in unicodedata.normalize('NFD', valor or '') if unicodedata.category(c) != 'Mn').upper().strip()
+
+
+def _codigo_area_compra_usuario(usuario):
+    if not usuario or not usuario.is_authenticated:
+        return None
+    if (usuario.username or '').lower() in {'admin', 'admin1'}:
+        return '*'
+    return USUARIOS_AREAS_COMPRA.get(_texto_sin_acentos(usuario.nombre))
+
+
+def _areas_compra_usuario():
+    codigo = _codigo_area_compra_usuario(current_user)
+    consulta = AreaCompra.query.filter_by(activa=True)
+    if codigo == '*':
+        return consulta.order_by(AreaCompra.nombre).all()
+    return consulta.filter_by(codigo=codigo).all() if codigo else []
+
+
+def acceso_compras_requerido(funcion):
+    @wraps(funcion)
+    def protegida(*args, **kwargs):
+        if _codigo_area_compra_usuario(current_user) is None:
+            flash('Tu usuario no tiene acceso al módulo de órdenes de compra.', 'warning')
+            return redirect(url_for('main.dashboard'))
+        return funcion(*args, **kwargs)
+    return protegida
+
+
+def _areas_compra_iniciales():
+    """Crea las series autorizadas sin reducir contadores ya utilizados."""
+    series = {'SP': ('SOPORTE TÉCNICO', 81), 'PV': ('PREVENCIÓN', 576), 'CONT': ('CONTABILIDAD', 0), 'CH': ('CAPITAL HUMANO', 0)}
+    cambio = False
+    for codigo, (nombre, ultimo) in series.items():
+        area = AreaCompra.query.filter_by(codigo=codigo).first()
+        if not area:
+            db.session.add(AreaCompra(nombre=nombre, codigo=codigo, ultimo_consecutivo=ultimo))
+            cambio = True
+        elif not area.activa:
+            area.activa = True
+            cambio = True
+    if cambio:
+        db.session.commit()
+
+
+def _decimal_factura(valor, default='0'):
+    texto = str(valor or '').replace('$', '').replace(',', '').strip()
+    try:
+        return Decimal(texto)
+    except (InvalidOperation, ValueError):
+        return Decimal(default)
+
+
+def _extraer_factura_xml(ruta):
+    raiz = ET.parse(ruta).getroot()
+    local = lambda etiqueta: etiqueta.rsplit('}', 1)[-1]
+    if local(raiz.tag).lower() != 'comprobante':
+        raise ValueError('El XML no parece ser un CFDI válido.')
+    emisor = next((n for n in raiz.iter() if local(n.tag) == 'Emisor'), None)
+    conceptos = [n for n in raiz.iter() if local(n.tag) == 'Concepto']
+    traslados = [n for n in raiz.iter() if local(n.tag) == 'Traslado' and n.attrib.get('Impuesto') == '002']
+    fecha_texto = raiz.attrib.get('Fecha', '')[:10]
+    try:
+        fecha = datetime.strptime(fecha_texto, '%Y-%m-%d').date().isoformat()
+    except ValueError:
+        fecha = datetime.now().date().isoformat()
+    items = []
+    for concepto in conceptos:
+        descripcion = concepto.attrib.get('Descripcion', '').strip()
+        if descripcion:
+            items.append({
+                'cantidad': str(_decimal_factura(concepto.attrib.get('Cantidad'), '1')),
+                'descripcion': descripcion,
+                'precio_unitario': str(_decimal_factura(concepto.attrib.get('ValorUnitario'))),
+                'importe': str(_decimal_factura(concepto.attrib.get('Importe'))),
+            })
+    iva = sum((_decimal_factura(n.attrib.get('Importe')) for n in traslados), Decimal('0'))
+    return {
+        'origen': 'XML CFDI',
+        'proveedor': (emisor.attrib.get('Nombre', '') if emisor is not None else '').strip().upper(),
+        'rfc': (emisor.attrib.get('Rfc', '') if emisor is not None else '').strip().upper(),
+        'fecha': fecha,
+        'subtotal': str(_decimal_factura(raiz.attrib.get('SubTotal'))),
+        'iva': str(iva),
+        'total': str(_decimal_factura(raiz.attrib.get('Total'))),
+        'moneda': raiz.attrib.get('Moneda', 'MXN'),
+        'domicilio': '',
+        'telefono': '',
+        'conceptos': items,
+    }
+
+
+def _buscar_importe_pdf(texto, etiqueta):
+    patrones = [
+        rf'(?im)^\s*{etiqueta}\s*[:$]?\s*\$?\s*([\d,]+\.\d{{2}})',
+        rf'(?im){etiqueta}[^\d]{{0,20}}\$?\s*([\d,]+\.\d{{2}})',
+    ]
+    for patron in patrones:
+        coincidencias = re.findall(patron, texto)
+        if coincidencias:
+            return str(_decimal_factura(coincidencias[-1]))
+    return '0'
+
+
+def _extraer_conceptos_pdf(lineas):
+    conceptos = []
+    indice = 0
+    numero = re.compile(r'^\$?\s*([\d,]+\.\d{2})\s*$')
+    cantidad = re.compile(r'^\d+(?:\.\d+)?$')
+    while indice < len(lineas) - 2:
+        if not cantidad.fullmatch(lineas[indice]) or not re.search(r'(?i)(pieza|servicio|unidad|H87|ACT|E48)', lineas[indice + 1]):
+            indice += 1
+            continue
+        inicio = indice
+        cantidad_texto = lineas[indice]
+        indice += 2
+        descripcion = []
+        while indice < len(lineas) and not numero.fullmatch(lineas[indice]) and not re.match(r'(?i)^subtotal', lineas[indice]):
+            descripcion.append(lineas[indice])
+            indice += 1
+        if indice >= len(lineas) or not numero.fullmatch(lineas[indice]):
+            indice = inicio + 1
+            continue
+        precio = str(_decimal_factura(numero.fullmatch(lineas[indice]).group(1)))
+        indice += 1
+        importe = None
+        while indice < len(lineas):
+            if re.match(r'(?i)^subtotal', lineas[indice]):
+                break
+            if cantidad.fullmatch(lineas[indice]) and indice + 1 < len(lineas) and re.search(r'(?i)(pieza|servicio|unidad|H87|ACT|E48)', lineas[indice + 1]):
+                break
+            coincidencia = numero.fullmatch(lineas[indice])
+            if coincidencia:
+                importe = str(_decimal_factura(coincidencia.group(1)))
+            indice += 1
+        texto_descripcion = ' '.join(descripcion).strip()
+        if texto_descripcion:
+            conceptos.append({'cantidad': cantidad_texto, 'descripcion': texto_descripcion, 'precio_unitario': precio, 'importe': importe or str(_decimal_factura(cantidad_texto) * _decimal_factura(precio))})
+    return conceptos
+
+
+def _extraer_factura_pdf(ruta):
+    try:
+        import fitz
+        documento = fitz.open(ruta)
+        texto = '\n'.join(pagina.get_text('text') for pagina in documento)
+        documento.close()
+    except Exception as exc:
+        raise ValueError('No fue posible leer el PDF de la factura.') from exc
+    texto = texto.strip()
+    for incorrecto, correcto in {
+        'Delegaci�n': 'Delegación', 'M�xico': 'México', 'Le�n': 'León',
+        'emisi�n': 'emisión', 'Descripci�n': 'Descripción', 'R�gimen': 'Régimen',
+        'cr�dito': 'crédito', 'N�mero': 'Número', 'p�gina': 'página',
+    }.items():
+        texto = texto.replace(incorrecto, correcto)
+    if len(texto) < 40:
+        raise ValueError('El PDF parece escaneado y no contiene texto reconocible. Adjunta también el XML CFDI.')
+    rfc_encontrados = [rfc for rfc in re.findall(r'\b[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}\b', texto.upper()) if rfc != 'PBL890425149']
+    fecha = datetime.now().date().isoformat()
+    for patron, formato in [(r'\b(\d{2}/\d{2}/20\d{2})\b', '%d/%m/%Y'), (r'\b(20\d{2}-\d{2}-\d{2})\b', '%Y-%m-%d')]:
+        for candidato in re.findall(patron, texto):
+            try:
+                fecha = datetime.strptime(candidato, formato).date().isoformat()
+                break
+            except ValueError:
+                continue
+        if fecha != datetime.now().date().isoformat():
+            break
+    proveedor = ''
+    for patron in [r'(?im)^\s*(?:EMISOR|NOMBRE|RAZ[ÓO]N SOCIAL)\s*:?\s*(.+)$', r'(?im)^\s*PROVEEDOR\s*:?\s*(.+)$']:
+        encontrado = re.search(patron, texto)
+        if encontrado:
+            proveedor = encontrado.group(1).strip(' :-').upper()[:160]
+            break
+    lineas = [l.strip() for l in texto.splitlines() if l.strip()]
+    telefono = ''
+    domicilio = ''
+    for indice, linea in enumerate(lineas):
+        telefono_match = re.search(r'(?i)\bTel(?:éfono)?\.?\s*:?[ ]*([0-9 ()+\-]{7,}?)(?=\s*Fax|$)', linea)
+        if not telefono_match:
+            continue
+        telefono = ' '.join(telefono_match.group(1).split()).strip()
+        direccion = []
+        candidato_proveedor = ''
+        for anterior in reversed(lineas[max(0, indice - 6):indice]):
+            letras = ''.join(c for c in anterior if c.isalpha())
+            if direccion and letras and anterior == anterior.upper():
+                candidato_proveedor = anterior
+                break
+            direccion.insert(0, anterior)
+        domicilio = ', '.join(direccion[-4:])[:300]
+        if not proveedor and candidato_proveedor:
+            proveedor = candidato_proveedor[:160]
+        break
+    conceptos_pdf = _extraer_conceptos_pdf(lineas)
+    lineas_utiles = [l for l in lineas if 8 <= len(l) <= 220]
+    descripcion = ' | '.join(lineas_utiles[:8])[:1800]
+    subtotal = _buscar_importe_pdf(texto, 'SUBTOTAL')
+    subtotal_separado = re.search(r'(?is)Subtotal.{0,220}?\$\s*([\d,]+\.\d{2})', texto)
+    if _decimal_factura(subtotal) <= 0 and subtotal_separado:
+        subtotal = str(_decimal_factura(subtotal_separado.group(1)))
+    iva = _buscar_importe_pdf(texto, r'(?:IVA|I\.V\.A\.)')
+    iva_traslado = re.search(r'(?is)IVA\s+Traslado\s+Tasa\s*\([^)]+\)\s*:\s*([\d,]+\.\d{2})', texto)
+    if iva_traslado:
+        iva = str(_decimal_factura(iva_traslado.group(1)))
+    for linea in lineas if 'lineas' in locals() else texto.splitlines():
+        if 'IVA' in linea.upper():
+            importes_iva = re.findall(r'([\d,]+\.\d{2})', linea)
+            if len(importes_iva) >= 2:
+                iva = str(_decimal_factura(importes_iva[-1]))
+                break
+    total = _buscar_importe_pdf(texto, 'TOTAL')
+    if _decimal_factura(subtotal) <= 0 and _decimal_factura(total) > 0 and _decimal_factura(iva) > 0:
+        subtotal = str(_decimal_factura(total) - _decimal_factura(iva))
+    return {
+        'origen': 'PDF', 'proveedor': proveedor, 'rfc': rfc_encontrados[0] if rfc_encontrados else '',
+        'fecha': fecha, 'subtotal': subtotal, 'iva': iva, 'total': total, 'moneda': 'MXN',
+        'domicilio': domicilio, 'telefono': telefono,
+        'conceptos': conceptos_pdf or [{'cantidad': '1', 'descripcion': descripcion, 'precio_unitario': subtotal, 'importe': subtotal}],
+    }
+
+
+def _sugerir_partida_factura(descripcion, partidas):
+    palabras = set(re.findall(r'[a-záéíóúñ]{4,}', (descripcion or '').lower()))
+    ignorar = {'para', 'como', 'este', 'esta', 'servicio', 'material', 'gastos', 'pago'}
+    palabras -= ignorar
+    mejor, puntuacion_mejor = None, 0
+    for partida in partidas:
+        catalogo = f'{partida.nombre} {partida.descripcion or ""}'.lower()
+        puntuacion = sum(1 for palabra in palabras if palabra in catalogo)
+        if puntuacion > puntuacion_mejor:
+            mejor, puntuacion_mejor = partida, puntuacion
+    return mejor
+
+
+def _normalizar_nombre_proveedor(nombre):
+    nombre = (nombre or '').upper().replace('&', ' Y ')
+    nombre = re.sub(r'[^A-Z0-9Ñ ]+', ' ', nombre)
+    nombre = re.sub(r'\b(SA|S A|DE|CV|C V|SAPI|S DE RL|SOCIEDAD ANONIMA)\b', ' ', nombre)
+    return ' '.join(nombre.split())
+
+
+def _reconocer_proveedor_factura(nombre, rfc):
+    if rfc:
+        encontrado = ProveedorCompra.query.filter(
+            db.func.upper(ProveedorCompra.rfc) == rfc.upper(),
+            ProveedorCompra.activo.is_(True),
+        ).first()
+        if encontrado:
+            return encontrado
+    buscado = _normalizar_nombre_proveedor(nombre)
+    if not buscado:
+        return None
+    for proveedor in ProveedorCompra.query.filter_by(activo=True).all():
+        guardado = _normalizar_nombre_proveedor(proveedor.nombre)
+        if guardado == buscado or (len(buscado) >= 8 and (buscado in guardado or guardado in buscado)):
+            return proveedor
+    return None
+
+
+def _guardar_factura_pendiente(archivo, token):
+    nombre = secure_filename(archivo.filename)
+    extension = os.path.splitext(nombre)[1].lower()
+    if extension not in {'.pdf', '.xml'}:
+        raise ValueError('Para generar la orden sólo se permiten archivos PDF o XML.')
+    archivo.stream.seek(0, os.SEEK_END)
+    tamano = archivo.stream.tell()
+    archivo.stream.seek(0)
+    if tamano > 15 * 1024 * 1024:
+        raise ValueError(f'El archivo {nombre} excede el límite de 15 MB.')
+    carpeta = os.path.join(current_app.config['UPLOAD_FOLDER'], 'facturas_pendientes')
+    os.makedirs(carpeta, exist_ok=True)
+    nombre_interno = f'{token}_{secrets.token_hex(6)}{extension}'
+    ruta = os.path.join(carpeta, nombre_interno)
+    archivo.save(ruta)
+    return {'original': nombre, 'interno': nombre_interno, 'extension': extension, 'mime': archivo.mimetype, 'tamano': tamano, 'ruta': ruta}
+
+
+@main.route('/ordenes-compra')
+@login_required
+@acceso_compras_requerido
+def ordenes_compra():
+    _areas_compra_iniciales()
+    areas = _areas_compra_usuario()
+    ids_area = [area.id for area in areas]
+    area_id = request.args.get('area', type=int)
+    consulta = OrdenCompra.query.filter(OrdenCompra.area_id.in_(ids_area))
+    if area_id in ids_area:
+        consulta = consulta.filter_by(area_id=area_id)
+    ordenes = consulta.order_by(OrdenCompra.creado_en.desc()).limit(100).all()
+    return render_template(
+        'ordenes_compra.html',
+        ordenes=ordenes,
+        areas=areas,
+        area_seleccionada=area_id,
+    )
+
+
+@main.route('/ordenes-compra/catalogos')
+@login_required
+@acceso_compras_requerido
+def catalogos_compra():
+    return render_template(
+        'catalogos_compra.html',
+        proveedores=ProveedorCompra.query.order_by(ProveedorCompra.nombre).all(),
+        partidas=PartidaPresupuestal.query.order_by(PartidaPresupuestal.codigo).all(),
+    )
+
+
+@main.route('/ordenes-compra/proveedores', methods=['POST'])
+@login_required
+@acceso_compras_requerido
+def guardar_proveedor_compra():
+    nombre = request.form.get('nombre', '').strip().upper()
+    if not nombre:
+        flash('El nombre del proveedor es obligatorio.', 'warning')
+        return redirect(url_for('main.catalogos_compra'))
+    proveedor = ProveedorCompra.query.filter(db.func.lower(ProveedorCompra.nombre) == nombre.lower()).first()
+    if not proveedor:
+        proveedor = ProveedorCompra(nombre=nombre)
+        db.session.add(proveedor)
+    proveedor.domicilio = request.form.get('domicilio', '').strip() or None
+    proveedor.atencion_a = request.form.get('atencion_a', '').strip() or None
+    proveedor.telefono = request.form.get('telefono', '').strip() or None
+    proveedor.rfc = request.form.get('rfc', '').strip().upper() or None
+    proveedor.correo = request.form.get('correo', '').strip().lower() or None
+    proveedor.activo = True
+    db.session.commit()
+    flash(f'Proveedor {nombre} guardado.', 'success')
+    return redirect(url_for('main.catalogos_compra'))
+
+
+@main.route('/ordenes-compra/partidas-presupuestales', methods=['POST'])
+@login_required
+@acceso_compras_requerido
+def guardar_partida_presupuestal():
+    codigo = request.form.get('codigo', '').strip().upper()
+    nombre = request.form.get('nombre', '').strip().upper()
+    if not codigo or not nombre:
+        flash('Código y nombre de la partida son obligatorios.', 'warning')
+        return redirect(url_for('main.catalogos_compra'))
+    partida = PartidaPresupuestal.query.filter(db.func.lower(PartidaPresupuestal.codigo) == codigo.lower()).first()
+    if not partida:
+        partida = PartidaPresupuestal(codigo=codigo, nombre=nombre)
+        db.session.add(partida)
+    partida.nombre = nombre
+    partida.descripcion = request.form.get('descripcion', '').strip() or None
+    partida.activa = True
+    db.session.commit()
+    flash(f'Partida {codigo} guardada.', 'success')
+    return redirect(url_for('main.catalogos_compra'))
+
+
+@main.route('/ordenes-compra/areas', methods=['POST'])
+@login_required
+@acceso_compras_requerido
+def crear_area_compra():
+    if current_user.username.lower() != 'admin':
+        return jsonify({'error': 'Solo administración puede configurar áreas.'}), 403
+    nombre = request.form.get('nombre', '').strip().upper()
+    codigo = request.form.get('codigo', '').strip().upper()
+    try:
+        consecutivo_inicial = int(request.form.get('consecutivo_inicial', '0'))
+        if not nombre or not codigo.isalnum() or len(codigo) > 12 or consecutivo_inicial < 0:
+            raise ValueError('Indica nombre, código alfanumérico y último consecutivo válido.')
+        db.session.add(AreaCompra(nombre=nombre, codigo=codigo, ultimo_consecutivo=consecutivo_inicial))
+        db.session.commit()
+        flash(f'Área {nombre} configurada. El siguiente folio será PBL/{codigo}/{consecutivo_inicial + 1:03d}.', 'success')
+    except ValueError as exc:
+        db.session.rollback()
+        flash(str(exc), 'warning')
+    except Exception:
+        db.session.rollback()
+        flash('El nombre o código de esa área ya existe.', 'warning')
+    return redirect(url_for('main.ordenes_compra'))
+
+
+@main.route('/ordenes-compra/desde-factura', methods=['GET', 'POST'])
+@login_required
+@acceso_compras_requerido
+def orden_desde_factura():
+    _areas_compra_iniciales()
+    areas = _areas_compra_usuario()
+    partidas = PartidaPresupuestal.query.filter_by(activa=True).order_by(PartidaPresupuestal.codigo).all()
+    if request.method == 'GET':
+        return render_template('orden_desde_factura.html', etapa='carga', areas=areas, partidas=partidas)
+
+    accion = request.form.get('accion', 'analizar')
+    carpeta_pendiente = os.path.join(current_app.config['UPLOAD_FOLDER'], 'facturas_pendientes')
+    os.makedirs(carpeta_pendiente, exist_ok=True)
+    if accion == 'analizar':
+        guardados = []
+        try:
+            archivos = [a for a in (request.files.get('pdf'), request.files.get('xml')) if a and a.filename]
+            if not archivos:
+                raise ValueError('Adjunta el PDF de la factura o su XML CFDI.')
+            token = secrets.token_urlsafe(18)
+            guardados = [_guardar_factura_pendiente(archivo, token) for archivo in archivos]
+            xml = next((a for a in guardados if a['extension'] == '.xml'), None)
+            pdf = next((a for a in guardados if a['extension'] == '.pdf'), None)
+            datos_pdf = _extraer_factura_pdf(pdf['ruta']) if pdf else {}
+            datos = _extraer_factura_xml(xml['ruta']) if xml else datos_pdf
+            if xml and datos_pdf:
+                datos['domicilio'] = datos_pdf.get('domicilio', '')
+                datos['telefono'] = datos_pdf.get('telefono', '')
+            if not datos['conceptos']:
+                raise ValueError('No se encontraron conceptos en la factura.')
+            descripcion = '\n'.join(item['descripcion'] for item in datos['conceptos'])[:3000]
+            subtotal = _decimal_factura(datos.get('subtotal'))
+            if subtotal <= 0:
+                subtotal = sum((_decimal_factura(item.get('importe')) for item in datos['conceptos']), Decimal('0'))
+            proveedor = _reconocer_proveedor_factura(datos.get('proveedor'), datos.get('rfc'))
+            sugerida = _sugerir_partida_factura(descripcion, partidas)
+            meta = {
+                'token': token,
+                'archivos': [{k: v for k, v in archivo.items() if k != 'ruta'} for archivo in guardados],
+                'datos': datos,
+            }
+            with open(os.path.join(carpeta_pendiente, f'{token}.json'), 'w', encoding='utf-8') as salida:
+                pyjson.dump(meta, salida, ensure_ascii=False)
+            revision = {
+                'token': token, 'origen': datos['origen'], 'proveedor_id': proveedor.id if proveedor else '',
+                'proveedor': (proveedor.nombre if proveedor else datos.get('proveedor')) or 'NO INDICA',
+                'rfc': (proveedor.rfc if proveedor and proveedor.rfc else datos.get('rfc')) or 'NO INDICA',
+                'domicilio': (proveedor.domicilio if proveedor else None) or datos.get('domicilio') or 'NO INDICA',
+                'atencion_a': (proveedor.atencion_a if proveedor else None) or 'NO INDICA',
+                'telefono': (proveedor.telefono if proveedor else None) or datos.get('telefono') or 'NO INDICA',
+                'fecha': datetime.now().date().isoformat(),
+                'descripcion': descripcion, 'conceptos': datos['conceptos'],
+                'subtotal': str(subtotal),
+                'total_factura': datos.get('total', '0'), 'iva_factura': datos.get('iva', '0'),
+                'partida_codigo': sugerida.codigo if sugerida else '',
+                'justificacion': f"ADQUISICIÓN DE {datos['conceptos'][0]['descripcion']} SEGÚN FACTURA"[:1000].upper(),
+            }
+            return render_template('orden_desde_factura.html', etapa='revision', areas=areas, partidas=partidas, revision=revision)
+        except (ValueError, ET.ParseError) as exc:
+            for archivo in guardados:
+                try:
+                    os.remove(archivo['ruta'])
+                except OSError:
+                    pass
+            flash(str(exc), 'warning')
+        except Exception:
+            current_app.logger.exception('Error analizando factura')
+            flash('No fue posible analizar la factura. Si tienes el XML CFDI, adjúntalo junto con el PDF.', 'danger')
+        return render_template('orden_desde_factura.html', etapa='carga', areas=areas, partidas=partidas), 400
+
+    token = request.form.get('token', '')
+    if not re.fullmatch(r'[A-Za-z0-9_-]{20,40}', token):
+        flash('La revisión de la factura ya no es válida. Vuelve a cargarla.', 'warning')
+        return redirect(url_for('main.orden_desde_factura'))
+    ruta_meta = os.path.join(carpeta_pendiente, f'{token}.json')
+    try:
+        with open(ruta_meta, encoding='utf-8') as entrada:
+            meta = pyjson.load(entrada)
+        if meta.get('token') != token:
+            raise ValueError('La factura pendiente no coincide con esta revisión.')
+        area_id = request.form.get('area_id', type=int)
+        if area_id not in {area.id for area in areas}:
+            raise ValueError('El área seleccionada no está autorizada para tu usuario.')
+        partida = PartidaPresupuestal.query.filter_by(codigo=request.form.get('partida_codigo', '').strip(), activa=True).first()
+        if not partida:
+            raise ValueError('Selecciona una partida presupuestal válida.')
+        nombre_proveedor = request.form.get('proveedor', '').strip().upper() or 'NO INDICA'
+        rfc = request.form.get('rfc', '').strip().upper() or 'NO INDICA'
+        proveedor = db.session.get(ProveedorCompra, request.form.get('proveedor_id', type=int))
+        if not proveedor and rfc != 'NO INDICA':
+            proveedor = ProveedorCompra.query.filter(db.func.upper(ProveedorCompra.rfc) == rfc).first()
+        if not proveedor:
+            proveedor = ProveedorCompra.query.filter(db.func.lower(ProveedorCompra.nombre) == nombre_proveedor.lower()).first()
+        if not proveedor:
+            proveedor = ProveedorCompra(nombre=nombre_proveedor)
+            db.session.add(proveedor)
+        proveedor.nombre = nombre_proveedor
+        proveedor.rfc = rfc if rfc != 'NO INDICA' else (proveedor.rfc or 'NO INDICA')
+        proveedor.domicilio = request.form.get('domicilio', '').strip() or proveedor.domicilio or 'NO INDICA'
+        proveedor.atencion_a = request.form.get('atencion_a', '').strip() or proveedor.atencion_a or 'NO INDICA'
+        proveedor.telefono = request.form.get('telefono', '').strip() or proveedor.telefono or 'NO INDICA'
+        proveedor.activo = True
+        fecha = datetime.now().date()
+        fecha_entrega = datetime.strptime(request.form.get('fecha_entrega_requerida', ''), '%Y-%m-%d').date()
+        cantidades = request.form.getlist('cantidad[]')
+        descripciones = request.form.getlist('descripcion[]')
+        precios = request.form.getlist('precio_unitario[]')
+        conceptos = []
+        for posicion, (cantidad_texto, descripcion, precio_texto) in enumerate(zip(cantidades, descripciones, precios), 1):
+            cantidad = _decimal_factura(cantidad_texto)
+            precio_unitario = _decimal_factura(precio_texto)
+            descripcion = descripcion.strip()
+            if descripcion and cantidad > 0 and precio_unitario > 0:
+                conceptos.append((posicion, cantidad, descripcion, precio_unitario))
+        justificacion = request.form.get('justificacion', '').strip()
+        if not conceptos or not justificacion:
+            raise ValueError('Confirma la cantidad, descripción y precio unitario de cada artículo.')
+        siguiente = db.session.execute(db.text(
+            'UPDATE area_compra SET ultimo_consecutivo = ultimo_consecutivo + 1 '
+            'WHERE id = :area_id AND activa = 1 RETURNING ultimo_consecutivo, codigo'
+        ), {'area_id': area_id}).first()
+        if not siguiente:
+            raise ValueError('Selecciona un área válida.')
+        consecutivo, codigo_area = siguiente
+        orden = OrdenCompra(
+            area_id=area_id, consecutivo=consecutivo, folio=f'PBL/{codigo_area}/{consecutivo:03d}',
+            solicitante_id=current_user.id, fecha=fecha, fecha_entrega_requerida=fecha_entrega,
+            proveedor_catalogo=proveedor, partida_presupuestal=partida, proveedor=proveedor.nombre,
+            domicilio=proveedor.domicilio, atencion_a=proveedor.atencion_a, telefono=proveedor.telefono,
+            cuenta_presupuestal=f'{partida.codigo} {partida.nombre}', proyecto_programa=partida.nombre.upper(),
+            fuente_financiamiento='RECURSOS PROPIOS', tipo_compra='ADQUISICIÓN DIRECTA',
+            justificacion=justificacion, iva_porcentaje=Decimal('16'),
+            estado='DESDE FACTURA',
+        )
+        db.session.add(orden)
+        db.session.flush()
+        for posicion, cantidad, descripcion, precio_unitario in conceptos:
+            db.session.add(PartidaOrdenCompra(orden_id=orden.id, posicion=posicion, cantidad=cantidad, descripcion=descripcion, precio_unitario=precio_unitario))
+        carpeta_final = os.path.join(current_app.config['UPLOAD_FOLDER'], 'facturas')
+        os.makedirs(carpeta_final, exist_ok=True)
+        for archivo in meta.get('archivos', []):
+            if not archivo.get('interno', '').startswith(f'{token}_'):
+                continue
+            origen = os.path.join(carpeta_pendiente, archivo['interno'])
+            if not os.path.isfile(origen):
+                continue
+            nombre_final = f'{orden.id}_{secrets.token_hex(12)}{archivo["extension"]}'
+            shutil.move(origen, os.path.join(carpeta_final, nombre_final))
+            db.session.add(FacturaOrdenCompra(
+                orden_id=orden.id, nombre_original=archivo['original'], nombre_archivo=nombre_final,
+                tipo_mime=archivo.get('mime'), tamano=archivo.get('tamano', 0), subido_por_id=current_user.id,
+            ))
+        db.session.commit()
+        try:
+            os.remove(ruta_meta)
+        except OSError:
+            pass
+        flash(f'Orden {orden.folio} generada desde la factura.', 'success')
+        return redirect(url_for('main.ver_orden_compra', orden_id=orden.id))
+    except (ValueError, InvalidOperation) as exc:
+        db.session.rollback()
+        flash(str(exc), 'warning')
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception('Error generando orden desde factura')
+        flash('No fue posible generar la orden desde la factura.', 'danger')
+    return redirect(url_for('main.orden_desde_factura'))
+
+
+@main.route('/ordenes-compra/nueva', methods=['GET', 'POST'])
+@login_required
+@acceso_compras_requerido
+def nueva_orden_compra():
+    _areas_compra_iniciales()
+    areas = _areas_compra_usuario()
+    proveedores = ProveedorCompra.query.filter_by(activo=True).order_by(ProveedorCompra.nombre).all()
+    partidas_catalogo = PartidaPresupuestal.query.filter_by(activa=True).order_by(PartidaPresupuestal.codigo).all()
+    if request.method == 'GET':
+        return render_template('orden_compra_form.html', areas=areas, proveedores=proveedores, partidas_catalogo=partidas_catalogo, hoy=datetime.now().date())
+
+    try:
+        area_id = int(request.form.get('area_id', ''))
+        if area_id not in {area.id for area in areas}:
+            raise ValueError('El área seleccionada no está autorizada para tu usuario.')
+        fecha = datetime.strptime(request.form.get('fecha', ''), '%Y-%m-%d').date()
+        fecha_entrega = datetime.strptime(request.form.get('fecha_entrega_requerida', ''), '%Y-%m-%d').date()
+        proveedor_catalogo = db.session.get(ProveedorCompra, request.form.get('proveedor_id', type=int))
+        codigo_partida = request.form.get('partida_codigo', '').strip()
+        partida_catalogo = PartidaPresupuestal.query.filter(
+            db.func.lower(PartidaPresupuestal.codigo) == codigo_partida.lower(),
+            PartidaPresupuestal.activa.is_(True),
+        ).first()
+        if not proveedor_catalogo or not proveedor_catalogo.activo:
+            raise ValueError('Selecciona un proveedor guardado en el catálogo.')
+        if not partida_catalogo or not partida_catalogo.activa:
+            raise ValueError('Selecciona una partida presupuestal guardada en el catálogo.')
+        cantidades = request.form.getlist('cantidad[]')[:1]
+        descripciones = request.form.getlist('descripcion[]')[:1]
+        precios = request.form.getlist('precio_unitario[]')[:1]
+        partidas = []
+        for posicion, (cantidad, descripcion, precio) in enumerate(zip(cantidades, descripciones, precios), 1):
+            descripcion = descripcion.strip()
+            if not descripcion and not cantidad and not precio:
+                continue
+            cantidad_decimal = Decimal(cantidad)
+            precio_decimal = Decimal(precio)
+            if cantidad_decimal <= 0 or precio_decimal < 0 or not descripcion:
+                raise ValueError('Cada partida requiere descripción, cantidad mayor a cero y precio válido.')
+            partidas.append((posicion, cantidad_decimal, descripcion, precio_decimal))
+        if not partidas:
+            raise ValueError('Agrega al menos una partida a la orden.')
+
+        # RETURNING reserva un número único incluso con capturas simultáneas.
+        siguiente = db.session.execute(
+            db.text(
+                'UPDATE area_compra SET ultimo_consecutivo = ultimo_consecutivo + 1 '
+                'WHERE id = :area_id AND activa = 1 RETURNING ultimo_consecutivo, codigo'
+            ),
+            {'area_id': area_id},
+        ).first()
+        if not siguiente:
+            raise ValueError('El área seleccionada no existe o está inactiva.')
+        consecutivo, codigo_area = siguiente
+        folio = f'PBL/{codigo_area}/{consecutivo:03d}'
+        orden = OrdenCompra(
+            area_id=area_id,
+            consecutivo=consecutivo,
+            folio=folio,
+            solicitante_id=current_user.id,
+            fecha=fecha,
+            fecha_entrega_requerida=fecha_entrega,
+            proveedor_id=proveedor_catalogo.id,
+            partida_presupuestal_id=partida_catalogo.id,
+            proveedor=proveedor_catalogo.nombre,
+            domicilio=proveedor_catalogo.domicilio or 'NO INDICA',
+            atencion_a=proveedor_catalogo.atencion_a or 'NO INDICA',
+            telefono=proveedor_catalogo.telefono or 'NO INDICA',
+            cuenta_presupuestal=f'{partida_catalogo.codigo} {partida_catalogo.nombre}',
+            proyecto_programa=partida_catalogo.nombre.upper(),
+            fuente_financiamiento='RECURSOS PROPIOS',
+            tipo_compra='ADQUISICIÓN DIRECTA',
+            justificacion=request.form.get('justificacion', '').strip(),
+            iva_porcentaje=Decimal('16'),
+        )
+        if not orden.proveedor or not orden.cuenta_presupuestal or not orden.justificacion:
+            raise ValueError('Proveedor, cuenta presupuestal y justificación son obligatorios.')
+        db.session.add(orden)
+        db.session.flush()
+        for posicion, cantidad, descripcion, precio in partidas:
+            db.session.add(PartidaOrdenCompra(
+                orden_id=orden.id,
+                posicion=posicion,
+                cantidad=cantidad,
+                descripcion=descripcion,
+                precio_unitario=precio,
+            ))
+        db.session.commit()
+        flash(f'Orden {folio} creada correctamente.', 'success')
+        return redirect(url_for('main.ver_orden_compra', orden_id=orden.id))
+    except (ValueError, InvalidOperation) as exc:
+        db.session.rollback()
+        flash(str(exc), 'warning')
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception('Error creando orden de compra')
+        flash('No fue posible guardar la orden. Intenta nuevamente.', 'danger')
+    return render_template('orden_compra_form.html', areas=areas, proveedores=proveedores, partidas_catalogo=partidas_catalogo, hoy=datetime.now().date()), 400
+
+
+@main.route('/ordenes-compra/<int:orden_id>')
+@login_required
+@acceso_compras_requerido
+def ver_orden_compra(orden_id):
+    orden = db.get_or_404(OrdenCompra, orden_id)
+    if orden.area_id not in {area.id for area in _areas_compra_usuario()}:
+        flash('No tienes permiso para consultar órdenes de esa área.', 'warning')
+        return redirect(url_for('main.ordenes_compra'))
+    factura_paginas = []
+    if orden.estado == 'DESDE FACTURA':
+        try:
+            import fitz
+            carpeta = os.path.join(current_app.config['UPLOAD_FOLDER'], 'facturas')
+            for factura in orden.facturas:
+                if os.path.splitext(factura.nombre_archivo)[1].lower() != '.pdf':
+                    continue
+                ruta = os.path.join(carpeta, factura.nombre_archivo)
+                with fitz.open(ruta) as documento:
+                    factura_paginas.extend((factura, pagina) for pagina in range(documento.page_count))
+        except Exception:
+            current_app.logger.exception('No fue posible preparar la factura para impresión')
+    return render_template('orden_compra_documento.html', orden=orden, factura_paginas=factura_paginas)
+
+
+@main.route('/ordenes-compra/facturas/<int:factura_id>/pagina/<int:pagina>')
+@login_required
+@acceso_compras_requerido
+def pagina_factura_compra(factura_id, pagina):
+    factura = db.get_or_404(FacturaOrdenCompra, factura_id)
+    if factura.orden.area_id not in {area.id for area in _areas_compra_usuario()}:
+        return 'No autorizado.', 403
+    if os.path.splitext(factura.nombre_archivo)[1].lower() != '.pdf':
+        return 'La factura no es un PDF.', 404
+    ruta = os.path.join(current_app.config['UPLOAD_FOLDER'], 'facturas', factura.nombre_archivo)
+    try:
+        import fitz
+        with fitz.open(ruta) as documento:
+            if pagina < 0 or pagina >= documento.page_count:
+                return 'Página no encontrada.', 404
+            pixmap = documento[pagina].get_pixmap(matrix=fitz.Matrix(2, 2), alpha=False)
+            imagen = BytesIO(pixmap.tobytes('png'))
+        respuesta = send_file(imagen, mimetype='image/png')
+        respuesta.headers['Cache-Control'] = 'private, max-age=3600'
+        return respuesta
+    except Exception:
+        current_app.logger.exception('No fue posible renderizar una página de factura')
+        return 'No fue posible mostrar la factura.', 500
+
+
+@main.route('/ordenes-compra/<int:orden_id>/facturas', methods=['POST'])
+@login_required
+@acceso_compras_requerido
+def adjuntar_factura_compra(orden_id):
+    orden = db.get_or_404(OrdenCompra, orden_id)
+    if orden.area_id not in {area.id for area in _areas_compra_usuario()}:
+        flash('No tienes permiso para modificar órdenes de esa área.', 'warning')
+        return redirect(url_for('main.ordenes_compra'))
+    archivo = request.files.get('factura')
+    if not archivo or not archivo.filename:
+        flash('Selecciona una factura para adjuntar.', 'warning')
+        return redirect(url_for('main.ver_orden_compra', orden_id=orden.id))
+    extension = os.path.splitext(secure_filename(archivo.filename))[1].lower()
+    if extension not in {'.pdf', '.xml', '.png', '.jpg', '.jpeg'}:
+        flash('Formato no permitido. Usa PDF, XML, PNG o JPG.', 'warning')
+        return redirect(url_for('main.ver_orden_compra', orden_id=orden.id))
+    archivo.stream.seek(0, os.SEEK_END)
+    tamano = archivo.stream.tell()
+    archivo.stream.seek(0)
+    if tamano > 15 * 1024 * 1024:
+        flash('La factura excede el límite de 15 MB.', 'warning')
+        return redirect(url_for('main.ver_orden_compra', orden_id=orden.id))
+    nombre_archivo = f'{orden.id}_{secrets.token_hex(12)}{extension}'
+    carpeta = os.path.join(current_app.config['UPLOAD_FOLDER'], 'facturas')
+    os.makedirs(carpeta, exist_ok=True)
+    archivo.save(os.path.join(carpeta, nombre_archivo))
+    db.session.add(FacturaOrdenCompra(
+        orden_id=orden.id,
+        nombre_original=secure_filename(archivo.filename),
+        nombre_archivo=nombre_archivo,
+        tipo_mime=archivo.mimetype,
+        tamano=tamano,
+        subido_por_id=current_user.id,
+    ))
+    db.session.commit()
+    flash('Factura adjuntada correctamente.', 'success')
+    return redirect(url_for('main.ver_orden_compra', orden_id=orden.id))
+
+
+@main.route('/ordenes-compra/facturas/<int:factura_id>')
+@login_required
+@acceso_compras_requerido
+def descargar_factura_compra(factura_id):
+    factura = db.get_or_404(FacturaOrdenCompra, factura_id)
+    if factura.orden.area_id not in {area.id for area in _areas_compra_usuario()}:
+        return 'No autorizado.', 403
+    carpeta = os.path.join(current_app.config['UPLOAD_FOLDER'], 'facturas')
+    return send_from_directory(carpeta, factura.nombre_archivo, as_attachment=True, download_name=factura.nombre_original)
 @main.route('/uploads/<filename>')
 @login_required
 def serve_uploaded_file(filename):
@@ -1030,8 +1794,20 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('main.dashboard'))
     form = LoginForm()
+    if current_app.config.get('LOCAL_DEVELOPMENT'):
+        # RecaptchaField valida directamente contra Google; en el modo local
+        # explícito retiramos únicamente ese validador. CSRF y usuario siguen
+        # validándose normalmente.
+        form.recaptcha.validators = []
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
+        username = form.username.data.strip()
+        user = User.query.filter(db.func.lower(User.username) == username.lower()).first()
+        if not user and current_app.config.get('LOCAL_DEVELOPMENT'):
+            user = User(username=username, nombre=f'Usuario local ({username})')
+            user.set_password(secrets.token_urlsafe(24))
+            db.session.add(user)
+            db.session.commit()
+            current_app.logger.info('Usuario temporal creado para pruebas locales: %s', username)
         if user:
             if user.username == 'admin':
                 if not form.password.data or not user.check_password(form.password.data):
@@ -1045,6 +1821,9 @@ def login():
             return redirect(url_for('main.dashboard'))
         else:
             flash('Usuario incorrecto.', 'danger')
+    elif request.method == 'POST':
+        current_app.logger.warning('Inicio de sesión rechazado por formulario: %s', form.errors)
+        flash('Revisa el usuario y vuelve a intentarlo.', 'warning')
 
     return render_template('login.html', form=form)
 

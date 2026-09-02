@@ -1765,6 +1765,12 @@
 
                 <section class="dash-quick">
                     <div class="quick-access">
+                        {% if puede_compras %}
+                        <a href="{{ url_for('main.ordenes_compra') }}" class="quick-card card-blue-gray">
+                            <span class="quick-card-text">Órdenes de Compra</span>
+                            <i class="bi bi-receipt-cutoff quick-icon"></i>
+                        </a>
+                        {% endif %}
                         <a href="{{ url_for('main.entrega_uniformes_general') }}" class="quick-card card-blue-gray">
                             <span class="quick-card-text">Nueva Entrega de Uniformes</span>
                             <i class="bi bi-box-seam quick-icon"></i>

@@ -25,6 +25,119 @@ class User(db.Model, UserMixin):
         return check_password_hash(self.password_hash, password)
 
 
+class AreaCompra(db.Model):
+    """Catálogo y contador independiente para órdenes de compra por área."""
+    __tablename__ = 'area_compra'
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(100), nullable=False, unique=True)
+    codigo = db.Column(db.String(12), nullable=False, unique=True)
+    ultimo_consecutivo = db.Column(db.Integer, nullable=False, default=0)
+    activa = db.Column(db.Boolean, nullable=False, default=True)
+
+
+class ProveedorCompra(db.Model):
+    __tablename__ = 'proveedor_compra'
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(160), nullable=False, unique=True, index=True)
+    domicilio = db.Column(db.String(300), nullable=True)
+    atencion_a = db.Column(db.String(120), nullable=True)
+    telefono = db.Column(db.String(40), nullable=True)
+    rfc = db.Column(db.String(20), nullable=True)
+    correo = db.Column(db.String(160), nullable=True)
+    activo = db.Column(db.Boolean, nullable=False, default=True)
+    creado_en = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+
+class PartidaPresupuestal(db.Model):
+    __tablename__ = 'partida_presupuestal'
+    id = db.Column(db.Integer, primary_key=True)
+    codigo = db.Column(db.String(30), nullable=False, unique=True, index=True)
+    nombre = db.Column(db.String(180), nullable=False)
+    descripcion = db.Column(db.String(300), nullable=True)
+    activa = db.Column(db.Boolean, nullable=False, default=True)
+    creado_en = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+
+class OrdenCompra(db.Model):
+    __tablename__ = 'orden_compra'
+    id = db.Column(db.Integer, primary_key=True)
+    area_id = db.Column(db.Integer, db.ForeignKey('area_compra.id'), nullable=False, index=True)
+    consecutivo = db.Column(db.Integer, nullable=False)
+    folio = db.Column(db.String(40), nullable=False, unique=True, index=True)
+    solicitante_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
+    fecha = db.Column(db.Date, nullable=False)
+    fecha_entrega_requerida = db.Column(db.Date, nullable=True)
+    proveedor_id = db.Column(db.Integer, db.ForeignKey('proveedor_compra.id'), nullable=True, index=True)
+    partida_presupuestal_id = db.Column(db.Integer, db.ForeignKey('partida_presupuestal.id'), nullable=True, index=True)
+    proveedor = db.Column(db.String(160), nullable=False)
+    domicilio = db.Column(db.String(300), nullable=True)
+    atencion_a = db.Column(db.String(120), nullable=True)
+    telefono = db.Column(db.String(40), nullable=True)
+    cuenta_presupuestal = db.Column(db.String(180), nullable=False)
+    proyecto_programa = db.Column(db.String(180), nullable=True)
+    fuente_financiamiento = db.Column(db.String(40), nullable=False, default='RECURSOS PROPIOS')
+    tipo_compra = db.Column(db.String(40), nullable=False, default='ADQUISICIÓN DIRECTA')
+    justificacion = db.Column(db.Text, nullable=False)
+    iva_porcentaje = db.Column(db.Numeric(5, 2), nullable=False, default=16)
+    estado = db.Column(db.String(20), nullable=False, default='BORRADOR')
+    creado_en = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    actualizado_en = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    area = db.relationship('AreaCompra', backref=db.backref('ordenes', lazy=True))
+    solicitante = db.relationship('User', backref=db.backref('ordenes_compra', lazy=True))
+    proveedor_catalogo = db.relationship('ProveedorCompra', backref=db.backref('ordenes', lazy=True))
+    partida_presupuestal = db.relationship('PartidaPresupuestal', backref=db.backref('ordenes', lazy=True))
+    __table_args__ = (
+        db.UniqueConstraint('area_id', 'consecutivo', name='uq_orden_area_consecutivo'),
+    )
+
+    @property
+    def subtotal(self):
+        return sum((item.subtotal for item in self.partidas), 0)
+
+    @property
+    def iva(self):
+        return self.subtotal * self.iva_porcentaje / 100
+
+    @property
+    def total(self):
+        return self.subtotal + self.iva
+
+
+class PartidaOrdenCompra(db.Model):
+    __tablename__ = 'partida_orden_compra'
+    id = db.Column(db.Integer, primary_key=True)
+    orden_id = db.Column(db.Integer, db.ForeignKey('orden_compra.id', ondelete='CASCADE'), nullable=False, index=True)
+    posicion = db.Column(db.Integer, nullable=False)
+    cantidad = db.Column(db.Numeric(12, 2), nullable=False)
+    descripcion = db.Column(db.Text, nullable=False)
+    precio_unitario = db.Column(db.Numeric(14, 2), nullable=False)
+
+    orden = db.relationship(
+        'OrdenCompra',
+        backref=db.backref('partidas', lazy=True, cascade='all, delete-orphan', order_by='PartidaOrdenCompra.posicion'),
+    )
+
+    @property
+    def subtotal(self):
+        return self.cantidad * self.precio_unitario
+
+
+class FacturaOrdenCompra(db.Model):
+    __tablename__ = 'factura_orden_compra'
+    id = db.Column(db.Integer, primary_key=True)
+    orden_id = db.Column(db.Integer, db.ForeignKey('orden_compra.id', ondelete='CASCADE'), nullable=False, index=True)
+    nombre_original = db.Column(db.String(255), nullable=False)
+    nombre_archivo = db.Column(db.String(255), nullable=False, unique=True)
+    tipo_mime = db.Column(db.String(100), nullable=True)
+    tamano = db.Column(db.Integer, nullable=False)
+    subido_por_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    creado_en = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    orden = db.relationship('OrdenCompra', backref=db.backref('facturas', lazy=True, cascade='all, delete-orphan'))
+    subido_por = db.relationship('User', backref=db.backref('facturas_compra_subidas', lazy=True))
+
+
 class PasskeyCredential(db.Model):
     __tablename__ = 'passkey_credential'
     id = db.Column(db.Integer, primary_key=True)

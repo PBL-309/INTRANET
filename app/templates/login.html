@@ -39,7 +39,13 @@
                         <i class="bi bi-lock-fill input-icon"></i>
                     </div>
                 </div>
+                {% if config.LOCAL_DEVELOPMENT %}
+                <div class="alert alert-warning py-2 small" role="status">
+                    Modo local: CAPTCHA desactivado. Puedes ingresar con cualquier usuario de prueba; si no existe localmente, se creará solo en esta base local.
+                </div>
+                {% else %}
                 <div id="recaptcha-container">{{ form.recaptcha }}</div>
+                {% endif %}
                 <button type="submit">Ingresar <i class="bi bi-arrow-right"></i></button>
                 <div class="divider"><span>o</span></div>
                 <button type="button" id="passkeyLoginBtn" class="btn-facial">

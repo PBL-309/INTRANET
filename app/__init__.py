@@ -18,7 +18,7 @@ def create_app():
     app = Flask(__name__)
 
     app.config['SECRET_KEY'] = 'clave_secreta'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///intranet.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('INTRANET_DATABASE_URI', 'sqlite:///intranet.db')
     app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
     app.config['SESSION_PERMANENT'] = True
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=2)
@@ -35,6 +35,10 @@ def create_app():
     # Claves de producción proporcionadas por el usuario
     app.config['RECAPTCHA_PUBLIC_KEY'] = '6Lf1UmgsAAAAADkKsBHsHZht0D45KBQgo18JOBox'
     app.config['RECAPTCHA_PRIVATE_KEY'] = '6Lf1UmgsAAAAAGkckMYzC2hj_SPzMrDNEBOhguH4'
+    # Permite probar el acceso sin Google reCAPTCHA únicamente cuando el
+    # desarrollador activa expresamente el modo local en su equipo.
+    app.config['LOCAL_DEVELOPMENT'] = os.environ.get('INTRANET_LOCAL_MODE') == '1'
+    app.config['RECAPTCHA_TESTING'] = app.config['LOCAL_DEVELOPMENT']
 
     db.init_app(app)
     login_manager.init_app(app)
@@ -136,7 +140,7 @@ def create_app():
         return response
 
     with app.app_context():
-        from app.models import User
+        from app.models import User, OrdenCompra, ProveedorCompra, PartidaPresupuestal
         db.create_all()
         # Migracion ligera para instalaciones SQLite existentes.
         columnas_chat = {fila[1] for fila in db.session.execute(db.text("PRAGMA table_info(mensaje_chat)"))}
@@ -147,6 +151,59 @@ def create_app():
         if 'ultima_actividad' not in columnas_usuario:
             db.session.execute(db.text("ALTER TABLE user ADD COLUMN ultima_actividad DATETIME"))
             db.session.commit()
+        columnas_orden = {fila[1] for fila in db.session.execute(db.text("PRAGMA table_info(orden_compra)"))}
+        migraciones_orden = {
+            'fecha_entrega_requerida': 'ALTER TABLE orden_compra ADD COLUMN fecha_entrega_requerida DATE',
+            'proveedor_id': 'ALTER TABLE orden_compra ADD COLUMN proveedor_id INTEGER REFERENCES proveedor_compra(id)',
+            'partida_presupuestal_id': 'ALTER TABLE orden_compra ADD COLUMN partida_presupuestal_id INTEGER REFERENCES partida_presupuestal(id)',
+        }
+        for columna, sql in migraciones_orden.items():
+            if columna not in columnas_orden:
+                db.session.execute(db.text(sql))
+        db.session.commit()
+        catalogo_partidas = os.path.join(app.root_path, 'data', 'partidas_presupuestales.csv')
+        if os.path.exists(catalogo_partidas):
+            existentes = {item.codigo.lower() for item in PartidaPresupuestal.query.all()}
+            with open(catalogo_partidas, encoding='utf-8') as archivo_partidas:
+                for linea in archivo_partidas:
+                    linea = linea.strip()
+                    if not linea or '|' not in linea:
+                        continue
+                    codigo, nombre = linea.split('|', 1)
+                    if codigo.lower() not in existentes:
+                        db.session.add(PartidaPresupuestal(codigo=codigo, nombre=nombre))
+                        existentes.add(codigo.lower())
+            db.session.commit()
+        # Aprovecha las órdenes locales existentes como base inicial de los
+        # catálogos, sin alterar las copias históricas impresas en cada orden.
+        for orden in OrdenCompra.query.all():
+            if orden.proveedor and not orden.proveedor_id:
+                proveedor = ProveedorCompra.query.filter(
+                    db.func.lower(ProveedorCompra.nombre) == orden.proveedor.lower()
+                ).first()
+                if not proveedor:
+                    proveedor = ProveedorCompra(
+                        nombre=orden.proveedor,
+                        domicilio=orden.domicilio,
+                        atencion_a=orden.atencion_a,
+                        telefono=orden.telefono,
+                    )
+                    db.session.add(proveedor)
+                    db.session.flush()
+                orden.proveedor_id = proveedor.id
+            if orden.cuenta_presupuestal and not orden.partida_presupuestal_id:
+                partes = orden.cuenta_presupuestal.strip().split(maxsplit=1)
+                codigo = partes[0]
+                nombre = partes[1] if len(partes) > 1 else 'PARTIDA PRESUPUESTAL'
+                partida = PartidaPresupuestal.query.filter(
+                    db.func.lower(PartidaPresupuestal.codigo) == codigo.lower()
+                ).first()
+                if not partida:
+                    partida = PartidaPresupuestal(codigo=codigo, nombre=nombre.upper())
+                    db.session.add(partida)
+                    db.session.flush()
+                orden.partida_presupuestal_id = partida.id
+        db.session.commit()
         
         # Inicializar servicio de reconocimiento facial (DESHABILITADO - Usuario quitó facial recognition)
         # try:
